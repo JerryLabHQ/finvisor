@@ -53,11 +53,22 @@ node scripts/export-leads.mjs
 node scripts/export-leads.mjs --format=csv > leads_export.csv
 ```
 
-### Protocol D: Adding or Updating Regional City Pages (Programmatic SEO)
+### Protocol D: Adding Regional City Pages (Programmatic SEO)
 City data is maintained in `src/lib/cities.ts`.
 To add a new UK city:
 1. Add a new entry to `UK_CITIES` with `slug`, `name`, `averagePrice`, `averageRentMonthly`, `priceToRentRatio`, `highlights`.
 2. Next.js statically renders the new city page at `/city/[slug]` automatically during `npm run build`.
+
+### Protocol E: Updating Regional City Property & Rental Data
+When HM Land Registry publishes new UK HPI figures or ONS publishes new private rent bulletins:
+```bash
+# List all current city benchmarks
+node scripts/update-city-data.mjs --list
+
+# Update specific city metrics (automatically recomputes price-to-rent ratio & highlights)
+node scripts/update-city-data.mjs --city=london --price=540000 --rent=2200 --hpi=2.9
+```
+This script automatically runs `npm run verify:math` to ensure model consistency.
 
 ## 3. Monetization & Community Support Architecture
 - **"Buy Me a Coffee" Setup**: 100% free with no paywalls. Reuses the FitPass pattern with `SUPPORT_URL` (`NEXT_PUBLIC_SUPPORT_URL` / `https://buymeacoffee.com/jerrylabhq`) and `SUPPORT_LABEL` (`☕ Buy me a coffee`), including top-nav pill buttons and dismissible nudge banners.
