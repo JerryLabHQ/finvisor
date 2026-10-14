@@ -53,7 +53,7 @@ export const SDLT_CONFIG = {
 /**
  * Support & Donation Configuration (reusing Buy Me a Coffee setup)
  */
-export const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_URL || "https://buymeacoffee.com/fit.pass";
+export const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_URL || "https://buymeacoffee.com/jerrylabhq";
 export const SUPPORT_LABEL = "☕ Buy me a coffee";
 
 /**

@@ -13,7 +13,7 @@ LadderPass is the financial sibling project to **FitPass**:
 ### 1. "Buy Me a Coffee" Community Support
 - **100% Free & Unlocked:** No artificial paywalls. All tools—including PDF investment report generation, 40-year amortization CSV exports, multi-property comparisons, and macro rate shock stress-testing—are completely free for everyone.
 - **Configurable Support Link:**
-  - `SUPPORT_URL`: Configurable via `NEXT_PUBLIC_SUPPORT_URL` (defaults to `https://buymeacoffee.com/fit.pass`).
+  - `SUPPORT_URL`: Configurable via `NEXT_PUBLIC_SUPPORT_URL` (defaults to `https://buymeacoffee.com/jerrylabhq`).
   - `SUPPORT_LABEL`: `☕ Buy me a coffee`.
 - **UI Placements (FitPass Pattern):**
   - Sleek pill button in the top navigation bar (`.layout__header-donate`).
@@ -72,8 +72,8 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 Configure these in `.env.local`:
 
 ```env
-# Custom Buy Me a Coffee / donation link (defaults to https://buymeacoffee.com/fit.pass)
-NEXT_PUBLIC_SUPPORT_URL=https://buymeacoffee.com/fit.pass
+# Custom Buy Me a Coffee / donation link (defaults to https://buymeacoffee.com/jerrylabhq)
+NEXT_PUBLIC_SUPPORT_URL=https://buymeacoffee.com/jerrylabhq
 
 # Broker lead webhook (Zapier, Make, CRM endpoint)
 BROKER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...

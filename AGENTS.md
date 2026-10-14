@@ -60,7 +60,7 @@ To add a new UK city:
 2. Next.js statically renders the new city page at `/city/[slug]` automatically during `npm run build`.
 
 ## 3. Monetization & Community Support Architecture
-- **"Buy Me a Coffee" Setup**: 100% free with no paywalls. Reuses the FitPass pattern with `SUPPORT_URL` (`NEXT_PUBLIC_SUPPORT_URL` / `https://buymeacoffee.com/fit.pass`) and `SUPPORT_LABEL` (`☕ Buy me a coffee`), including top-nav pill buttons and dismissible nudge banners.
+- **"Buy Me a Coffee" Setup**: 100% free with no paywalls. Reuses the FitPass pattern with `SUPPORT_URL` (`NEXT_PUBLIC_SUPPORT_URL` / `https://buymeacoffee.com/jerrylabhq`) and `SUPPORT_LABEL` (`☕ Buy me a coffee`), including top-nav pill buttons and dismissible nudge banners.
 - **FCA Broker Referrals**: Optional B2B affiliate revenue (£150 - £250 per qualified lead). Captures borrower LTV, deposit, timeline, and dispatches to `BROKER_WEBHOOK_URL` (Zapier, Make, CRM) while storing in `data/leads.json`.
 - **Programmatic SEO**: High-intent city pages generating 100% organic, ad-free search traffic.
 
