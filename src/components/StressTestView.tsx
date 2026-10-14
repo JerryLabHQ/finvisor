@@ -15,17 +15,17 @@ export function StressTestView({ inputs }: StressTestViewProps) {
   const stressScenarios = runStressTests(inputs);
 
   return (
-    <div className="glass-panel" style={{ padding: "24px", marginTop: "24px" }}>
+    <div className="glass-panel" style={{ padding: "26px", marginTop: "16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "var(--primary)", marginBottom: 4 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
             <ShieldAlert size={14} />
-            <span>MACRO STRESS TESTING & SENSITIVITY</span>
+            <span>Macro Stress Testing & Sensitivity</span>
           </div>
-          <h3 style={{ fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 }}>
-            What If Market Conditions Shift?
+          <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>
+            What If UK Market Conditions Shift?
           </h3>
-          <p style={{ color: "var(--on-surface-variant)", fontSize: 13, marginTop: 4 }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 4, lineHeight: 1.5 }}>
             Simulate how interest rate hikes, falling house prices, or surging rental inflation alter your financial break-even.
           </p>
         </div>
@@ -38,39 +38,40 @@ export function StressTestView({ inputs }: StressTestViewProps) {
             <div
               key={scenario.id}
               style={{
-                background: "rgba(255, 255, 255, 0.02)",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
+                background: "var(--surface-subtle)",
+                border: "1px solid var(--surface-border)",
                 borderRadius: 10,
-                padding: 16,
+                padding: 18,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
+                gap: 12,
               }}
             >
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{scenario.title}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{scenario.title}</span>
                   {isPositive ? (
                     <ArrowUpRight size={16} style={{ color: "var(--primary)" }} />
                   ) : (
                     <ArrowDownRight size={16} style={{ color: "var(--secondary)" }} />
                   )}
                 </div>
-                <p style={{ fontSize: 12, color: "var(--on-surface-variant)", lineHeight: 1.4, marginBottom: 12 }}>
+                <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.45, margin: 0 }}>
                   {scenario.description}
                 </p>
               </div>
 
-              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)", paddingTop: 10 }}>
+              <div style={{ borderTop: "1px solid var(--surface-border)", paddingTop: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
-                  <span style={{ color: "var(--on-surface-variant)" }}>Net Difference:</span>
+                  <span style={{ color: "var(--text-secondary)" }}>Net Difference:</span>
                   <span style={{ fontWeight: 700, color: isPositive ? "var(--primary)" : "var(--secondary)" }}>
                     {isPositive ? "+" : ""}{formatGBP(scenario.netWorthDiff)}
                   </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                  <span style={{ color: "var(--on-surface-variant)" }}>Break-Even:</span>
-                  <span style={{ fontWeight: 600, color: scenario.breakEven ? "#fff" : "var(--tertiary)" }}>
+                  <span style={{ color: "var(--text-secondary)" }}>Break-Even:</span>
+                  <span style={{ fontWeight: 600, color: scenario.breakEven ? "var(--text-primary)" : "var(--tertiary)" }}>
                     {scenario.breakEven ? `Yr ${scenario.breakEven}` : "Renting Wins"}
                   </span>
                 </div>

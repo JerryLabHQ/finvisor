@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "id": "lead_1791988672488_qrvxc",
+    "createdAt": "2026-10-14T14:37:52.488Z",
+    "name": "Elizabeth Bennet",
+    "email": "elizabeth@pemberley.co.uk",
+    "phone": "07700900123",
+    "propertyPrice": 500000,
+    "depositAmount": 100000,
+    "depositPercent": 20,
+    "loanAmount": 400000,
+    "ltvPercent": 80,
+    "estimatedMonthlyMortgage": 2223,
+    "buyerType": "FIRST_TIME_BUYER",
+    "buyingTimeline": "IMMEDIATE_3M",
+    "status": "NEW",
+    "estimatedLeadValueGbp": 250
+  }
+]

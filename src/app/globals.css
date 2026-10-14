@@ -1,62 +1,71 @@
 :root {
-  /* Warm Slate & Modern PropTech Palette */
-  --background: #0b1120;
-  --foreground: #f1f5f9;
+  /* British Financial Editorial Palette — Warm, Pristine, Human */
+  --background: #fafaf9; /* Warm Porcelain / Paper Chalk */
+  --foreground: #0f172a; /* Obsidian Charcoal Ink */
   
-  --surface: #0f172a;
-  --surface-dim: #0b1120;
-  --surface-bright: #334155;
-  
-  --surface-container-lowest: #070d18;
-  --surface-container-low: #111c30;
-  --surface-container: #1e293b;
-  --surface-container-high: #27354a;
-  --surface-container-highest: #334155;
-  
-  --on-surface: #f8fafc;
-  --on-surface-variant: #94a3b8;
-  --on-surface-muted: #64748b;
-  
-  /* Primary: British Emerald (Home & Property Ladder) */
-  --primary: #10b981;
-  --primary-hover: #34d399;
-  --primary-light: rgba(16, 185, 129, 0.12);
-  --primary-glow: rgba(16, 185, 129, 0.25);
-  --on-primary: #022c22;
-  
-  /* Secondary: Vibrant Indigo (Stocks & Shares ISA Compounding) */
-  --secondary: #6366f1;
-  --secondary-hover: #818cf8;
-  --secondary-light: rgba(99, 102, 241, 0.12);
-  --secondary-glow: rgba(99, 102, 241, 0.25);
-  --on-secondary: #1e1b4b;
-  
-  /* Tertiary: Warm Coral / Rose (Sunk Costs & Interest) */
-  --tertiary: #f43f5e;
-  --tertiary-hover: #fb7185;
-  --tertiary-light: rgba(244, 63, 94, 0.12);
-  --on-tertiary: #4c0519;
+  --surface: #ffffff; /* Optical White Container */
+  --surface-subtle: #f8fafc; /* Crisp Slate Tint */
+  --surface-tray: #f1f5f9; /* Recessed Segmented Tray */
+  --surface-border: #e2e8f0; /* Razor-thin Hairline Border */
+  --surface-border-subtle: #f1f5f9;
+  --surface-border-hover: #cbd5e1;
 
-  /* Accent Gold / Coffee */
-  --accent-gold: #f59e0b;
-  --accent-gold-light: rgba(245, 158, 11, 0.12);
-  --accent-gold-hover: #fbbf24;
-
-  --outline: #475569;
-  --outline-variant: #334155;
-  --outline-subtle: rgba(255, 255, 255, 0.08);
+  --text-primary: #0f172a; /* Deep Ink */
+  --text-secondary: #475569; /* Slate Stone */
+  --text-muted: #64748b; /* Muted Caption */
+  --text-faint: #94a3b8;
   
-  --round-xs: 4px;
-  --round-sm: 6px;
-  --round-md: 10px;
-  --round-lg: 14px;
-  --round-xl: 20px;
+  /* Primary: British Racing Green (Equity, Wealth, Long-term Asset) */
+  --primary: #064e3b;
+  --primary-hover: #047857;
+  --primary-light: #ecfdf5;
+  --primary-border: #a7f3d0;
+  --on-primary: #ffffff;
+  
+  /* Secondary: Deep Royal Navy / Oxford Indigo (Stocks & Shares ISA Index) */
+  --secondary: #1e3a8a;
+  --secondary-hover: #2563eb;
+  --secondary-light: #eff6ff;
+  --secondary-border: #bfdbfe;
+  --on-secondary: #ffffff;
+  
+  /* Tertiary: Brick Wine / Cotswold Terracotta (Non-recoverable Sunk Costs) */
+  --tertiary: #991b1b;
+  --tertiary-hover: #b91c1c;
+  --tertiary-light: #fef2f2;
+  --tertiary-border: #fecaca;
+  --on-tertiary: #ffffff;
+
+  /* Accent: Muted Buff Amber (Bank of England Base Rate / Policy Benchmark) */
+  --accent-amber: #d97706;
+  --accent-amber-light: #fef3c7;
+  --accent-amber-border: #fde68a;
+  --accent-amber-text: #92400e;
+
+  /* Accent: Warm Cafe Gold (Buy Me a Coffee) */
+  --accent-coffee-bg: #fef08a;
+  --accent-coffee-border: #facc15;
+  --accent-coffee-text: #713f12;
+
+  --round-xs: 3px;
+  --round-sm: 5px;
+  --round-md: 8px;
+  --round-lg: 12px;
+  --round-xl: 16px;
   --round-full: 9999px;
   
   --container-max: 1240px;
   
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Typographic Hierarchy: Editorial Serif + Tabular Sans */
+  --font-serif: "Newsreader", "Charter", "Bitstream Charter", "Sitka Text", "Cambria", Georgia, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+  /* Organic Paper Drop Shadows (No Blurry Neon) */
+  --shadow-subtle: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
+  --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+  --shadow-hover: 0 10px 20px -5px rgba(15, 23, 42, 0.06), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+  --shadow-popover: 0 12px 30px -4px rgba(15, 23, 42, 0.12), 0 4px 8px -2px rgba(15, 23, 42, 0.05);
 }
 
 * {
@@ -68,23 +77,27 @@
 html, body {
   min-height: 100%;
   background-color: var(--background);
-  background-image: 
-    radial-gradient(at 15% 15%, rgba(16, 185, 129, 0.05) 0px, transparent 45%),
-    radial-gradient(at 85% 10%, rgba(99, 102, 241, 0.06) 0px, transparent 45%),
-    radial-gradient(at 50% 90%, rgba(15, 23, 42, 0.8) 0px, transparent 100%);
-  background-attachment: fixed;
   color: var(--foreground);
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  font-variant-numeric: tabular-nums;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans);
-  color: var(--on-surface);
-  font-weight: 700;
+/* Serif Headings with Editorial Restraint */
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  color: var(--text-primary);
+  font-weight: 500;
   letter-spacing: -0.02em;
+}
+
+h5, h6 {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -96,33 +109,37 @@ a:hover {
   color: var(--primary-hover);
 }
 
-/* Modern Frosted Glass Card */
+/* Editorial Crisp Card */
 .glass-panel {
-  background: rgba(17, 28, 48, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--outline-subtle);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
   border-radius: var(--round-lg);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .glass-panel:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--surface-border-hover);
 }
 
-/* Custom Scrollbar */
+/* Tabular Numbers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Minimalist Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-container-high);
+  background: var(--surface-border);
   border-radius: var(--round-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--surface-container-highest);
+  background: var(--surface-border-hover);
 }

@@ -27,64 +27,64 @@ export function ScenarioCompare({ baseInputs }: ScenarioCompareProps) {
   const scenarioB = runBuyVsRentCalculation(altInputs);
 
   return (
-    <div className="glass-panel" style={{ padding: "24px", marginTop: "24px" }}>
+    <div className="glass-panel" style={{ padding: "26px", marginTop: "16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "var(--primary)", marginBottom: 4 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
             <GitCompare size={14} />
-            <span>SIDE-BY-SIDE PROPERTY BENCHMARKING</span>
+            <span>Side-by-Side Property Benchmarking</span>
           </div>
-          <h3 style={{ fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 }}>
+          <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>
             Compare Two Property Decisions
           </h3>
-          <p style={{ color: "var(--on-surface-variant)", fontSize: 13, marginTop: 4 }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 4, lineHeight: 1.5 }}>
             Directly test how changing property price or location impacts your required cash, monthly outgoings, and wealth trajectory.
           </p>
         </div>
       </div>
 
       {/* Comparison Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
         {/* Scenario 1 */}
-        <div style={{ background: "rgba(255,255,255,0.02)", padding: 18, borderRadius: 10, border: "1px solid rgba(16, 185, 129, 0.3)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: "var(--primary)" }}>Scenario 1 (Current Active)</span>
-            <span style={{ fontSize: 12, color: "var(--on-surface-variant)" }}>{formatGBP(baseInputs.propertyPrice)}</span>
+        <div style={{ background: "var(--surface-subtle)", padding: 20, borderRadius: 10, border: "1px solid var(--primary-border)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--primary)" }}>Scenario 1 (Current Active)</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>{formatGBP(baseInputs.propertyPrice)}</span>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Upfront Cash Required:</span>
-              <strong style={{ color: "#fff" }}>{formatGBP(scenarioA.buyUpfrontCosts)}</strong>
+              <span style={{ color: "var(--text-secondary)" }}>Upfront Cash Required:</span>
+              <strong style={{ color: "var(--text-primary)" }}>{formatGBP(scenarioA.buyUpfrontCosts)}</strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Initial Monthly Mortgage:</span>
+              <span style={{ color: "var(--text-secondary)" }}>Initial Monthly Mortgage:</span>
               <strong style={{ color: "var(--primary)" }}>{formatGBP(scenarioA.initialMonthlyMortgage)}</strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Stamp Duty (SDLT):</span>
-              <span style={{ color: "#fff" }}>{formatGBP(scenarioA.sdltCost)}</span>
+              <span style={{ color: "var(--text-secondary)" }}>Stamp Duty (SDLT):</span>
+              <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{formatGBP(scenarioA.sdltCost)}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Break-Even Horizon:</span>
-              <span style={{ color: scenarioA.breakEvenYear ? "var(--secondary)" : "var(--tertiary)", fontWeight: 700 }}>
+              <span style={{ color: "var(--text-secondary)" }}>Break-Even Horizon:</span>
+              <span style={{ color: scenarioA.breakEvenYear ? "var(--primary)" : "var(--tertiary)", fontWeight: 700 }}>
                 {scenarioA.breakEvenYear ? `Year ${scenarioA.breakEvenYear}` : "Renting Wins"}
               </span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 8, marginTop: 4 }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Projected Net Worth ({baseInputs.timeHorizonYears}y):</span>
-              <strong style={{ color: "#fff" }}>{formatGBP(scenarioA.annualBreakdown[scenarioA.annualBreakdown.length - 1]?.buyerTotalNetWorth || 0)}</strong>
+            <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--surface-border)", paddingTop: 10, marginTop: 4 }}>
+              <span style={{ color: "var(--text-secondary)" }}>Projected Net Worth ({baseInputs.timeHorizonYears}y):</span>
+              <strong style={{ color: "var(--text-primary)", fontSize: 14 }}>{formatGBP(scenarioA.annualBreakdown[scenarioA.annualBreakdown.length - 1]?.buyerTotalNetWorth || 0)}</strong>
             </div>
           </div>
         </div>
 
         {/* Scenario 2 */}
-        <div style={{ background: "rgba(255,255,255,0.02)", padding: 18, borderRadius: 10, border: "1px solid rgba(99, 102, 241, 0.3)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: "var(--secondary)" }}>Scenario 2 (Alternative Test)</span>
-            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ background: "var(--surface-subtle)", padding: 20, borderRadius: 10, border: "1px solid var(--secondary-border)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--secondary)" }}>Scenario 2 (Alternative Test)</span>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                <span style={{ fontSize: 11, color: "var(--on-surface-variant)" }}>Price £</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Price £</span>
                 <input
                   type="number"
                   value={altPrice}
@@ -93,15 +93,16 @@ export function ScenarioCompare({ baseInputs }: ScenarioCompareProps) {
                     width: 75,
                     padding: "3px 6px",
                     borderRadius: 4,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    color: "#fff",
+                    background: "var(--surface)",
+                    border: "1px solid var(--surface-border)",
+                    color: "var(--text-primary)",
                     fontSize: 11,
+                    fontWeight: 600,
                   }}
                 />
               </div>
               <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                <span style={{ fontSize: 11, color: "var(--on-surface-variant)" }}>Dep %</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Dep %</span>
                 <input
                   type="number"
                   value={altDepositPct}
@@ -110,15 +111,16 @@ export function ScenarioCompare({ baseInputs }: ScenarioCompareProps) {
                     width: 48,
                     padding: "3px 6px",
                     borderRadius: 4,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    color: "#fff",
+                    background: "var(--surface)",
+                    border: "1px solid var(--surface-border)",
+                    color: "var(--text-primary)",
                     fontSize: 11,
+                    fontWeight: 600,
                   }}
                 />
               </div>
               <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                <span style={{ fontSize: 11, color: "var(--on-surface-variant)" }}>Rent £</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Rent £</span>
                 <input
                   type="number"
                   value={altRent}
@@ -127,38 +129,39 @@ export function ScenarioCompare({ baseInputs }: ScenarioCompareProps) {
                     width: 60,
                     padding: "3px 6px",
                     borderRadius: 4,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    color: "#fff",
+                    background: "var(--surface)",
+                    border: "1px solid var(--surface-border)",
+                    color: "var(--text-primary)",
                     fontSize: 11,
+                    fontWeight: 600,
                   }}
                 />
               </div>
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Upfront Cash Required:</span>
-              <strong style={{ color: "#fff" }}>{formatGBP(scenarioB.buyUpfrontCosts)}</strong>
+              <span style={{ color: "var(--text-secondary)" }}>Upfront Cash Required:</span>
+              <strong style={{ color: "var(--text-primary)" }}>{formatGBP(scenarioB.buyUpfrontCosts)}</strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Initial Monthly Mortgage:</span>
+              <span style={{ color: "var(--text-secondary)" }}>Initial Monthly Mortgage:</span>
               <strong style={{ color: "var(--secondary)" }}>{formatGBP(scenarioB.initialMonthlyMortgage)}</strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Stamp Duty (SDLT):</span>
-              <span style={{ color: "#fff" }}>{formatGBP(scenarioB.sdltCost)}</span>
+              <span style={{ color: "var(--text-secondary)" }}>Stamp Duty (SDLT):</span>
+              <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{formatGBP(scenarioB.sdltCost)}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Break-Even Horizon:</span>
+              <span style={{ color: "var(--text-secondary)" }}>Break-Even Horizon:</span>
               <span style={{ color: scenarioB.breakEvenYear ? "var(--secondary)" : "var(--tertiary)", fontWeight: 700 }}>
                 {scenarioB.breakEvenYear ? `Year ${scenarioB.breakEvenYear}` : "Renting Wins"}
               </span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 8, marginTop: 4 }}>
-              <span style={{ color: "var(--on-surface-variant)" }}>Projected Net Worth ({baseInputs.timeHorizonYears}y):</span>
-              <strong style={{ color: "#fff" }}>{formatGBP(scenarioB.annualBreakdown[scenarioB.annualBreakdown.length - 1]?.buyerTotalNetWorth || 0)}</strong>
+            <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--surface-border)", paddingTop: 10, marginTop: 4 }}>
+              <span style={{ color: "var(--text-secondary)" }}>Projected Net Worth ({baseInputs.timeHorizonYears}y):</span>
+              <strong style={{ color: "var(--text-primary)", fontSize: 14 }}>{formatGBP(scenarioB.annualBreakdown[scenarioB.annualBreakdown.length - 1]?.buyerTotalNetWorth || 0)}</strong>
             </div>
           </div>
         </div>

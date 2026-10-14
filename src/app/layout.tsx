@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RentOrLadder - UK Buy vs Rent Calculator & Property Ladder Intelligence",
-  description: "The definitive UK buy vs rent calculator. Compare the true cost of renting vs getting on the property ladder after Stamp Duty (SDLT), mortgage interest, and Stocks & Shares ISA compounding.",
-  metadataBase: new URL("https://rentorladder.com"),
+  title: "LadderPass - UK Buy vs Rent Financial Intelligence & Property Calculator",
+  description: "The definitive mathematical guide to the British property ladder. Compare home equity accumulation against tax-free Stocks & Shares ISA compounding after Stamp Duty, BoE mortgage rates, and maintenance.",
+  metadataBase: new URL("https://ladderpass.com"),
 };
 
 export default function RootLayout({

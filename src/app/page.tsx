@@ -149,6 +149,7 @@ export default function Dashboard() {
 
     if (typeof window !== "undefined") {
       if (
+        localStorage.getItem("ladderpass_donation_dismissed") === "true" ||
         localStorage.getItem("rentorladder_donation_dismissed") === "true" ||
         localStorage.getItem("finvisor_donation_dismissed") === "true"
       ) {
@@ -171,7 +172,7 @@ export default function Dashboard() {
   const dismissDonation = () => {
     setDonationDismissed(true);
     if (typeof window !== "undefined") {
-      localStorage.setItem("rentorladder_donation_dismissed", "true");
+      localStorage.setItem("ladderpass_donation_dismissed", "true");
     }
   };
 
@@ -294,8 +295,8 @@ export default function Dashboard() {
           <div className="logo-icon-wrap">
             <TrendingUp size={18} />
           </div>
-          <span>RentOrLadder</span>
-          <span className="logo-badge">100% Free UK Property Engine</span>
+          <span>LadderPass</span>
+          <span className="logo-badge">UK Property Ladder vs Renting</span>
         </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -345,7 +346,7 @@ export default function Dashboard() {
       {!donationDismissed && SUPPORT_URL && (
         <div className="donation-banner" role="note">
           <span className="donation-banner__text">
-            👋 <strong>RentOrLadder is 100% free with no ads, trackers, or broker sales calls.</strong> If this tool helps you and your partner make a confident property decision, consider{" "}
+            👋 <strong>LadderPass is 100% free with no ads, trackers, or broker sales calls.</strong> If this tool helps you and your partner make a confident property decision, consider{" "}
             <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="donation-banner__link">
               buying me a coffee
             </a>{" "}
@@ -672,8 +673,8 @@ export default function Dashboard() {
 
             {/* Time Horizon Quick Selector */}
             <div className="timeframe-controls">
-              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--on-surface-variant)" }}>
-                Projection Horizon: <strong style={{ color: "#fff" }}>{timeHorizon} Years</strong>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-secondary)" }}>
+                Projection Horizon: <strong style={{ color: "var(--text-primary)" }}>{timeHorizon} Years</strong>
               </span>
 
               <div className="timeframe-chips">
@@ -700,43 +701,45 @@ export default function Dashboard() {
                   >
                     <defs>
                       <linearGradient id="colorBuy" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.45} />
-                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.02} />
+                        <stop offset="5%" stopColor="#064e3b" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#064e3b" stopOpacity={0.0} />
                       </linearGradient>
                       <linearGradient id="colorRent" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--secondary)" stopOpacity={0.45} />
-                        <stop offset="95%" stopColor="var(--secondary)" stopOpacity={0.02} />
+                        <stop offset="5%" stopColor="#1e3a8a" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#1e3a8a" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                     <XAxis
                       dataKey="year"
-                      stroke="var(--on-surface-variant)"
+                      stroke="#94a3b8"
                       fontSize={12}
                       tickLine={false}
                       label={{
                         value: "Years Elapsed",
                         position: "insideBottomRight",
                         offset: -5,
-                        fill: "var(--on-surface-variant)",
+                        fill: "#64748b",
                         fontSize: 11,
                       }}
                     />
                     <YAxis
-                      stroke="var(--on-surface-variant)"
+                      stroke="#94a3b8"
                       fontSize={11}
                       tickLine={false}
                       tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#1e293b",
-                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #e2e8f0",
                         borderRadius: "8px",
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-                        color: "#fff",
+                        boxShadow: "0 4px 12px rgba(15, 23, 42, 0.08)",
+                        color: "#0f172a",
                         fontSize: "12px",
                       }}
+                      itemStyle={{ color: "#0f172a" }}
+                      labelStyle={{ color: "#475569", fontWeight: 600, marginBottom: 4 }}
                       formatter={(value, name) => [
                         formatGBP(Number(value || 0)),
                         name === "buyerTotalNetWorth"
@@ -751,11 +754,11 @@ export default function Dashboard() {
                         <div className="chart-legend">
                           <div className="legend-item">
                             <span className="legend-color-buy"></span>
-                            <span style={{ color: "#34d399" }}>Buying (Home Equity + Savings)</span>
+                            <span style={{ color: "#064e3b" }}>Buying (Home Equity + Savings)</span>
                           </div>
                           <div className="legend-item">
                             <span className="legend-color-rent"></span>
-                            <span style={{ color: "#a5b4fc" }}>Renting (Stocks & Shares ISA Pot)</span>
+                            <span style={{ color: "#1e3a8a" }}>Renting (Stocks & Shares ISA Pot)</span>
                           </div>
                         </div>
                       )}
@@ -763,8 +766,8 @@ export default function Dashboard() {
                     <Area
                       type="monotone"
                       dataKey="buyerTotalNetWorth"
-                      stroke="var(--primary)"
-                      strokeWidth={3}
+                      stroke="#064e3b"
+                      strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#colorBuy)"
                       name="buyerTotalNetWorth"
@@ -772,8 +775,8 @@ export default function Dashboard() {
                     <Area
                       type="monotone"
                       dataKey="renterTotalNetWorth"
-                      stroke="var(--secondary)"
-                      strokeWidth={3}
+                      stroke="#1e3a8a"
+                      strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#colorRent)"
                       name="renterTotalNetWorth"
@@ -781,7 +784,7 @@ export default function Dashboard() {
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--on-surface-variant)" }}>
+                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)" }}>
                   Loading Wealth Trajectory...
                 </div>
               )}
@@ -830,7 +833,7 @@ export default function Dashboard() {
                 <span className="stat-title">Renting Position</span>
                 <PiggyBank size={18} style={{ color: "var(--secondary)" }} />
               </div>
-              <div className="stat-value" style={{ color: "#a5b4fc" }}>
+              <div className="stat-value" style={{ color: "var(--secondary)" }}>
                 {formatGBP(lastYearData.renterTotalNetWorth)}
               </div>
               <div style={{ fontSize: "12px", color: "var(--on-surface-variant)", marginTop: "-6px" }}>
@@ -926,7 +929,7 @@ export default function Dashboard() {
           <div className="jargon-card glass-panel">
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
               <HelpCircle size={16} style={{ color: "var(--primary)" }} />
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>UK Jargon Demystified</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>UK Jargon Demystified</h3>
             </div>
 
             <div className="jargon-item">
@@ -970,28 +973,29 @@ export default function Dashboard() {
             <button className="cta-button" onClick={() => setIsBrokerModalOpen(true)}>
               Get Free Broker Illustration
             </button>
-            <div style={{ fontSize: 11, color: "var(--on-surface-muted)", textAlign: "center", marginTop: 4 }}>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginTop: 4 }}>
               Independent FCA Brokers • Zero Broker Fee Option • No Spam
             </div>
           </div>
 
-          {/* Support RentOrLadder / Buy Me a Coffee Box (fitpass style) */}
+          {/* Support LadderPass / Buy Me a Coffee Box (fitpass style) */}
           {SUPPORT_URL && (
             <div
               className="glass-panel"
               style={{
-                padding: 18,
+                padding: 20,
                 borderRadius: 14,
-                background: "linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, rgba(16, 185, 129, 0.06) 100%)",
-                border: "1px solid rgba(245, 158, 11, 0.3)",
+                background: "var(--surface)",
+                border: "1px solid var(--surface-border)",
+                boxShadow: "var(--shadow-card)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <Coffee size={16} style={{ color: "#ffdd00" }} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Support RentOrLadder</span>
+                <Coffee size={16} style={{ color: "var(--accent-amber)" }} />
+                <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>Support LadderPass</span>
               </div>
-              <p style={{ fontSize: 12, color: "var(--on-surface-variant)", lineHeight: 1.5, marginBottom: 12 }}>
-                RentOrLadder is 100% free with no paywalls or intrusive ads. If this calculator helped you make a confident property decision, consider buying me a coffee to support hosting & data maintenance!
+              <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: 14 }}>
+                LadderPass is 100% free with no paywalls or intrusive ads. If this calculator helped you make a confident property decision, consider buying me a coffee to support hosting & data maintenance!
               </p>
               <a
                 href={SUPPORT_URL}

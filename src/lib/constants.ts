@@ -1,5 +1,5 @@
 /**
- * UK Financial, Tax, and Market Benchmarks for RentOrLadder
+ * UK Financial, Tax, and Market Benchmarks for LadderPass
  * Maintained and versioned for AI agent updates.
  * Last updated: October 2026
  */
@@ -60,7 +60,7 @@ export const SUPPORT_LABEL = "☕ Buy me a coffee";
  * Product & Monetization Configuration
  */
 export const MONETIZATION_CONFIG = {
-  appName: "RentOrLadder",
+  appName: "LadderPass",
   supportUrl: SUPPORT_URL,
   supportLabel: SUPPORT_LABEL,
   proPricing: {
@@ -68,9 +68,9 @@ export const MONETIZATION_CONFIG = {
     monthlySubscriptionGbp: 9,
   },
   brokerReferral: {
-    partnerName: "RentOrLadder FCA Broker Network",
+    partnerName: "LadderPass FCA Broker Network",
     averageBrokerCommissionPerLeadGbp: 175,
     complianceNotice:
-      "RentOrLadder is an independent financial modeling platform. When you request a consultation, we introduce you to FCA-regulated independent mortgage brokers at no cost to you.",
+      "LadderPass is an independent financial modeling platform. When you request a consultation, we introduce you to FCA-regulated independent mortgage brokers at no cost to you.",
   },
 };

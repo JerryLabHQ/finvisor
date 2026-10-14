@@ -1,5 +1,5 @@
 /**
- * RentOrLadder Automated Math Verification Script
+ * LadderPass Automated Math Verification Script
  * Intended for AI Agent autonomous verification before committing or deploying changes.
  * Run with: npm run verify:math
  */
@@ -7,7 +7,7 @@
 import { calculateSDLT, calculateMonthlyMortgage, runBuyVsRentCalculation } from "../src/lib/calculator.ts";
 
 console.log("=================================================");
-console.log("  RENTORLADDER AUTOMATED FINANCIAL MATH AUDIT   ");
+console.log("  LADDERPASS AUTOMATED FINANCIAL MATH AUDIT     ");
 console.log("=================================================");
 
 let failedChecks = 0;

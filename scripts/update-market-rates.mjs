@@ -1,5 +1,5 @@
 /**
- * RentOrLadder Market Benchmark Updater
+ * LadderPass Market Benchmark Updater
  * Allows AI agents or automated jobs to update current market benchmarks
  * Example usage:
  *   node scripts/update-market-rates.mjs --mortgage=4.3 --svr=7.1 --boe=4.5 --inflation=2.4 --hpi=3.3

@@ -4,9 +4,9 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# RentOrLadder: Autonomous AI Agent Operations Playbook
+# LadderPass: Autonomous AI Agent Operations Playbook
 
-RentOrLadder is built to be 100% self-serve and capable of autonomous maintenance, updates, and verification by AI agents.
+LadderPass is built to be 100% self-serve and capable of autonomous maintenance, updates, and verification by AI agents.
 
 ## 1. Quick Verification Commands
 Before submitting any changes, an AI agent must run the following verification suite:
@@ -44,7 +44,7 @@ When the Chancellor announces changes in the Spring or Autumn Budget:
 3. Run `npm run verify:math` and `npm test`.
 
 ### Protocol C: Auditing and Exporting Broker Affiliate Leads
-RentOrLadder captures qualified mortgage borrower leads at `/api/leads`:
+LadderPass captures qualified mortgage borrower leads at `/api/leads`:
 ```bash
 # View summary of pipeline value and recent leads
 node scripts/export-leads.mjs

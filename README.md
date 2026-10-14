@@ -1,14 +1,14 @@
-# RentOrLadder 🇬🇧
+# LadderPass 🇬🇧
 
-> **Independent UK Buy vs. Rent Financial Modeling & Property Advisory Platform.**
-> **Live Web App:** [https://rentorladder.vercel.app](https://rentorladder.vercel.app)
+> **Independent UK Buy vs. Rent Financial Modeling & Property Advisory Platform (`ladderpass.com`).**
+> **Live Web App:** [https://ladderpass.vercel.app](https://ladderpass.vercel.app)
 > Engineered as a 100% free, community-supported side project powered by "Buy Me a Coffee" and maintained autonomously by AI agents.
 
 ---
 
 ## ☕ Support & Monetization Architecture
 
-RentOrLadder reuses the clean, community-supported setup from **FitPass**:
+LadderPass is the financial sibling project to **FitPass**:
 
 ### 1. "Buy Me a Coffee" Community Support
 - **100% Free & Unlocked:** No artificial paywalls. All tools—including PDF investment report generation, 40-year amortization CSV exports, multi-property comparisons, and macro rate shock stress-testing—are completely free for everyone.
@@ -19,7 +19,7 @@ RentOrLadder reuses the clean, community-supported setup from **FitPass**:
   - Sleek pill button in the top navigation bar (`.layout__header-donate`).
   - Dismissible friendly donation nudge banner (`.donation-banner`) above the calculator controls.
   - Creator support note inside the printable PDF report.
-  - Dedicated "Support RentOrLadder" card in the advisor sidebar.
+  - Dedicated "Support LadderPass" card in the advisor sidebar.
 
 ### 2. Whole-of-Market FCA Broker Lead Referrals (Optional Affiliate Revenue)
 - **Economics:** £150 to £250+ per qualified mortgage lead.
@@ -34,7 +34,7 @@ RentOrLadder reuses the clean, community-supported setup from **FitPass**:
 
 ## 🤖 Built & Maintained by AI Agents
 
-RentOrLadder is designed from the ground up for autonomous development and background agent workflows:
+LadderPass is designed from the ground up for autonomous development and background agent workflows:
 
 | Script / Command | Purpose |
 |---|---|

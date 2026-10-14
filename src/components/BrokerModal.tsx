@@ -84,7 +84,9 @@ export function BrokerModal({
           position: "relative",
           maxHeight: "92vh",
           overflowY: "auto",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          background: "var(--surface)",
+          border: "1px solid var(--surface-border)",
+          boxShadow: "var(--shadow-popover)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -94,28 +96,28 @@ export function BrokerModal({
 
         {submittedLead ? (
           <div style={{ textAlign: "center", padding: "20px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-            <CheckCircle size={56} style={{ color: "var(--secondary)" }} />
+            <CheckCircle size={56} style={{ color: "var(--primary)" }} />
             <div>
-              <h3 style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 6 }}>
-                Broker Match Requested!
+              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>
+                Broker Match Requested
               </h3>
-              <p style={{ color: "var(--on-surface-variant)", fontSize: 14, lineHeight: 1.5, maxWidth: 380, margin: "0 auto" }}>
+              <p style={{ color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.5, maxWidth: 380, margin: "0 auto" }}>
                 An FCA-regulated whole-of-market mortgage specialist has been matched with your scenario. They will review lender rates and contact you within 24 business hours.
               </p>
             </div>
 
-            <div style={{ background: "rgba(255,255,255,0.03)", padding: 14, borderRadius: 8, width: "100%", textAlign: "left", fontSize: 13, border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ background: "var(--surface-subtle)", padding: 14, borderRadius: 8, width: "100%", textAlign: "left", fontSize: 13, border: "1px solid var(--surface-border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ color: "var(--on-surface-variant)" }}>Reference ID:</span>
-                <span style={{ fontWeight: 600, color: "#fff" }}>{submittedLead.id}</span>
+                <span style={{ color: "var(--text-secondary)" }}>Reference ID:</span>
+                <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{submittedLead.id}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ color: "var(--on-surface-variant)" }}>Target Borrowing:</span>
+                <span style={{ color: "var(--text-secondary)" }}>Target Borrowing:</span>
                 <span style={{ fontWeight: 600, color: "var(--primary)" }}>{formatGBP(loanAmount)} ({ltvPercent}% LTV)</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--on-surface-variant)" }}>Deposit Equity:</span>
-                <span style={{ fontWeight: 600, color: "#fff" }}>{formatGBP(depositAmount)}</span>
+                <span style={{ color: "var(--text-secondary)" }}>Deposit Equity:</span>
+                <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{formatGBP(depositAmount)}</span>
               </div>
             </div>
 
@@ -130,74 +132,103 @@ export function BrokerModal({
         ) : (
           <>
             <div style={{ marginBottom: 20 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", marginBottom: 6 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
                 <Shield size={14} /> Whole-of-Market FCA Broker Match
               </div>
-              <h3 style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 6 }}>
+              <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6 }}>
                 Get a Bespoke Mortgage & Tax Review
               </h3>
-              <p style={{ color: "var(--on-surface-variant)", fontSize: 13, lineHeight: 1.5 }}>
+              <p style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.5 }}>
                 Connect with an independent mortgage advisor to access exclusive lender fixed rates, Stamp Duty optimization, and Decision in Principle (AIP) paperwork.
               </p>
             </div>
 
             {/* Quick Summary Pill */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, background: "rgba(0,0,0,0.25)", padding: 12, borderRadius: 8, marginBottom: 20, fontSize: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, background: "var(--surface-tray)", border: "1px solid var(--surface-border)", padding: 12, borderRadius: 8, marginBottom: 20, fontSize: 12 }}>
               <div>
-                <span style={{ color: "var(--on-surface-variant)" }}>Loan to Value: </span>
+                <span style={{ color: "var(--text-secondary)" }}>Loan to Value: </span>
                 <strong style={{ color: "var(--primary)" }}>{ltvPercent}% LTV</strong>
               </div>
               <div>
-                <span style={{ color: "var(--on-surface-variant)" }}>Borrowing: </span>
-                <strong style={{ color: "#fff" }}>{formatGBP(loanAmount)}</strong>
+                <span style={{ color: "var(--text-secondary)" }}>Borrowing: </span>
+                <strong style={{ color: "var(--text-primary)" }}>{formatGBP(loanAmount)}</strong>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div className="input-field-wrapper">
-                <label className="input-label" htmlFor="lead-fullname">Full Name</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }} htmlFor="lead-fullname">
+                  Full Name
+                </label>
                 <input
                   id="lead-fullname"
                   type="text"
                   required
-                  className="numeric-input"
                   placeholder="e.g. Sarah Jenkins"
-                  style={{ paddingLeft: 12 }}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 6,
+                    background: "var(--surface-subtle)",
+                    border: "1px solid var(--surface-border)",
+                    color: "var(--text-primary)",
+                    fontSize: 13,
+                    outline: "none",
+                  }}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
 
-              <div className="input-field-wrapper">
-                <label className="input-label" htmlFor="lead-emailaddr">Email Address</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }} htmlFor="lead-emailaddr">
+                  Email Address
+                </label>
                 <input
                   id="lead-emailaddr"
                   type="email"
                   required
-                  className="numeric-input"
                   placeholder="sarah@example.co.uk"
-                  style={{ paddingLeft: 12 }}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 6,
+                    background: "var(--surface-subtle)",
+                    border: "1px solid var(--surface-border)",
+                    color: "var(--text-primary)",
+                    fontSize: 13,
+                    outline: "none",
+                  }}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
-              <div className="input-field-wrapper">
-                <label className="input-label" htmlFor="lead-phone-input">Phone Number (Optional for WhatsApp update)</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }} htmlFor="lead-phone-input">
+                  Phone Number (Optional for WhatsApp update)
+                </label>
                 <input
                   id="lead-phone-input"
                   type="tel"
-                  className="numeric-input"
                   placeholder="07123 456789"
-                  style={{ paddingLeft: 12 }}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 6,
+                    background: "var(--surface-subtle)",
+                    border: "1px solid var(--surface-border)",
+                    color: "var(--text-primary)",
+                    fontSize: 13,
+                    outline: "none",
+                  }}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <div>
-                  <label className="input-label" htmlFor="lead-buyertype">Buyer Status</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }} htmlFor="lead-buyertype">
+                    Buyer Status
+                  </label>
                   <select
                     id="lead-buyertype"
                     value={buyerType}
@@ -206,20 +237,23 @@ export function BrokerModal({
                       width: "100%",
                       padding: "10px",
                       borderRadius: 6,
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      color: "#fff",
+                      background: "var(--surface-subtle)",
+                      border: "1px solid var(--surface-border)",
+                      color: "var(--text-primary)",
                       fontSize: 13,
+                      outline: "none",
                     }}
                   >
-                    <option value="FIRST_TIME_BUYER" style={{ background: "#131b2e" }}>First-Time Buyer</option>
-                    <option value="HOME_MOVER" style={{ background: "#131b2e" }}>Home Mover</option>
-                    <option value="REMORTGAGE" style={{ background: "#131b2e" }}>Remortgage</option>
+                    <option value="FIRST_TIME_BUYER">First-Time Buyer</option>
+                    <option value="HOME_MOVER">Home Mover</option>
+                    <option value="REMORTGAGE">Remortgage</option>
                   </select>
                 </div>
 
-                <div>
-                  <label className="input-label" htmlFor="lead-timeline">Target Timeline</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }} htmlFor="lead-timeline">
+                    Target Timeline
+                  </label>
                   <select
                     id="lead-timeline"
                     value={buyingTimeline}
@@ -228,16 +262,17 @@ export function BrokerModal({
                       width: "100%",
                       padding: "10px",
                       borderRadius: 6,
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      color: "#fff",
+                      background: "var(--surface-subtle)",
+                      border: "1px solid var(--surface-border)",
+                      color: "var(--text-primary)",
                       fontSize: 13,
+                      outline: "none",
                     }}
                   >
-                    <option value="IMMEDIATE_3M" style={{ background: "#131b2e" }}>Next 3 Months</option>
-                    <option value="WITHIN_6M" style={{ background: "#131b2e" }}>3 - 6 Months</option>
-                    <option value="WITHIN_12M" style={{ background: "#131b2e" }}>6 - 12 Months</option>
-                    <option value="JUST_RESEARCHING" style={{ background: "#131b2e" }}>Exploring</option>
+                    <option value="IMMEDIATE_3M">Next 3 Months</option>
+                    <option value="WITHIN_6M">3 - 6 Months</option>
+                    <option value="WITHIN_12M">6 - 12 Months</option>
+                    <option value="JUST_RESEARCHING">Exploring</option>
                   </select>
                 </div>
               </div>
@@ -246,14 +281,14 @@ export function BrokerModal({
                 type="submit"
                 disabled={submitting}
                 className="cta-button"
-                style={{ width: "100%", marginTop: 10, padding: "13px", display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}
+                style={{ width: "100%", marginTop: 10, padding: "12px", display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}
               >
                 <span>{submitting ? "Connecting to Advisor..." : "Request Free Consultation"}</span>
                 <ArrowRight size={16} />
               </button>
             </form>
 
-            <div style={{ marginTop: 16, fontSize: 11, color: "var(--on-surface-variant)", lineHeight: 1.4, textAlign: "center" }}>
+            <div style={{ marginTop: 16, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.4, textAlign: "center" }}>
               {MONETIZATION_CONFIG.brokerReferral.complianceNotice}
             </div>
           </>

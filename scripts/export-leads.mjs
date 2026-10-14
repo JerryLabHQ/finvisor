@@ -1,5 +1,5 @@
 /**
- * RentOrLadder Lead Audit and Export Tool
+ * LadderPass Lead Audit and Export Tool
  * Allows AI agents or operators to inspect, export to CSV, and calculate affiliate revenue
  * Example:
  *   node scripts/export-leads.mjs [--format=csv|json] [--status=NEW|QUALIFIED|INVOICED]
