@@ -4,9 +4,7 @@ import React, { useState, useMemo } from "react";
 import {
   GraduationCap,
   Sliders,
-  Sparkles,
   FileText,
-  Shield,
   Coins,
   CheckCircle,
   AlertTriangle,
@@ -14,6 +12,7 @@ import {
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
+import { ConsultationModal } from "@/components/ConsultationModal";
 import {
   runStudentLoanCalculation,
   StudentLoanInputs,
@@ -35,10 +34,6 @@ export default function StudentLoanPage() {
 
   const [donationDismissed, setDonationDismissed] = useState(false);
   const [showBrokerModal, setShowBrokerModal] = useState(false);
-  const [brokerSubmitted, setBrokerSubmitted] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
 
   const inputs: StudentLoanInputs = useMemo(
     () => ({
@@ -70,28 +65,6 @@ export default function StudentLoanPage() {
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const handleBrokerSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone,
-          buyerType: "FIRST_TIME_BUYER",
-          propertyPrice: 350000,
-          depositPercent: 15,
-          buyingTimeline: "WITHIN_6M",
-        }),
-      });
-      setBrokerSubmitted(true);
-    } catch {
-      setBrokerSubmitted(true);
-    }
   };
 
   const isDoNotOverpay = results.verdict === "DO_NOT_OVERPAY";
@@ -484,123 +457,27 @@ export default function StudentLoanPage() {
         </div>
       </div>
 
-      {/* Broker Lead Modal */}
-      {showBrokerModal && (
-        <div className="drawer-overlay open" style={{ display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div
-            className="glass-panel"
-            style={{
-              width: "92%",
-              maxWidth: 480,
-              padding: "28px 24px",
-              background: "var(--surface)",
-              border: "1px solid var(--surface-border)",
-              borderRadius: "var(--round-lg)",
-              boxShadow: "var(--shadow-popover)",
-            }}
-          >
-            {brokerSubmitted ? (
-              <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <Sparkles size={48} style={{ color: "var(--primary)", margin: "0 auto 16px" }} />
-                <h3 style={{ fontSize: 18, fontWeight: 700 }}>Borrowing Assessment Requested</h3>
-                <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 8 }}>
-                  An FCA-authorised mortgage broker will assess your borrowing capacity with high-street lenders who take a favorable approach to student loan deductions.
-                </p>
-                <button
-                  onClick={() => {
-                    setShowBrokerModal(false);
-                    setBrokerSubmitted(false);
-                  }}
-                  style={{
-                    marginTop: 18,
-                    padding: "10px 20px",
-                    borderRadius: "var(--round-md)",
-                    background: "var(--primary)",
-                    color: "#fff",
-                    border: "none",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleBrokerSubmit}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                  <Shield size={20} style={{ color: "var(--primary)" }} />
-                  <h3 style={{ fontSize: 18, fontWeight: 700 }}>Check Your Mortgage Affordability</h3>
-                </div>
-                <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 16 }}>
-                  Different UK lenders treat student loan repayments differently. Connect with a whole-of-market broker to maximize your borrowing capacity.
-                </p>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Phone (Optional for callback)</label>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    style={{
-                      marginTop: 8,
-                      padding: "12px",
-                      borderRadius: "var(--round-md)",
-                      background: "var(--primary)",
-                      color: "#fff",
-                      border: "none",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Assess My Mortgage Borrowing
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowBrokerModal(false)}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "var(--text-muted)",
-                      fontSize: 12,
-                      cursor: "pointer",
-                      marginTop: 4,
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Graduate Mortgage Borrowing Review Modal */}
+      <ConsultationModal
+        isOpen={showBrokerModal}
+        onClose={() => setShowBrokerModal(false)}
+        context="STUDENT_LOAN"
+        propertyPrice={salary * 4.5}
+        customMetrics={{
+          primaryLabel: "Annual Gross Salary",
+          primaryValue: formatGBP(salary),
+          primarySub: plan.replace("_", " "),
+          secondaryLabel: "Current Loan Balance",
+          secondaryValue: formatGBP(balance),
+          secondarySub: `Growth: +${growth}%/yr`,
+          tertiaryLabel: "Monthly Deductions",
+          tertiaryValue: `${formatGBP(results.currentMonthlyRepayment)}/mo`,
+          tertiarySub: "Automatic PAYE",
+          quaternaryLabel: "Estimated Debt Cancelled",
+          quaternaryValue: formatGBP(results.debtWipedOutStandard),
+          quaternarySub: isDoNotOverpay ? "Wipeout expected" : "Full payoff",
+        }}
+      />
 
       {/* Global Institutional Editorial Footer */}
       <Footer />

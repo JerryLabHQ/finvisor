@@ -4,7 +4,6 @@ import React, { useState, useMemo } from "react";
 import {
   Coins,
   Sliders,
-  Sparkles,
   FileText,
   Shield,
   CheckCircle,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
+import { ConsultationModal } from "@/components/ConsultationModal";
 import {
   runPensionCalculation,
   PensionInputs,
@@ -37,10 +37,6 @@ export default function RetirementPage() {
 
   const [donationDismissed, setDonationDismissed] = useState(false);
   const [showIfaModal, setShowIfaModal] = useState(false);
-  const [ifaSubmitted, setIfaSubmitted] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
 
   const inputs: PensionInputs = useMemo(
     () => ({
@@ -78,28 +74,6 @@ export default function RetirementPage() {
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const handleIfaSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone,
-          buyerType: "RETIREMENT_PLANNING",
-          propertyPrice: pensionPot,
-          depositPercent: 20,
-          buyingTimeline: "IMMEDIATE_3M",
-        }),
-      });
-      setIfaSubmitted(true);
-    } catch {
-      setIfaSubmitted(true);
-    }
   };
 
   const isSustainable = results.verdict === "SUSTAINABLE_DRAWDOWN";
@@ -532,123 +506,27 @@ export default function RetirementPage() {
         </div>
       </div>
 
-      {/* IFA Lead Modal */}
-      {showIfaModal && (
-        <div className="drawer-overlay open" style={{ display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div
-            className="glass-panel"
-            style={{
-              width: "92%",
-              maxWidth: 480,
-              padding: "28px 24px",
-              background: "var(--surface)",
-              border: "1px solid var(--surface-border)",
-              borderRadius: "var(--round-lg)",
-              boxShadow: "var(--shadow-popover)",
-            }}
-          >
-            {ifaSubmitted ? (
-              <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <Sparkles size={48} style={{ color: "var(--primary)", margin: "0 auto 16px" }} />
-                <h3 style={{ fontSize: 18, fontWeight: 700 }}>Retirement Specialist Assigned</h3>
-                <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 8 }}>
-                  An FCA-authorised Independent Financial Adviser specializing in UK pension drawdown, annuities, and post-2027 IHT mitigation will contact you shortly.
-                </p>
-                <button
-                  onClick={() => {
-                    setShowIfaModal(false);
-                    setIfaSubmitted(false);
-                  }}
-                  style={{
-                    marginTop: 18,
-                    padding: "10px 20px",
-                    borderRadius: "var(--round-md)",
-                    background: "var(--primary)",
-                    color: "#fff",
-                    border: "none",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleIfaSubmit}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                  <Shield size={20} style={{ color: "var(--primary)" }} />
-                  <h3 style={{ fontSize: 18, fontWeight: 700 }}>Connect with a Retirement IFA</h3>
-                </div>
-                <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 16 }}>
-                  Receive independent, whole-of-market advice on safe withdrawal rates, annuity quotes, and 2027 pension inheritance tax planning.
-                </p>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Phone (Optional for callback)</label>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    style={{
-                      marginTop: 8,
-                      padding: "12px",
-                      borderRadius: "var(--round-md)",
-                      background: "var(--primary)",
-                      color: "#fff",
-                      border: "none",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Request Free Pension Consultation
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowIfaModal(false)}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "var(--text-muted)",
-                      fontSize: 12,
-                      cursor: "pointer",
-                      marginTop: 4,
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Chartered Financial Planner & Pension Consultation Modal */}
+      <ConsultationModal
+        isOpen={showIfaModal}
+        onClose={() => setShowIfaModal(false)}
+        context="RETIREMENT"
+        propertyPrice={pensionPot}
+        customMetrics={{
+          primaryLabel: "Accumulated Pension Pot",
+          primaryValue: formatGBP(pensionPot),
+          primarySub: `Current Age: ${currentAge}`,
+          secondaryLabel: "Target Annual Net Income",
+          secondaryValue: `${formatGBP(incomeNet)}/yr`,
+          secondarySub: `Retire at ${retireAge}`,
+          tertiaryLabel: "25% Tax-Free Lump Sum (PCLS)",
+          tertiaryValue: formatGBP(takePcls ? Math.min(268275, pensionPot * 0.25) : 0),
+          tertiarySub: "HMRC statutory allowance",
+          quaternaryLabel: "Portfolio Sustainability",
+          quaternaryValue: isSustainable ? "Sustainable Drawdown" : "Depletion Risk",
+          quaternarySub: isSustainable ? `Survives past age ${lifeAge}` : "Requires reduction",
+        }}
+      />
 
       {/* Global Institutional Editorial Footer */}
       <Footer />

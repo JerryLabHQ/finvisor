@@ -6,13 +6,13 @@ import {
   Sliders,
   Sparkles,
   FileText,
-  Shield,
   Coins,
   CheckCircle,
   Car,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
+import { ConsultationModal } from "@/components/ConsultationModal";
 import {
   runEVCalculation,
   EVInputs,
@@ -36,10 +36,6 @@ export default function EVPage() {
 
   const [donationDismissed, setDonationDismissed] = useState(false);
   const [showBrokerModal, setShowBrokerModal] = useState(false);
-  const [brokerSubmitted, setBrokerSubmitted] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [company, setCompany] = useState("");
 
   const inputs: EVInputs = useMemo(
     () => ({
@@ -65,27 +61,6 @@ export default function EVPage() {
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const handleBrokerSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          buyerType: "EV_SALARY_SACRIFICE",
-          propertyPrice: p11d,
-          depositPercent: 15,
-          buyingTimeline: "IMMEDIATE_3M",
-        }),
-      });
-      setBrokerSubmitted(true);
-    } catch {
-      setBrokerSubmitted(true);
-    }
   };
 
   return (
@@ -515,124 +490,27 @@ export default function EVPage() {
         </div>
       </div>
 
-      {/* Provider Inquiry Modal */}
-      {showBrokerModal && (
-        <div className="drawer-overlay open" style={{ display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div
-            className="glass-panel"
-            style={{
-              width: "92%",
-              maxWidth: 480,
-              padding: "28px 24px",
-              background: "var(--surface)",
-              border: "1px solid var(--surface-border)",
-              borderRadius: "var(--round-lg)",
-              boxShadow: "var(--shadow-popover)",
-            }}
-          >
-            {brokerSubmitted ? (
-              <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <Sparkles size={48} style={{ color: "var(--primary)", margin: "0 auto 16px" }} />
-                <h3 style={{ fontSize: 18, fontWeight: 700 }}>Provider Quotes Requested</h3>
-                <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 8 }}>
-                  We are matching your criteria with leading UK salary sacrifice fleet providers (e.g. Octopus EV, The Electric Car Scheme). You will receive verified quote comparisons.
-                </p>
-                <button
-                  onClick={() => {
-                    setShowBrokerModal(false);
-                    setBrokerSubmitted(false);
-                  }}
-                  style={{
-                    marginTop: 18,
-                    padding: "10px 20px",
-                    borderRadius: "var(--round-md)",
-                    background: "var(--primary)",
-                    color: "#fff",
-                    border: "none",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleBrokerSubmit}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                  <Shield size={20} style={{ color: "var(--primary)" }} />
-                  <h3 style={{ fontSize: 18, fontWeight: 700 }}>Compare UK Salary Sacrifice Providers</h3>
-                </div>
-                <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 16 }}>
-                  Whether your company already has an EV scheme or you want to introduce one to your HR/Finance team, get whole-of-market vehicle lease quotes.
-                </p>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Work Email</label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 600 }}>Employer / Company Name</label>
-                    <input
-                      type="text"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      placeholder="e.g. Acme Tech Ltd"
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)", background: "var(--surface-tray)", color: "var(--text-primary)", marginTop: 4 }}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    style={{
-                      marginTop: 8,
-                      padding: "12px",
-                      borderRadius: "var(--round-md)",
-                      background: "var(--primary)",
-                      color: "#fff",
-                      border: "none",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Get Free Provider Comparisons
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowBrokerModal(false)}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "var(--text-muted)",
-                      fontSize: 12,
-                      cursor: "pointer",
-                      marginTop: 4,
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Fleet Provider & Salary Sacrifice Consultation Modal */}
+      <ConsultationModal
+        isOpen={showBrokerModal}
+        onClose={() => setShowBrokerModal(false)}
+        context="EV_SCHEME"
+        propertyPrice={p11d}
+        customMetrics={{
+          primaryLabel: "Vehicle P11D Retail Value",
+          primaryValue: formatGBP(p11d),
+          primarySub: `Lease: ${formatGBP(grossLease)}/mo`,
+          secondaryLabel: "Net SalSac Monthly Cost",
+          secondaryValue: formatGBP(results.salarySacrificeOption.netTotalMonthlyCost),
+          secondarySub: "All-inclusive",
+          tertiaryLabel: "Monthly Tax & NI Saved",
+          tertiaryValue: formatGBP(results.salarySacrificeOption.monthlyTaxRelief),
+          tertiarySub: `${results.effectiveEmployeeTaxRatePercent}% marginal relief`,
+          quaternaryLabel: "3-Year Savings vs. PCP",
+          quaternaryValue: formatGBP(results.monthlySavingsVsPcp * 36),
+          quaternarySub: `Save ${formatGBP(results.monthlySavingsVsPcp)}/mo`,
+        }}
+      />
 
       {/* Global Institutional Editorial Footer */}
       <Footer />
