@@ -13,6 +13,7 @@ import {
   Scale,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
+import { Footer } from "@/components/Footer";
 import {
   runStudentLoanCalculation,
   StudentLoanInputs,
@@ -305,6 +306,12 @@ export default function StudentLoanPage() {
               onChange={(e) => setBalance(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>£5k</span>
+              <span>£25k</span>
+              <span>£50k (Avg)</span>
+              <span>£95k</span>
+            </div>
           </div>
 
           {/* Plan Selector */}
@@ -357,6 +364,12 @@ export default function StudentLoanPage() {
               onChange={(e) => setGrowth(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>1%</span>
+              <span>3%</span>
+              <span>5% (Typical)</span>
+              <span>8%</span>
+            </div>
             <span className="control-help">
               Blends general inflation (e.g. 2.5%) plus career promotion increases.
             </span>
@@ -380,6 +393,12 @@ export default function StudentLoanPage() {
               onChange={(e) => setOverpay(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>£0</span>
+              <span>£150</span>
+              <span>£300</span>
+              <span>£600</span>
+            </div>
             <span className="control-help">
               Test whether extra monthly payments save interest or are wasted.
             </span>
@@ -582,6 +601,9 @@ export default function StudentLoanPage() {
           </div>
         </div>
       )}
+
+      {/* Global Institutional Editorial Footer */}
+      <Footer />
     </div>
   );
 }

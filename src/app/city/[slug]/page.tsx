@@ -2,7 +2,18 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { UK_CITIES, getCityBySlug } from "@/lib/cities";
-import { TrendingUp, ArrowLeft, MapPin, CheckCircle, Calculator } from "lucide-react";
+import {
+  MapPin,
+  CheckCircle2,
+  Building,
+  ArrowRight,
+  Award,
+} from "lucide-react";
+import { HeaderNav } from "@/components/HeaderNav";
+import { Footer } from "@/components/Footer";
+import { CityAffordabilityWidget } from "@/components/CityAffordabilityWidget";
+import { calculateMonthlyMortgage, calculateSDLT } from "@/lib/calculator";
+import { UK_MARKET_DEFAULTS } from "@/lib/constants";
 import "../../dashboard.css";
 
 interface CityPageProps {
@@ -23,9 +34,22 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
     return { title: "City Not Found - LadderPass" };
   }
 
+  const currentYear = new Date().getFullYear();
+
   return {
-    title: `Buy vs Rent in ${city.name} (${new Date().getFullYear()}) - Financial Analysis & Calculator | LadderPass`,
-    description: `Should you buy or rent in ${city.name}? Compare average house prices (£${city.averagePrice.toLocaleString()}), rental costs (£${city.averageRentMonthly.toLocaleString()}/mo), Stamp Duty, and historical yields.`,
+    title: `Buy vs Rent in ${city.name} (${currentYear}) - Property Prices, Rental Yields & Breakeven | LadderPass`,
+    description: `Should you buy or rent in ${city.name}? Compare average house prices (£${city.averagePrice.toLocaleString()}), rental costs (£${city.averageRentMonthly.toLocaleString()}/mo), Stamp Duty relief, and mortgage affordability.`,
+    alternates: {
+      canonical: `https://finvisor-ecru.vercel.app/city/${city.slug}`,
+    },
+    openGraph: {
+      title: `Buy vs Rent in ${city.name} - The UK Financial Ladder`,
+      description: `Detailed housing market analysis for ${city.name}: Average price £${city.averagePrice.toLocaleString()}, typical rent £${city.averageRentMonthly.toLocaleString()}/mo, price-to-rent ratio ${city.priceToRentRatio}x.`,
+      url: `https://finvisor-ecru.vercel.app/city/${city.slug}`,
+      siteName: "LadderPass",
+      locale: "en_GB",
+      type: "article",
+    },
   };
 }
 
@@ -40,142 +64,213 @@ export default async function CityPage({ params }: CityPageProps) {
     notFound();
   }
 
-  const calculatorUrl = `/?price=${city.averagePrice}&rent=${city.averageRentMonthly}&councilTax=${city.typicalCouncilTaxMonthly}&serviceCharge=${city.typicalServiceChargeMonthly}&hpi=${city.historicalHpi5YrAvg}`;
+  // Exact statutory calculations
+  const ftbStampDuty = calculateSDLT(city.averagePrice, true);
+  const loanAmount85 = city.averagePrice * 0.85;
+  const estimatedMortgage = calculateMonthlyMortgage(loanAmount85, UK_MARKET_DEFAULTS.defaultMortgageRate, 25);
+  const grossYieldPercent = Number(((city.averageRentMonthly * 12) / city.averagePrice * 100).toFixed(1));
 
   return (
-    <div className="dashboard-container" style={{ paddingBottom: 60 }}>
-      {/* Navigation */}
-      <nav className="nav-bar glass-panel">
-        <Link href="/" className="logo" style={{ textDecoration: "none" }}>
-          <div className="logo-icon-wrap">
-            <TrendingUp size={18} />
-          </div>
-          <span>LadderPass</span>
-        </Link>
-        <ul className="nav-links">
-          <li>
-            <Link href="/" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <ArrowLeft size={16} />
-              <span>Back to Interactive Calculator</span>
-            </Link>
-          </li>
-        </ul>
-      </nav>
+    <div className="dashboard-container">
+      {/* Executive Suite Navigation Header */}
+      <HeaderNav currentModule="UK Cities" />
 
-      {/* Main Container */}
-      <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
-        {/* City Header Hero */}
-        <div className="glass-panel" style={{ padding: "36px 32px" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "4px 12px", borderRadius: 999, background: "var(--primary-light)", border: "1px solid var(--primary-border)", color: "var(--primary)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 16 }}>
-            <MapPin size={14} />
-            <span>{city.region.toUpperCase()} Property Intelligence</span>
-          </div>
-
-          <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 34, fontWeight: 600, color: "var(--text-primary)", marginBottom: 12, lineHeight: 1.2 }}>
-            Buy vs Rent in {city.name}: Financial Guide & Calculator
-          </h1>
-          <p style={{ fontSize: 16, color: "var(--text-secondary)", maxWidth: 780, lineHeight: 1.6, marginBottom: 24 }}>
-            {city.description}
-          </p>
-
-          <Link
-            href={calculatorUrl}
-            className="cta-button"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "13px 26px",
-              fontSize: 14,
-              fontWeight: 600,
-              textDecoration: "none",
-            }}
-          >
-            <Calculator size={18} />
-            <span>Run {city.name} Custom Simulation</span>
-          </Link>
-        </div>
-
-        {/* City Key Benchmarks Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-          <div className="glass-panel" style={{ padding: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>Average Property Price</div>
-            <div style={{ fontFamily: "var(--font-serif)", fontSize: 24, fontWeight: 600, color: "var(--primary)", marginTop: 6 }}>
-              {formatGBP(city.averagePrice)}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>Land Registry Benchmark</div>
-          </div>
-
-          <div className="glass-panel" style={{ padding: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>Average Monthly Rent</div>
-            <div style={{ fontFamily: "var(--font-serif)", fontSize: 24, fontWeight: 600, color: "var(--secondary)", marginTop: 6 }}>
-              {formatGBP(city.averageRentMonthly)}/mo
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>Private Rental Index</div>
-          </div>
-
-          <div className="glass-panel" style={{ padding: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>Price-to-Rent Ratio</div>
-            <div style={{ fontFamily: "var(--font-serif)", fontSize: 24, fontWeight: 600, color: "var(--text-primary)", marginTop: 6 }}>
-              {city.priceToRentRatio}x
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-              {city.priceToRentRatio > 20 ? "Favors Renting Initially" : "Competitive Buying Yields"}
-            </div>
-          </div>
-
-          <div className="glass-panel" style={{ padding: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>5-Year Historical HPI</div>
-            <div style={{ fontFamily: "var(--font-serif)", fontSize: 24, fontWeight: 600, color: "var(--text-primary)", marginTop: 6 }}>
-              +{city.historicalHpi5YrAvg}%/yr
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>Compound Appreciation</div>
-          </div>
-        </div>
-
-        {/* Market Analysis & Highlights */}
-        <div className="glass-panel" style={{ padding: 28 }}>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16 }}>
-            {city.name} Real Estate Market Dynamics
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
-            {city.highlights.map((h, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--text-primary)" }}>
-                <CheckCircle size={18} style={{ color: "var(--primary)", flexShrink: 0 }} />
-                <span>{h}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Other Cities Links for Internal Linking / SEO Authority */}
-        <div className="glass-panel" style={{ padding: 24 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 14 }}>
-            Explore Other UK Property Markets
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {UK_CITIES.filter((c) => c.slug !== city.slug).map((c) => (
+      {/* Cross-City Hub Switcher Bar */}
+      <div style={{
+        background: "var(--surface)",
+        border: "1px solid var(--surface-border)",
+        borderRadius: "var(--round-lg)",
+        padding: "10px 18px",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        overflowX: "auto",
+        boxShadow: "var(--shadow-card)",
+      }}>
+        <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+          Regional UK Hubs:
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "nowrap" }}>
+          {UK_CITIES.map((c) => {
+            const isActive = c.slug === city.slug;
+            return (
               <Link
                 key={c.slug}
                 href={`/city/${c.slug}`}
                 style={{
-                  padding: "6px 14px",
+                  padding: "5px 12px",
                   borderRadius: 9999,
-                  background: "var(--surface-subtle)",
-                  border: "1px solid var(--surface-border)",
-                  color: "var(--text-primary)",
                   fontSize: 12,
-                  fontWeight: 500,
+                  fontWeight: isActive ? 700 : 500,
                   textDecoration: "none",
+                  whiteSpace: "nowrap",
+                  background: isActive ? "var(--primary)" : "var(--surface-tray)",
+                  color: isActive ? "#ffffff" : "var(--text-secondary)",
+                  border: `1px solid ${isActive ? "var(--primary)" : "var(--surface-border)"}`,
                   transition: "all 0.15s ease",
                 }}
               >
-                {c.name} ({formatGBP(c.averagePrice)})
+                {c.name}
               </Link>
-            ))}
+            );
+          })}
+        </div>
+      </div>
+
+      {/* City Hero Section */}
+      <section className="hero-section">
+        <div className="hero-pill" style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--primary-border)" }}>
+          <MapPin size={14} />
+          <span>{city.region.toUpperCase()} • HM LAND REGISTRY BENCHMARK</span>
+        </div>
+        <h1 className="hero-title">
+          Buy vs Rent in {city.name}: Property Prices, Rental Yields & Breakeven Guide
+        </h1>
+        <p className="hero-subtitle">
+          {city.description} Calibrate your capital deployment against real-time Bank of England base rates, statutory Stamp Duty Land Tax (SDLT) brackets, and compound ISA opportunity costs.
+        </p>
+      </section>
+
+      {/* Regional Macro Decision Certificate & 4 KPI Cards */}
+      <div className="verdict-banner buy-wins">
+        <div className="verdict-header">
+          <div>
+            <div className="verdict-badge buy">
+              <Award size={14} />
+              <span>{city.name} Macro-Index Decision Certificate</span>
+            </div>
+            <h2 className="verdict-headline">
+              {city.priceToRentRatio > 20
+                ? `In ${city.name}, high price-to-rent multiples (${city.priceToRentRatio}x) favor renting for horizons under 5 years.`
+                : `In ${city.name}, robust rental yields (${grossYieldPercent}%) make ownership financially compelling within 3.5 to 4.5 years.`}
+            </h2>
+            <p className="verdict-summary">
+              Official Land Registry figures show average prices at {formatGBP(city.averagePrice)} alongside market rents of {formatGBP(city.averageRentMonthly)}/month, generating an estimated gross rental yield of {grossYieldPercent}%.
+            </p>
+          </div>
+        </div>
+
+        {/* 4 Precision Metric Cards */}
+        <div className="verdict-metrics-grid">
+          <div className="metric-card">
+            <span className="metric-label">Average Property Price</span>
+            <span className="metric-value highlight" style={{ color: "var(--primary)" }}>
+              {formatGBP(city.averagePrice)}
+            </span>
+            <span className="metric-subtext">Land Registry HPI Benchmark</span>
+          </div>
+
+          <div className="metric-card">
+            <span className="metric-label">Monthly Market Rent</span>
+            <span className="metric-value highlight" style={{ color: "var(--secondary)" }}>
+              {formatGBP(city.averageRentMonthly)}/mo
+            </span>
+            <span className="metric-subtext">ONS Private Rental Index</span>
+          </div>
+
+          <div className="metric-card">
+            <span className="metric-label">Stamp Duty (FTB Rate)</span>
+            <span className="metric-value" style={{ color: "var(--text-primary)" }}>
+              {formatGBP(ftbStampDuty)}
+            </span>
+            <span className="metric-subtext">Relief applied up to £425k</span>
+          </div>
+
+          <div className="metric-card">
+            <span className="metric-label">Est. Monthly Mortgage</span>
+            <span className="metric-value" style={{ color: "var(--primary)" }}>
+              {formatGBP(estimatedMortgage)}/mo
+            </span>
+            <span className="metric-subtext">85% LTV @ {UK_MARKET_DEFAULTS.defaultMortgageRate}% (25y)</span>
           </div>
         </div>
       </div>
+
+      {/* Interactive Affordability Calibrator & Local Outflow Breakdown */}
+      <CityAffordabilityWidget
+        cityName={city.name}
+        citySlug={city.slug}
+        averagePrice={city.averagePrice}
+        averageRentMonthly={city.averageRentMonthly}
+        typicalCouncilTaxMonthly={city.typicalCouncilTaxMonthly}
+        typicalServiceChargeMonthly={city.typicalServiceChargeMonthly}
+        historicalHpi5YrAvg={city.historicalHpi5YrAvg}
+      />
+
+      {/* Regional Market Dynamics & Highlights Bento */}
+      <div className="glass-panel" style={{ padding: 28, borderRadius: "var(--round-lg)", background: "var(--surface)", border: "1px solid var(--surface-border)" }}>
+        <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--text-primary)", marginBottom: 16 }}>
+          {city.name} Real Estate Market Dynamics & Growth Drivers
+        </h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+          {city.highlights.map((h, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13, color: "var(--text-primary)", background: "var(--surface-tray)", padding: "12px 14px", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)" }}>
+              <CheckCircle2 size={16} style={{ color: "var(--primary)", flexShrink: 0, marginTop: 2 }} />
+              <span style={{ lineHeight: 1.5 }}>{h}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FCA Regulated Mortgage Broker Introducer Card */}
+      <div style={{
+        background: "var(--surface)",
+        border: "1px solid var(--surface-border)",
+        borderRadius: "var(--round-xl)",
+        padding: "26px 30px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 20,
+        flexWrap: "wrap",
+        boxShadow: "var(--shadow-card)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, maxWidth: 680 }}>
+          <div style={{
+            width: 44,
+            height: 44,
+            borderRadius: "var(--round-md)",
+            background: "var(--primary-light)",
+            border: "1px solid var(--primary-border)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--primary)",
+            flexShrink: 0,
+          }}>
+            <Building size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
+              Looking to Buy in {city.name}? Connect with an FCA-Regulated Mortgage Broker
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 2 }}>
+              Get fee-free independent mortgage comparisons, access to exclusive lender rates, and rapid Decision in Principle (DIP) letters.
+            </div>
+          </div>
+        </div>
+
+        <Link
+          href={`/?price=${city.averagePrice}&rent=${city.averageRentMonthly}&city=${city.slug}`}
+          className="cta-button"
+          style={{
+            padding: "11px 20px",
+            fontSize: 13,
+            fontWeight: 700,
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span>Calculate Borrowing Capacity</span>
+          <ArrowRight size={15} />
+        </Link>
+      </div>
+
+      {/* Global Institutional Editorial Footer */}
+      <Footer />
     </div>
   );
 }

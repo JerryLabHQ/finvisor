@@ -13,6 +13,7 @@ import {
   Coins,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
+import { Footer } from "@/components/Footer";
 import {
   runTaxOptimization,
   TaxInputs,
@@ -675,6 +676,9 @@ export default function TaxPage() {
           </div>
         </div>
       )}
+
+      {/* Global Institutional Editorial Footer */}
+      <Footer />
     </div>
   );
 }

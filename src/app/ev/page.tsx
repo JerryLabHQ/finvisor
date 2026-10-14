@@ -12,6 +12,7 @@ import {
   Car,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
+import { Footer } from "@/components/Footer";
 import {
   runEVCalculation,
   EVInputs,
@@ -344,6 +345,12 @@ export default function EVPage() {
               onChange={(e) => setMileage(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>5,000</span>
+              <span>10,000 (UK Avg)</span>
+              <span>15,000</span>
+              <span>25,000</span>
+            </div>
           </div>
 
           <div className="control-group">
@@ -361,6 +368,12 @@ export default function EVPage() {
               onChange={(e) => setHomePercent(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>20%</span>
+              <span>50%</span>
+              <span>80% (Typical)</span>
+              <span>100% Home</span>
+            </div>
           </div>
 
           <div className="control-group" style={{ borderTop: "1px solid var(--surface-border)", paddingTop: 14 }}>
@@ -620,6 +633,9 @@ export default function EVPage() {
           </div>
         </div>
       )}
+
+      {/* Global Institutional Editorial Footer */}
+      <Footer />
     </div>
   );
 }

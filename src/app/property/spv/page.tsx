@@ -13,6 +13,7 @@ import {
   Scale,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
+import { Footer } from "@/components/Footer";
 import {
   runBTLCalculation,
   BTLInputs,
@@ -287,6 +288,12 @@ export default function SpvPage() {
               onChange={(e) => setPrice(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>£100k</span>
+              <span>£250k</span>
+              <span>£500k</span>
+              <span>£800k</span>
+            </div>
           </div>
 
           {/* Deposit Percent */}
@@ -329,6 +336,12 @@ export default function SpvPage() {
               onChange={(e) => setRent(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>£500</span>
+              <span>£1,500</span>
+              <span>£3,000</span>
+              <span>£4,500</span>
+            </div>
             <span className="control-help">
               Gross Yield: {((rent * 12) / price * 100).toFixed(1)}%
             </span>
@@ -383,6 +396,12 @@ export default function SpvPage() {
               onChange={(e) => setPersonalRate(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>3.0%</span>
+              <span>4.5%</span>
+              <span>6.0%</span>
+              <span>7.0%</span>
+            </div>
           </div>
 
           <div className="control-group">
@@ -400,6 +419,12 @@ export default function SpvPage() {
               onChange={(e) => setSpvRate(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>3.5%</span>
+              <span>5.0%</span>
+              <span>6.5%</span>
+              <span>8.0%</span>
+            </div>
             <span className="control-help">
               SPV commercial rates are typically 0.7%–1.2% higher than personal loans.
             </span>
@@ -651,6 +676,9 @@ export default function SpvPage() {
           </div>
         </div>
       )}
+
+      {/* Global Institutional Editorial Footer */}
+      <Footer />
     </div>
   );
 }

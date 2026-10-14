@@ -38,6 +38,7 @@ import { StressTestView } from "@/components/StressTestView";
 import { ScenarioCompare } from "@/components/ScenarioCompare";
 import { AnnualTable } from "@/components/AnnualTable";
 import { HeaderNav } from "@/components/HeaderNav";
+import { Footer } from "@/components/Footer";
 import "./dashboard.css";
 
 // Helper for formatting GBP
@@ -1276,6 +1277,9 @@ export default function Dashboard() {
         mortgageRate={mortgageRate}
         mortgageTerm={mortgageTerm}
       />
+
+      {/* Global Institutional Editorial Footer */}
+      <Footer />
     </div>
   );
 }

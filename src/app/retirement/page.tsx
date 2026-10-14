@@ -12,6 +12,7 @@ import {
   Scale,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
+import { Footer } from "@/components/Footer";
 import {
   runPensionCalculation,
   PensionInputs,
@@ -289,6 +290,12 @@ export default function RetirementPage() {
               onChange={(e) => setPensionPot(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>£100k</span>
+              <span>£500k</span>
+              <span>£1.0m</span>
+              <span>£1.5m</span>
+            </div>
           </div>
 
           {/* Stocks & Shares ISA Slider */}
@@ -307,6 +314,12 @@ export default function RetirementPage() {
               onChange={(e) => setIsaPot(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>£0</span>
+              <span>£100k</span>
+              <span>£250k</span>
+              <span>£500k</span>
+            </div>
             <span className="control-help">
               ISA withdrawals are 100% free of income tax.
             </span>
@@ -328,6 +341,12 @@ export default function RetirementPage() {
               onChange={(e) => setIncomeNet(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>£18k</span>
+              <span>£35k (Comfortable)</span>
+              <span>£60k</span>
+              <span>£90k</span>
+            </div>
             <span className="control-help">
               Equivalent to {formatGBP(Math.round(incomeNet / 12))}/month post-tax spending.
             </span>
@@ -349,6 +368,12 @@ export default function RetirementPage() {
               onChange={(e) => setRetireAge(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>Age 50</span>
+              <span>Age 58 (SIPP)</span>
+              <span>Age 67 (State)</span>
+              <span>Age 70</span>
+            </div>
           </div>
 
           {/* Current Age Slider */}
@@ -367,6 +392,12 @@ export default function RetirementPage() {
               onChange={(e) => setCurrentAge(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>Age 30</span>
+              <span>Age 40</span>
+              <span>Age 50</span>
+              <span>Age 65</span>
+            </div>
           </div>
 
           {/* Longevity Horizon Slider */}
@@ -385,6 +416,12 @@ export default function RetirementPage() {
               onChange={(e) => setLifeAge(Number(e.target.value))}
               className="slider"
             />
+            <div className="slider-ticks">
+              <span>Age 75</span>
+              <span>Age 85 (ONS Avg)</span>
+              <span>Age 90</span>
+              <span>Age 98</span>
+            </div>
           </div>
 
           {/* Toggles */}
@@ -612,6 +649,9 @@ export default function RetirementPage() {
           </div>
         </div>
       )}
+
+      {/* Global Institutional Editorial Footer */}
+      <Footer />
     </div>
   );
 }

@@ -1047,6 +1047,19 @@
   }
 }
 
+.city-affordability-grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .city-affordability-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .controls-panel {
   background: #ffffff;
   border: 1px solid var(--surface-border);
@@ -1809,6 +1822,129 @@
     transform: translateY(0);
     opacity: 1;
   }
+/* LadderPass Institutional Editorial Footer */
+.ladder-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--surface-border);
+  margin-top: 56px;
+  width: 100%;
+}
+
+.ladder-footer__container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 48px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.ladder-footer__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.3fr;
+  gap: 36px;
+}
+
+@media (max-width: 960px) {
+  .ladder-footer__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 560px) {
+  .ladder-footer__grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.ladder-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ladder-footer__brand {
+  max-width: 380px;
+}
+
+.ladder-footer__mission {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ladder-footer__status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-amber-light);
+  border: 1px solid var(--accent-amber-border);
+  color: var(--accent-amber-text);
+  padding: 4px 12px;
+  border-radius: var(--round-full);
+  font-size: 11px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.ladder-footer__heading {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  margin: 0 0 4px;
+}
+
+.ladder-footer__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ladder-footer__link {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.ladder-footer__link:hover {
+  color: var(--text-primary);
+}
+
+.ladder-footer__bottom {
+  border-top: 1px solid var(--surface-border);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ladder-footer__disclaimer {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0;
+}
+
+.ladder-footer__trust-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  flex-wrap: wrap;
 }
 
 /* Print Styles */
