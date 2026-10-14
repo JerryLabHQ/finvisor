@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         formData.append("line_items[0][price_data][unit_amount]", String(amountGbp * 100));
         formData.append(
           "line_items[0][price_data][product_data][name]",
-          `Finvisor Pro (${isLifetime ? "Lifetime Pass" : "Monthly"})`
+          `RentOrLadder Pro (${isLifetime ? "Lifetime Pass" : "Monthly"})`
         );
         formData.append(
           "line_items[0][price_data][product_data][description]",

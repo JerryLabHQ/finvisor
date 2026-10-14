@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Finvisor - UK Buy vs Rent Calculator & Financial Intelligence",
-  description: "The ultimate UK buy vs rent calculator and financial intelligence tool. Calculate Stamp Duty Land Tax (SDLT), mortgage amortizations, and compare net worth over time with open historical data.",
-  metadataBase: new URL("https://finvisor.co.uk"),
+  title: "RentOrLadder - UK Buy vs Rent Calculator & Property Ladder Intelligence",
+  description: "The definitive UK buy vs rent calculator. Compare the true cost of renting vs getting on the property ladder after Stamp Duty (SDLT), mortgage interest, and Stocks & Shares ISA compounding.",
+  metadataBase: new URL("https://rentorladder.com"),
 };
 
 export default function RootLayout({

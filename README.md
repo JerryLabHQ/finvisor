@@ -1,13 +1,13 @@
-# Finvisor 🇬🇧
+# RentOrLadder 🇬🇧
 
-> **Independent UK Buy vs. Rent Financial Modeling & Property Advisory Platform.**
+> **Independent UK Buy vs. Rent Financial Modeling & Property Advisory Platform (`rentorladder.com`).**
 > Engineered as a 100% free, community-supported side project powered by "Buy Me a Coffee" and maintained autonomously by AI agents.
 
 ---
 
 ## ☕ Support & Monetization Architecture
 
-Finvisor reuses the clean, community-supported setup from **FitPass**:
+RentOrLadder reuses the clean, community-supported setup from **FitPass**:
 
 ### 1. "Buy Me a Coffee" Community Support
 - **100% Free & Unlocked:** No artificial paywalls. All tools—including PDF investment report generation, 40-year amortization CSV exports, multi-property comparisons, and macro rate shock stress-testing—are completely free for everyone.
@@ -18,7 +18,7 @@ Finvisor reuses the clean, community-supported setup from **FitPass**:
   - Sleek pill button in the top navigation bar (`.layout__header-donate`).
   - Dismissible friendly donation nudge banner (`.donation-banner`) above the calculator controls.
   - Creator support note inside the printable PDF report.
-  - Dedicated "Support Finvisor" card in the advisor sidebar.
+  - Dedicated "Support RentOrLadder" card in the advisor sidebar.
 
 ### 2. Whole-of-Market FCA Broker Lead Referrals (Optional Affiliate Revenue)
 - **Economics:** £150 to £250+ per qualified mortgage lead.
@@ -33,7 +33,7 @@ Finvisor reuses the clean, community-supported setup from **FitPass**:
 
 ## 🤖 Built & Maintained by AI Agents
 
-Finvisor is designed from the ground up for autonomous development and background agent workflows:
+RentOrLadder is designed from the ground up for autonomous development and background agent workflows:
 
 | Script / Command | Purpose |
 |---|---|

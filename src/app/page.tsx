@@ -98,7 +98,10 @@ export default function Dashboard() {
     setMounted(true);
 
     if (typeof window !== "undefined") {
-      if (localStorage.getItem("finvisor_donation_dismissed") === "true") {
+      if (
+        localStorage.getItem("rentorladder_donation_dismissed") === "true" ||
+        localStorage.getItem("finvisor_donation_dismissed") === "true"
+      ) {
         setDonationDismissed(true);
       }
 
@@ -118,7 +121,7 @@ export default function Dashboard() {
   const dismissDonation = () => {
     setDonationDismissed(true);
     if (typeof window !== "undefined") {
-      localStorage.setItem("finvisor_donation_dismissed", "true");
+      localStorage.setItem("rentorladder_donation_dismissed", "true");
     }
   };
 
@@ -244,7 +247,7 @@ export default function Dashboard() {
       <nav className="nav-bar glass-panel">
         <div className="logo">
           <TrendingUp className="logo-icon" />
-          <span>finvisor</span>
+          <span>RentOrLadder</span>
           <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: "rgba(255,255,255,0.08)", color: "var(--on-surface-variant)", fontWeight: 600 }}>
             100% Free UK Property Tool
           </span>
@@ -299,7 +302,7 @@ export default function Dashboard() {
       {!donationDismissed && SUPPORT_URL && (
         <div className="donation-banner" role="note">
           <span className="donation-banner__text">
-            Enjoying Finvisor? It&apos;s 100% free with no ads or paywalls — consider{" "}
+            Enjoying RentOrLadder? It&apos;s 100% free with no ads or paywalls — consider{" "}
             <a
               href={SUPPORT_URL}
               target="_blank"
@@ -750,7 +753,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Support Finvisor / Buy Me a Coffee Box (fitpass style) */}
+          {/* Support RentOrLadder / Buy Me a Coffee Box (fitpass style) */}
           {SUPPORT_URL && (
             <div
               className="glass-panel"
@@ -763,10 +766,10 @@ export default function Dashboard() {
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <Coffee size={16} style={{ color: "#ffdd00" }} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>Support Finvisor</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>Support RentOrLadder</span>
               </div>
               <p style={{ fontSize: 12, color: "var(--on-surface-variant)", lineHeight: 1.5, marginBottom: 12 }}>
-                Finvisor is 100% free with no paywalls or intrusive ads. If this calculator helped you make a confident property decision, consider buying me a coffee to support hosting & data maintenance!
+                RentOrLadder is 100% free with no paywalls or intrusive ads. If this calculator helped you make a confident property decision, consider buying me a coffee to support hosting & data maintenance!
               </p>
               <a
                 href={SUPPORT_URL}

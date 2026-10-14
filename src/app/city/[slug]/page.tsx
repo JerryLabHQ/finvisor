@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
   const city = getCityBySlug(slug);
 
   if (!city) {
-    return { title: "City Not Found - Finvisor" };
+    return { title: "City Not Found - RentOrLadder" };
   }
 
   return {
-    title: `Buy vs Rent in ${city.name} (${new Date().getFullYear()}) - Financial Analysis & Calculator | Finvisor`,
+    title: `Buy vs Rent in ${city.name} (${new Date().getFullYear()}) - Financial Analysis & Calculator | RentOrLadder`,
     description: `Should you buy or rent in ${city.name}? Compare average house prices (£${city.averagePrice.toLocaleString()}), rental costs (£${city.averageRentMonthly.toLocaleString()}/mo), Stamp Duty, and historical yields.`,
   };
 }
@@ -48,7 +48,7 @@ export default async function CityPage({ params }: CityPageProps) {
       <nav className="nav-bar glass-panel">
         <Link href="/" className="logo" style={{ textDecoration: "none" }}>
           <TrendingUp className="logo-icon" />
-          <span>finvisor</span>
+          <span>RentOrLadder</span>
         </Link>
         <ul className="nav-links">
           <li>

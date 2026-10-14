@@ -59,7 +59,7 @@ export function ReportModal({ isOpen, onClose, results }: ReportModalProps) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `finvisor_property_report_${Date.now()}.csv`);
+    link.setAttribute("download", `rentorladder_property_report_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -333,7 +333,7 @@ export function ReportModal({ isOpen, onClose, results }: ReportModalProps) {
           {SUPPORT_URL && (
             <div style={{ background: "rgba(255, 221, 0, 0.06)", border: "1px solid rgba(255, 221, 0, 0.2)", borderRadius: 8, padding: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
               <span style={{ fontSize: 13, color: "var(--on-surface-variant)" }}>
-                Enjoying Finvisor? It&apos;s 100% free with no ads. If this report helped you make a clearer decision, consider supporting the creator:
+                Enjoying RentOrLadder? It&apos;s 100% free with no ads. If this report helped you make a clearer decision, consider supporting the creator:
               </span>
               <a
                 href={SUPPORT_URL}
