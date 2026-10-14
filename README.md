@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Finvisor 🇬🇧
 
-## Getting Started
+> **Independent UK Buy vs. Rent Financial Modeling & Property Advisory Platform.**
+> Engineered as a 100% free, community-supported side project powered by "Buy Me a Coffee" and maintained autonomously by AI agents.
 
-First, run the development server:
+---
+
+## ☕ Support & Monetization Architecture
+
+Finvisor reuses the clean, community-supported setup from **FitPass**:
+
+### 1. "Buy Me a Coffee" Community Support
+- **100% Free & Unlocked:** No artificial paywalls. All tools—including PDF investment report generation, 40-year amortization CSV exports, multi-property comparisons, and macro rate shock stress-testing—are completely free for everyone.
+- **Configurable Support Link:**
+  - `SUPPORT_URL`: Configurable via `NEXT_PUBLIC_SUPPORT_URL` (defaults to `https://buymeacoffee.com/fit.pass`).
+  - `SUPPORT_LABEL`: `☕ Buy me a coffee`.
+- **UI Placements (FitPass Pattern):**
+  - Sleek pill button in the top navigation bar (`.layout__header-donate`).
+  - Dismissible friendly donation nudge banner (`.donation-banner`) above the calculator controls.
+  - Creator support note inside the printable PDF report.
+  - Dedicated "Support Finvisor" card in the advisor sidebar.
+
+### 2. Whole-of-Market FCA Broker Lead Referrals (Optional Affiliate Revenue)
+- **Economics:** £150 to £250+ per qualified mortgage lead.
+- **Intelligent Qualification:** Automatically computes borrower Loan-to-Value (LTV), target borrowing, deposit equity, and buying timeline.
+- **Delivery Engine:** Stores leads securely in `data/leads.json` and dispatches real-time webhooks (`BROKER_WEBHOOK_URL`) to Zapier, Make, HubSpot, or broker email queues.
+
+### 3. Programmatic SEO Engine (Zero-Ad-Spend Organic Discovery)
+- Static pre-rendering for major UK property markets: `/city/london`, `/city/manchester`, `/city/birmingham`, `/city/edinburgh`, `/city/bristol`, `/city/leeds`, `/city/cambridge`, `/city/oxford`.
+- Deep links back into the interactive calculator with pre-populated local prices, rents, and tax bands.
+
+---
+
+## 🤖 Built & Maintained by AI Agents
+
+Finvisor is designed from the ground up for autonomous development and background agent workflows:
+
+| Script / Command | Purpose |
+|---|---|
+| `npm test` | Runs the full unit test suite (SDLT brackets, amortization formulas, and API handlers). |
+| `npm run verify:math` | Automated 15-point mathematical audit against UK financial benchmarks. |
+| `npm run lint` | Ensures strict TypeScript and ESLint compliance (0 errors, 0 warnings). |
+| `npm run build` | Turbopack production compilation including SSG city pages. |
+| `node scripts/update-market-rates.mjs` | Autonomous CLI tool to update BoE base rates, mortgage rates, and inflation benchmarks. |
+| `node scripts/export-leads.mjs` | Autonomous CLI tool to audit captured leads and calculate partner broker commissions. |
+
+See [`AGENTS.md`](file:///Users/jerry-poon/dev/finvisor/AGENTS.md) for full autonomous maintenance protocols.
+
+---
+
+## ⚙️ Quick Start
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Run automated verification suite
+npm test
+npm run verify:math
+
+# 3. Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔐 Environment Variables (Optional)
 
-## Learn More
+Configure these in `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+# Custom Buy Me a Coffee / donation link (defaults to https://buymeacoffee.com/fit.pass)
+NEXT_PUBLIC_SUPPORT_URL=https://buymeacoffee.com/fit.pass
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Broker lead webhook (Zapier, Make, CRM endpoint)
+BROKER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📜 Regulatory Disclaimer
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Finvisor is an independent financial scenario modeling tool and does not provide FCA-regulated financial advice. Users are connected with independent, FCA-authorized mortgage intermediaries for formal borrowing assessments.*

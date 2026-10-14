@@ -1,0 +1,168 @@
+import { CityMarketData } from "./types";
+
+export const UK_CITIES: CityMarketData[] = [
+  {
+    slug: "london",
+    name: "London",
+    region: "Greater London",
+    averagePrice: 535000,
+    averageRentMonthly: 2150,
+    priceToRentRatio: 20.7,
+    typicalDepositPct: 20,
+    typicalCouncilTaxMonthly: 165,
+    typicalServiceChargeMonthly: 210,
+    historicalHpi5YrAvg: 2.8,
+    description:
+      "London has the highest price-to-rent ratio in the UK. Stamp duty and service charges significantly tilt the short-term balance toward renting, but high long-term capital values reward patient buyers.",
+    highlights: [
+      "Average 2-bed property price: £535,000",
+      "Average private rent: £2,150/month",
+      "Typical break-even horizon: 7-9 years",
+      "High leasehold service charge exposure",
+    ],
+  },
+  {
+    slug: "manchester",
+    name: "Manchester",
+    region: "North West",
+    averagePrice: 245000,
+    averageRentMonthly: 1250,
+    priceToRentRatio: 16.3,
+    typicalDepositPct: 15,
+    typicalCouncilTaxMonthly: 155,
+    typicalServiceChargeMonthly: 125,
+    historicalHpi5YrAvg: 4.6,
+    description:
+      "Manchester features robust rental yields and strong capital appreciation driven by tech and media sector growth. Buying often reaches break-even faster here than in southern hubs.",
+    highlights: [
+      "Average property price: £245,000",
+      "Average private rent: £1,250/month",
+      "Typical break-even horizon: 3-5 years",
+      "Eligible for maximum First-Time Buyer Stamp Duty relief",
+    ],
+  },
+  {
+    slug: "birmingham",
+    name: "Birmingham",
+    region: "West Midlands",
+    averagePrice: 230000,
+    averageRentMonthly: 1100,
+    priceToRentRatio: 17.4,
+    typicalDepositPct: 15,
+    typicalCouncilTaxMonthly: 160,
+    typicalServiceChargeMonthly: 115,
+    historicalHpi5YrAvg: 4.1,
+    description:
+      "The UK's second city offers accessible entry points for first-time buyers with competitive rental yields in Digbeth, Jewellery Quarter, and surrounding commuter rail corridors.",
+    highlights: [
+      "Average property price: £230,000",
+      "Average private rent: £1,100/month",
+      "Typical break-even horizon: 4-5 years",
+      "Low upfront Stamp Duty liability",
+    ],
+  },
+  {
+    slug: "bristol",
+    name: "Bristol",
+    region: "South West",
+    averagePrice: 385000,
+    averageRentMonthly: 1650,
+    priceToRentRatio: 19.4,
+    typicalDepositPct: 15,
+    typicalCouncilTaxMonthly: 195,
+    typicalServiceChargeMonthly: 130,
+    historicalHpi5YrAvg: 4.2,
+    description:
+      "Bristol is one of the most vibrant housing markets outside London, combining high tenant demand with strong house price growth across Clifton, Bishopston, and Southville.",
+    highlights: [
+      "Average property price: £385,000",
+      "Average private rent: £1,650/month",
+      "Typical break-even horizon: 5-7 years",
+      "Substantial rental competition",
+    ],
+  },
+  {
+    slug: "edinburgh",
+    name: "Edinburgh",
+    region: "Scotland",
+    averagePrice: 335000,
+    averageRentMonthly: 1450,
+    priceToRentRatio: 19.2,
+    typicalDepositPct: 15,
+    typicalCouncilTaxMonthly: 190,
+    typicalServiceChargeMonthly: 90,
+    historicalHpi5YrAvg: 3.9,
+    description:
+      "Edinburgh's historic tenement architecture and limited housing supply create steady capital appreciation, though Scottish LBTT and 'offers over' bidding dynamics apply.",
+    highlights: [
+      "Average property price: £335,000",
+      "Average private rent: £1,450/month",
+      "Typical break-even horizon: 5-6 years",
+      "Low tenement factoring costs relative to London service charges",
+    ],
+  },
+  {
+    slug: "leeds",
+    name: "Leeds",
+    region: "Yorkshire and The Humber",
+    averagePrice: 220000,
+    averageRentMonthly: 1050,
+    priceToRentRatio: 17.5,
+    typicalDepositPct: 15,
+    typicalCouncilTaxMonthly: 150,
+    typicalServiceChargeMonthly: 110,
+    historicalHpi5YrAvg: 4.0,
+    description:
+      "A major legal and financial center in the North, Leeds offers affordable price-to-earnings ratios and reliable rental yield fundamentals.",
+    highlights: [
+      "Average property price: £220,000",
+      "Average private rent: £1,050/month",
+      "Typical break-even horizon: 3-5 years",
+      "Zero Stamp Duty for first-time buyers at average price",
+    ],
+  },
+  {
+    slug: "cambridge",
+    name: "Cambridge",
+    region: "East of England",
+    averagePrice: 495000,
+    averageRentMonthly: 1800,
+    priceToRentRatio: 22.9,
+    typicalDepositPct: 20,
+    typicalCouncilTaxMonthly: 185,
+    typicalServiceChargeMonthly: 140,
+    historicalHpi5YrAvg: 3.2,
+    description:
+      "Driven by world-leading biomedical and tech clusters, Cambridge experiences strong long-term capital preservation despite high entry prices.",
+    highlights: [
+      "Average property price: £495,000",
+      "Average private rent: £1,800/month",
+      "Typical break-even horizon: 7-9 years",
+      "High equity requirements for entry",
+    ],
+  },
+  {
+    slug: "oxford",
+    name: "Oxford",
+    region: "South East",
+    averagePrice: 475000,
+    averageRentMonthly: 1750,
+    priceToRentRatio: 22.6,
+    typicalDepositPct: 20,
+    typicalCouncilTaxMonthly: 195,
+    typicalServiceChargeMonthly: 135,
+    historicalHpi5YrAvg: 3.1,
+    description:
+      "Constrained geographical boundaries and green belt limits maintain tight supply, leading to elevated price-to-rent multiples similar to outer London.",
+    highlights: [
+      "Average property price: £475,000",
+      "Average private rent: £1,750/month",
+      "Typical break-even horizon: 7-8 years",
+      "Strong demand from research and academic institutions",
+    ],
+  },
+];
+
+export function getCityBySlug(slug: string): CityMarketData | undefined {
+  return UK_CITIES.find((c) => c.slug.toLowerCase() === slug.toLowerCase());
+}

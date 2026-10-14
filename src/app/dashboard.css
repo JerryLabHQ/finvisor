@@ -600,3 +600,191 @@
   color: var(--on-surface-variant);
   margin-top: -4px;
 }
+
+/* Header Buy Me a Coffee button (fitpass style) */
+.layout__header-donate {
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--on-surface);
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.layout__header-donate:hover,
+.layout__header-donate:focus-visible {
+  color: #ffdd00;
+  border-color: rgba(255, 221, 0, 0.5);
+  background: rgba(255, 221, 0, 0.1);
+  box-shadow: 0 0 12px rgba(255, 221, 0, 0.2);
+}
+
+/* Dismissible Donation Banner (fitpass style) */
+.donation-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(255, 221, 0, 0.08);
+  border: 1px solid rgba(255, 221, 0, 0.25);
+  border-radius: var(--round-md);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.donation-banner__text {
+  color: var(--on-surface-variant);
+  flex: 1;
+}
+
+.donation-banner__link {
+  color: #ffdd00;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.donation-banner__link:hover {
+  text-decoration: underline;
+}
+
+.donation-banner__dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.donation-banner__dismiss:hover {
+  color: #ffffff;
+}
+
+/* City Presets Bar */
+.city-presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+
+.preset-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--on-surface-variant);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-pill:hover, .preset-pill.active {
+  background: rgba(0, 229, 255, 0.12);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+/* Toast Notification */
+.floating-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--surface-container-high);
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--primary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 999;
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Print Styles for PDF Export */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+  
+  .dashboard-container,
+  .nav-bar,
+  .quick-inputs-bar,
+  .advisor-area,
+  .drawer,
+  .drawer-overlay,
+  .floating-toast,
+  .close-btn {
+    display: none !important;
+  }
+
+  .drawer-overlay.open {
+    display: block !important;
+    position: static !important;
+    background: transparent !important;
+  }
+
+  .drawer-overlay .glass-panel {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  #printable-report {
+    color: #111827 !important;
+    padding: 0 !important;
+  }
+
+  #printable-report h1,
+  #printable-report h2,
+  #printable-report h3,
+  #printable-report h4,
+  #printable-report strong {
+    color: #111827 !important;
+  }
+
+  #printable-report table {
+    color: #111827 !important;
+  }
+
+  #printable-report th,
+  #printable-report td {
+    border-color: #e5e7eb !important;
+    color: #111827 !important;
+  }
+}
+
