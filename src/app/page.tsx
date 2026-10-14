@@ -27,10 +27,8 @@ import {
   Coffee,
   HelpCircle,
   CheckCircle2,
-  Building,
   Scale,
 } from "lucide-react";
-import Link from "next/link";
 import { runBuyVsRentCalculation, CalculatorInputs } from "@/lib/calculator";
 import { UK_CITIES } from "@/lib/cities";
 import { UK_MARKET_DEFAULTS, SUPPORT_URL, SUPPORT_LABEL } from "@/lib/constants";
@@ -39,6 +37,7 @@ import { BrokerModal } from "@/components/BrokerModal";
 import { StressTestView } from "@/components/StressTestView";
 import { ScenarioCompare } from "@/components/ScenarioCompare";
 import { AnnualTable } from "@/components/AnnualTable";
+import { HeaderNav } from "@/components/HeaderNav";
 import "./dashboard.css";
 
 // Helper for formatting GBP
@@ -289,58 +288,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="nav-bar glass-panel">
-        <Link href="/" className="logo">
-          <div className="logo-icon-wrap">
-            <TrendingUp size={18} />
-          </div>
-          <span>LadderPass</span>
-          <span className="logo-badge">UK Property Ladder vs Renting</span>
-        </Link>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <ul className="nav-links">
-            <li>
-              <Link href="/city/london" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <Building size={14} />
-                <span>UK Cities</span>
-              </Link>
-            </li>
-            <li>
-              <a
-                href="https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate"
-                target="_blank"
-                rel="noreferrer"
-                className="boe-pill"
-                title="Current Bank of England Official Bank Rate"
-              >
-                <span className="pulse-dot"></span>
-                <span>BoE Base: {UK_MARKET_DEFAULTS.boeBaseRate}%</span>
-              </a>
-            </li>
-          </ul>
-
-          {/* Buy Me a Coffee button (fitpass style) */}
-          {SUPPORT_URL && (
-            <a
-              href={SUPPORT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="layout__header-donate"
-              title="Support this free independent UK project"
-            >
-              <Coffee size={14} />
-              <span>{SUPPORT_LABEL}</span>
-            </a>
-          )}
-
-          <button onClick={handleCopyShareLink} className="share-nav-btn" title="Share with partner or friend">
-            <Share2 size={13} />
-            <span>Share</span>
-          </button>
-        </div>
-      </nav>
+      {/* Unified Suite Header Navigation */}
+      <HeaderNav currentModule="Property" />
 
       {/* Dismissible Donation Banner */}
       {!donationDismissed && SUPPORT_URL && (
@@ -425,14 +374,25 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsReportModalOpen(true)}
-            className="pdf-trigger-btn"
-            style={{ alignSelf: "center", whiteSpace: "nowrap" }}
-          >
-            <FileText size={16} />
-            <span>Generate Free PDF Report</span>
-          </button>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", alignSelf: "center" }}>
+            <button
+              onClick={() => setIsReportModalOpen(true)}
+              className="pdf-trigger-btn"
+              style={{ whiteSpace: "nowrap" }}
+            >
+              <FileText size={16} />
+              <span>Generate Free PDF Report</span>
+            </button>
+            <button
+              onClick={handleCopyShareLink}
+              className="share-nav-btn"
+              title="Share this calculated scenario"
+              style={{ padding: "10px 14px", height: "100%" }}
+            >
+              <Share2 size={15} />
+              <span>Share Scenario</span>
+            </button>
+          </div>
         </div>
 
         {/* 3 Core Verdict Metrics */}

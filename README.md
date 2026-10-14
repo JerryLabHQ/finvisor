@@ -1,8 +1,35 @@
 # LadderPass 🇬🇧
-
-> **Independent UK Buy vs. Rent Financial Modeling & Property Advisory Platform (`ladderpass.com`).**
+> **The UK Financial Ladder: Independent Life-Stage Scenario Modeling & Financial Advisory Suite (`ladderpass.com`).**
 > **Live Web App:** [https://ladderpass.vercel.app](https://ladderpass.vercel.app)
-> Engineered as a 100% free, community-supported side project powered by "Buy Me a Coffee" and maintained autonomously by AI agents.
+> Engineered as a 100% free, community-supported platform powered by "Buy Me a Coffee" and maintained autonomously by AI agents.
+
+---
+
+## 🪜 The UK Financial Ladder (6 Core Modeling Engines)
+
+LadderPass models the high-stakes financial decisions British professionals face across their careers:
+
+1. **🏠 Property Ladder (`/` & `/city/[slug]`):**
+   * Definitive UK Buy vs. Rent modeler comparing home equity growth against tax-free Stocks & Shares ISA compounding.
+   * Statutory SDLT brackets (First-Time Buyer relief up to £625k), 40-year amortization tables, service charges, and macro rate shock stress tests (+1%, +2%, +3%).
+2. **💼 Tax & High Earner Ladder (`/tax`):**
+   * The **60% Marginal Tax Trap** (£100,000–£125,140 Personal Allowance taper).
+   * Childcare Cliff Edge (sudden loss of 30 hours funded childcare & Tax-Free Childcare).
+   * High Income Child Benefit Charge (HICBC) taper (£60k–£80k).
+   * Exact SIPP & Workplace Salary Sacrifice optimization to preserve benefits and achieve statutory tax relief up to 62%.
+3. **🚗 EV Mobility Ladder (`/ev`):**
+   * Electric Vehicle Employer Salary Sacrifice vs. Private PCP vs. Cash Buying vs. Petrol/Diesel.
+   * HMRC Benefit-in-Kind (BiK) escalator (2% to 5%), smart off-peak tariffs (7p/kWh on Octopus Intelligent vs. 75p public), and 3-year total cost of ownership.
+4. **🎓 Student Loan Ladder (`/student-loan`):**
+   * Plan 2 vs. Plan 5 vs. Postgraduate "Graduate Tax" repayment simulator.
+   * 30-year vs. 40-year statutory cancellation cliffs, wage progression curves, and the definitive "Should I Overpay?" verdict.
+   * Direct quantification of student loan monthly deductions on high-street mortgage borrowing capacity.
+5. **🏢 Buy-to-Let SPV Ladder (`/property/spv`):**
+   * Section 24 mortgage interest relief restrictions vs. 19% Corporation Tax in a Limited Company Special Purpose Vehicle (SPV).
+   * 5% Higher Rates for Additional Dwellings (HRAD) Stamp Duty surcharge and dividend extraction tax modeling.
+6. **🏖️ Retirement & FIRE Ladder (`/retirement`):**
+   * Flexible SIPP Drawdown vs. Guaranteed Lifetime Annuity vs. Hybrid.
+   * 25% Tax-Free Lump Sum (PCLS, capped at £268,275), State Pension Triple Lock bridge, and Autumn Budget 2027 Pension Inheritance Tax (IHT) exposure.
 
 ---
 
@@ -11,41 +38,38 @@
 LadderPass is the financial sibling project to **FitPass**:
 
 ### 1. "Buy Me a Coffee" Community Support
-- **100% Free & Unlocked:** No artificial paywalls. All tools—including PDF investment report generation, 40-year amortization CSV exports, multi-property comparisons, and macro rate shock stress-testing—are completely free for everyone.
-- **Configurable Support Link:**
-  - `SUPPORT_URL`: Configurable via `NEXT_PUBLIC_SUPPORT_URL` (defaults to `https://buymeacoffee.com/jerrylabhq`).
-  - `SUPPORT_LABEL`: `☕ Buy me a coffee`.
-- **UI Placements (FitPass Pattern):**
-  - Sleek pill button in the top navigation bar (`.layout__header-donate`).
-  - Dismissible friendly donation nudge banner (`.donation-banner`) above the calculator controls.
-  - Creator support note inside the printable PDF report.
-  - Dedicated "Support LadderPass" card in the advisor sidebar.
+* **100% Free & Unlocked:** No artificial paywalls or gated features.
+* **Configurable Support Link:**
+  * `SUPPORT_URL`: Configurable via `NEXT_PUBLIC_SUPPORT_URL` (defaults to `https://buymeacoffee.com/jerrylabhq`).
+  * `SUPPORT_LABEL`: `☕ Buy me a coffee`.
+* **UI Placements:**
+  * Global pill button in the top navigation bar (`HeaderNav.tsx`).
+  * Dismissible friendly donation banner on every module page.
+  * Dedicated creator notes in printable reports.
 
-### 2. Whole-of-Market FCA Broker Lead Referrals (Optional Affiliate Revenue)
-- **Economics:** £150 to £250+ per qualified mortgage lead.
-- **Intelligent Qualification:** Automatically computes borrower Loan-to-Value (LTV), target borrowing, deposit equity, and buying timeline.
-- **Delivery Engine:** Stores leads securely in `data/leads.json` and dispatches real-time webhooks (`BROKER_WEBHOOK_URL`) to Zapier, Make, HubSpot, or broker email queues.
-
-### 3. Programmatic SEO Engine (Zero-Ad-Spend Organic Discovery)
-- Static pre-rendering for major UK property markets: `/city/london`, `/city/manchester`, `/city/birmingham`, `/city/edinburgh`, `/city/bristol`, `/city/leeds`, `/city/cambridge`, `/city/oxford`.
-- Deep links back into the interactive calculator with pre-populated local prices, rents, and tax bands.
+### 2. Commercial Quadrilateral Engine (Future Roadmap)
+See [`docs/BUSINESS_PLAN.md`](docs/BUSINESS_PLAN.md) for the complete commercial monetization blueprint:
+* **Pillar 1:** B2B High-Ticket Lead Referrals (FCA Mortgage Brokers, IFAs, EV Fleet Schemes paying £100–£350/lead).
+* **Pillar 2:** Direct D2C "Lender-Ready Financial Dossiers" (£19.99 one-off via Stripe).
+* **Pillar 3:** B2B White-Label & Embeddable Calculator SaaS for Estate Agencies (£49–£149/mo).
+* **Pillar 4:** Corporate Financial Wellbeing Licenses (£2,500–£7,500/yr).
 
 ---
 
 ## 🤖 Built & Maintained by AI Agents
 
-LadderPass is designed from the ground up for autonomous development and background agent workflows:
+LadderPass is engineered for autonomous agent development and self-auditing operations:
 
 | Script / Command | Purpose |
 |---|---|
-| `npm test` | Runs the full unit test suite (SDLT brackets, amortization formulas, and API handlers). |
-| `npm run verify:math` | Automated 15-point mathematical audit against UK financial benchmarks. |
+| `npm test` | Runs the full 29-test unit suite across all 6 financial modules and API endpoints. |
+| `npm run verify:math` | Automated 26-point mathematical audit against statutory UK financial benchmarks. |
 | `npm run lint` | Ensures strict TypeScript and ESLint compliance (0 errors, 0 warnings). |
-| `npm run build` | Turbopack production compilation including SSG city pages. |
+| `npm run build` | Turbopack production compilation including all 19 static/SSG routes. |
 | `node scripts/update-market-rates.mjs` | Autonomous CLI tool to update BoE base rates, mortgage rates, and inflation benchmarks. |
 | `node scripts/export-leads.mjs` | Autonomous CLI tool to audit captured leads and calculate partner broker commissions. |
 
-See [`AGENTS.md`](file:///Users/jerry-poon/dev/finvisor/AGENTS.md) for full autonomous maintenance protocols.
+See [`AGENTS.md`](AGENTS.md) for full autonomous maintenance protocols.
 
 ---
 
@@ -55,11 +79,15 @@ See [`AGENTS.md`](file:///Users/jerry-poon/dev/finvisor/AGENTS.md) for full auto
 # 1. Install dependencies
 npm install
 
-# 2. Run automated verification suite
+# 2. Run automated test and math verification suite
 npm test
 npm run verify:math
 
-# 3. Start development server
+# 3. Check linting and build production assets
+npm run lint
+npm run build
+
+# 4. Start local development server
 npm run dev
 ```
 
@@ -67,20 +95,6 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ---
 
-## 🔐 Environment Variables (Optional)
-
-Configure these in `.env.local`:
-
-```env
-# Custom Buy Me a Coffee / donation link (defaults to https://buymeacoffee.com/jerrylabhq)
-NEXT_PUBLIC_SUPPORT_URL=https://buymeacoffee.com/jerrylabhq
-
-# Broker lead webhook (Zapier, Make, CRM endpoint)
-BROKER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
-```
-
----
-
 ## 📜 Regulatory Disclaimer
 
-*Finvisor is an independent financial scenario modeling tool and does not provide FCA-regulated financial advice. Users are connected with independent, FCA-authorized mortgage intermediaries for formal borrowing assessments.*
+*LadderPass is an independent financial scenario modeling tool and does not provide FCA-regulated financial advice. Users are connected with independent, FCA-authorized intermediaries for formal mortgage borrowing and financial planning assessments.*

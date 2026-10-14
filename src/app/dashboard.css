@@ -157,6 +157,240 @@
   color: var(--text-primary);
 }
 
+/* LadderPass Unified Suite Header Navigation */
+.ladder-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ladder-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: var(--round-lg);
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-card);
+}
+
+.ladder-nav__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.logo-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.logo-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.logo-accent {
+  color: var(--primary);
+}
+
+.logo-subtitle {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.ladder-nav__center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.suite-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  padding: 4px;
+  background: var(--surface-tray);
+  border-radius: var(--round-full);
+  border: 1px solid var(--surface-border);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.suite-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--round-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.suite-pill:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.suite-pill--active {
+  background: var(--surface);
+  color: var(--primary) !important;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--primary-border);
+}
+
+.suite-pill__icon {
+  flex-shrink: 0;
+}
+
+.suite-pill__badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 5px;
+  border-radius: var(--round-full);
+  background: var(--primary-light);
+  color: var(--primary);
+  letter-spacing: 0.03em;
+}
+
+.ladder-nav__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ladder-nav__mobile-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.ladder-nav__mobile-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--round-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-popover);
+}
+
+.mobile-drawer__section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.mobile-drawer__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-drawer__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--round-md);
+  text-decoration: none;
+  color: var(--text-primary);
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.mobile-drawer__item:hover {
+  background: var(--surface-tray);
+}
+
+.mobile-drawer__item--active {
+  background: var(--primary-light);
+  border: 1px solid var(--primary-border);
+}
+
+.mobile-drawer__item-icon {
+  color: var(--primary);
+}
+
+.mobile-drawer__item-info {
+  flex: 1;
+}
+
+.mobile-drawer__item-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mobile-drawer__item-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.mobile-drawer__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-border);
+  margin-top: 4px;
+}
+
+.mobile-drawer__link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+@media (max-width: 1080px) {
+  .ladder-nav__center {
+    display: none;
+  }
+  .ladder-nav__mobile-toggle {
+    display: flex;
+  }
+}
+
 /* Dismissible Donation Banner */
 .donation-banner {
   display: flex;

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jiti test/calculator.test.mjs && jiti test/api.test.mjs",
+    "test": "jiti test/calculator.test.mjs && jiti test/tax-calculator.test.mjs && jiti test/ev-calculator.test.mjs && jiti test/student-loan-calculator.test.mjs && jiti test/btl-spv-calculator.test.mjs && jiti test/pension-calculator.test.mjs && jiti test/api.test.mjs",
     "verify:math": "jiti scripts/verify-financial-math.mjs"
   },
   "dependencies": {

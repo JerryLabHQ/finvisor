@@ -70,8 +70,17 @@ node scripts/update-city-data.mjs --city=london --price=540000 --rent=2200 --hpi
 ```
 This script automatically runs `npm run verify:math` to ensure model consistency.
 
+### Protocol F: The UK Financial Ladder Suite Architecture
+LadderPass operates 6 core life-stage financial modeling engines:
+1. **Property (`/` & `/city/[slug]`):** Buy vs. Rent, SDLT relief brackets, and 40-year mortgage amortizations (`src/lib/calculator.ts`).
+2. **Tax & High Earner (`/tax`):** The 60% Marginal Tax Trap (£100k-£125k), 30h Free Childcare cliff edge, HICBC child benefit taper, and SIPP salary sacrifice optimization (`src/lib/tax-calculator.ts`).
+3. **EV Mobility (`/ev`):** Electric vehicle employer salary sacrifice vs. private PCP vs. buying, factoring in HMRC BiK rates (2% to 5%) and smart off-peak charging (`src/lib/ev-calculator.ts`).
+4. **Student Loan (`/student-loan`):** Plan 2 vs. Plan 5 statutory write-off simulation (30y vs 40y) and mortgage borrowing capacity impact (`src/lib/student-loan-calculator.ts`).
+5. **BTL Limited Company SPV (`/property/spv`):** Section 24 mortgage interest relief restrictions, 19% Corporation Tax, and 5% HRAD Stamp Duty (`src/lib/btl-spv-calculator.ts`).
+6. **Retirement & FIRE (`/retirement`):** Flexible drawdown vs. lifetime annuity, 25% tax-free lump sum (PCLS), State Pension bridge, and post-2027 Pension IHT rules (`src/lib/pension-calculator.ts`).
+
 ## 3. Monetization & Community Support Architecture
 - **"Buy Me a Coffee" Setup**: 100% free with no paywalls. Reuses the FitPass pattern with `SUPPORT_URL` (`NEXT_PUBLIC_SUPPORT_URL` / `https://buymeacoffee.com/jerrylabhq`) and `SUPPORT_LABEL` (`☕ Buy me a coffee`), including top-nav pill buttons and dismissible nudge banners.
-- **FCA Broker Referrals**: Optional B2B affiliate revenue (£150 - £250 per qualified lead). Captures borrower LTV, deposit, timeline, and dispatches to `BROKER_WEBHOOK_URL` (Zapier, Make, CRM) while storing in `data/leads.json`.
-- **Programmatic SEO**: High-intent city pages generating 100% organic, ad-free search traffic.
+- **FCA Broker Referrals**: B2B qualified introducer revenue (£100 - £350 per lead). Captures buyer/investor criteria, dispatches to `BROKER_WEBHOOK_URL` (Zapier, Make, CRM), and stores locally in `data/leads.json`.
+- **Commercial Roadmap**: See `docs/BUSINESS_PLAN.md` for the Quadrilateral Monetization Engine (Pillars 1–4).
 
