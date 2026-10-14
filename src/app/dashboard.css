@@ -1822,6 +1822,8 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+
 /* LadderPass Institutional Editorial Footer */
 .ladder-footer {
   background: var(--surface);
@@ -1901,11 +1903,19 @@
 
 .ladder-footer__list {
   list-style: none;
+  list-style-type: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 9px;
+}
+
+.ladder-footer__list li {
+  list-style: none;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
 .ladder-footer__link {
