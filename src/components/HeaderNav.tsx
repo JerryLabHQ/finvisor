@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -15,52 +15,56 @@ import {
   Menu,
   X,
   Check,
+  ChevronDown,
 } from "lucide-react";
 import { UK_MARKET_DEFAULTS, SUPPORT_URL, SUPPORT_LABEL } from "@/lib/constants";
+
+export const FINANCIAL_MODELS = [
+  {
+    href: "/tax",
+    label: "60% Marginal Tax Trap",
+    subtitle: "Personal Allowance clawback & SIPP optimization",
+    icon: Percent,
+  },
+  {
+    href: "/ev",
+    label: "EV Salary Sacrifice",
+    subtitle: "Employer BiK rates (2%-5%) vs PCP vs buying",
+    icon: Zap,
+  },
+  {
+    href: "/student-loan",
+    label: "Student Loan Payoff",
+    subtitle: "Plan 2 vs 5 statutory write-off audit",
+    icon: GraduationCap,
+  },
+  {
+    href: "/property/spv",
+    label: "BTL Limited Company SPV",
+    subtitle: "Section 24 mortgage relief & 19% Corp Tax",
+    icon: Building,
+  },
+  {
+    href: "/retirement",
+    label: "Pension & FIRE Model",
+    subtitle: "Flexible drawdown vs annuity & 2027 IHT bridge",
+    icon: Coins,
+  },
+];
 
 export const LADDER_MODULES = [
   {
     href: "/",
-    label: "Property",
-    fullTitle: "Buy vs Rent & Mortgages",
+    label: "Buy vs Rent",
+    fullTitle: "Buy vs Rent & Mortgages (Flagship)",
     icon: Scale,
-    badge: "Flagship",
   },
-  {
-    href: "/tax",
-    label: "60% Tax Trap",
-    fullTitle: "Tax Trap & SIPP Optimizer",
-    icon: Percent,
-    badge: "High Earner",
-  },
-  {
-    href: "/ev",
-    label: "EV Car",
-    fullTitle: "EV Salary Sacrifice vs PCP",
-    icon: Zap,
-    badge: "Save 40%+",
-  },
-  {
-    href: "/student-loan",
-    label: "Student Loan",
-    fullTitle: "Plan 2 vs 5 & Overpay Guide",
-    icon: GraduationCap,
-    badge: "Wipeout",
-  },
-  {
-    href: "/property/spv",
-    label: "BTL SPV",
-    fullTitle: "Ltd Co SPV vs Personal BTL",
-    icon: Building,
-    badge: "Section 24",
-  },
-  {
-    href: "/retirement",
-    label: "Retirement",
-    fullTitle: "Pension Drawdown & FIRE",
-    icon: Coins,
-    badge: "2027 IHT",
-  },
+  ...FINANCIAL_MODELS.map((m) => ({
+    href: m.href,
+    label: m.label,
+    fullTitle: m.subtitle,
+    icon: m.icon,
+  })),
 ];
 
 interface HeaderNavProps {
@@ -69,8 +73,33 @@ interface HeaderNavProps {
 
 export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
   const pathname = usePathname();
+  const [modelsDropdownOpen, setModelsDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setModelsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close dropdown on Escape key
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setModelsDropdownOpen(false);
+        setMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleCopyShareLink = () => {
     if (typeof window !== "undefined") {
@@ -80,16 +109,19 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
     }
   };
 
-  const isModuleActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/" || pathname?.startsWith("/city");
-    }
-    return pathname === href || pathname?.startsWith(href);
-  };
+  const isPropertyActive = pathname === "/" || (pathname?.startsWith("/?") ?? false);
+  const isCitiesActive = pathname?.startsWith("/city");
+  const activeModel = FINANCIAL_MODELS.find(
+    (m) => pathname === m.href || pathname?.startsWith(m.href)
+  );
+  const isModelsActive = Boolean(activeModel);
 
   return (
-    <header className="ladder-header" aria-label={currentModule ? `${currentModule} Module - The UK Financial Ladder` : "The UK Financial Ladder"}>
-      {/* Top Main Navigation Bar */}
+    <header
+      className="ladder-header"
+      aria-label={currentModule ? `${currentModule} Module - The UK Financial Ladder` : "The UK Financial Ladder"}
+    >
+      {/* Top Main Executive Navigation Bar */}
       <nav className="ladder-nav" aria-label="Main Navigation">
         <div className="ladder-nav__left">
           <Link href="/" className="logo-link">
@@ -103,29 +135,76 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
           </Link>
         </div>
 
-        {/* Desktop Suite Links */}
+        {/* Desktop Executive Links & Dropdown (No Calculator Farm Tabs) */}
         <div className="ladder-nav__center">
-          <ul className="suite-pills" role="tablist">
-            {LADDER_MODULES.map((item) => {
-              const active = isModuleActive(item.href);
-              const Icon = item.icon;
-              return (
-                <li key={item.href} role="presentation">
-                  <Link
-                    href={item.href}
-                    className={`suite-pill ${active ? "suite-pill--active" : ""}`}
-                    title={item.fullTitle}
-                  >
-                    <Icon size={14} className="suite-pill__icon" />
-                    <span className="suite-pill__label">{item.label}</span>
-                    {item.badge && !active && (
-                      <span className="suite-pill__badge">{item.badge}</span>
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="executive-nav" role="navigation">
+            <Link
+              href="/"
+              className={`executive-nav-link ${isPropertyActive ? "active" : ""}`}
+              title="Buy vs Rent & Mortgages (Flagship Engine)"
+            >
+              <Scale size={14} className="executive-nav-link__icon" />
+              <span>Buy vs Rent (Flagship)</span>
+            </Link>
+
+            <Link
+              href="/city/london"
+              className={`executive-nav-link ${isCitiesActive ? "active" : ""}`}
+              title="Regional UK City Benchmarks (10 Major Hubs)"
+            >
+              <Building size={14} className="executive-nav-link__icon" />
+              <span>UK Cities</span>
+            </Link>
+
+            {/* Financial Models Dropdown Popover */}
+            <div className="executive-dropdown-wrap" ref={dropdownRef}>
+              <button
+                type="button"
+                className={`executive-nav-link executive-dropdown-toggle ${isModelsActive ? "active" : ""} ${modelsDropdownOpen ? "open" : ""}`}
+                onClick={() => setModelsDropdownOpen(!modelsDropdownOpen)}
+                aria-expanded={modelsDropdownOpen}
+                aria-haspopup="true"
+              >
+                <span>{activeModel ? activeModel.label : "Financial Models"}</span>
+                <ChevronDown
+                  size={14}
+                  className={`dropdown-chevron ${modelsDropdownOpen ? "rotated" : ""}`}
+                />
+              </button>
+
+              {modelsDropdownOpen && (
+                <div className="executive-dropdown-menu" role="menu">
+                  <div className="executive-dropdown-header">
+                    <span>Specialist UK Financial Engines</span>
+                  </div>
+                  {FINANCIAL_MODELS.map((item) => {
+                    const active = pathname === item.href;
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`executive-dropdown-item ${active ? "active" : ""}`}
+                        role="menuitem"
+                        onClick={() => setModelsDropdownOpen(false)}
+                      >
+                        <div className="executive-dropdown-icon">
+                          <Icon size={16} />
+                        </div>
+                        <div className="executive-dropdown-text">
+                          <div className="executive-dropdown-title">
+                            {item.label}
+                            {active && <span className="active-dot" aria-hidden="true" />}
+                          </div>
+                          <div className="executive-dropdown-sub">{item.subtitle}</div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Right Action Utilities */}
@@ -135,7 +214,7 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
             target="_blank"
             rel="noreferrer"
             className="boe-pill"
-            title="Current Bank of England Official Bank Rate"
+            title="Current Bank of England Official Bank Rate • MPC Indexed"
           >
             <span className="pulse-dot"></span>
             <span>BoE Base: {UK_MARKET_DEFAULTS.boeBaseRate}%</span>
@@ -180,10 +259,43 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="ladder-nav__mobile-drawer">
-          <div className="mobile-drawer__section-title">The UK Financial Ladder</div>
+          <div className="mobile-drawer__section-title">Core Property Intelligence</div>
           <div className="mobile-drawer__list">
-            {LADDER_MODULES.map((item) => {
-              const active = isModuleActive(item.href);
+            <Link
+              href="/"
+              className={`mobile-drawer__item ${isPropertyActive ? "mobile-drawer__item--active" : ""}`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <div className="mobile-drawer__item-icon">
+                <Scale size={16} />
+              </div>
+              <div className="mobile-drawer__item-info">
+                <div className="mobile-drawer__item-title">Buy vs Rent (Flagship)</div>
+                <div className="mobile-drawer__item-desc">40-year mortgage amortization & SDLT relief</div>
+              </div>
+            </Link>
+
+            <Link
+              href="/city/london"
+              className={`mobile-drawer__item ${isCitiesActive ? "mobile-drawer__item--active" : ""}`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <div className="mobile-drawer__item-icon">
+                <Building size={16} />
+              </div>
+              <div className="mobile-drawer__item-info">
+                <div className="mobile-drawer__item-title">UK Regional Cities</div>
+                <div className="mobile-drawer__item-desc">Price-to-rent ratios across 10 major hubs</div>
+              </div>
+            </Link>
+          </div>
+
+          <div className="mobile-drawer__section-title" style={{ marginTop: 8 }}>
+            Specialist Financial Models
+          </div>
+          <div className="mobile-drawer__list">
+            {FINANCIAL_MODELS.map((item) => {
+              const active = pathname === item.href;
               const Icon = item.icon;
               return (
                 <Link
@@ -197,32 +309,21 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
                   </div>
                   <div className="mobile-drawer__item-info">
                     <div className="mobile-drawer__item-title">{item.label}</div>
-                    <div className="mobile-drawer__item-desc">{item.fullTitle}</div>
+                    <div className="mobile-drawer__item-desc">{item.subtitle}</div>
                   </div>
-                  {item.badge && (
-                    <span className="suite-pill__badge">{item.badge}</span>
-                  )}
                 </Link>
               );
             })}
           </div>
 
           <div className="mobile-drawer__footer">
-            <Link
-              href="/city/london"
-              className="mobile-drawer__link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Building size={14} />
-              <span>Regional UK City Benchmarks</span>
-            </Link>
             {SUPPORT_URL && (
               <a
                 href={SUPPORT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="layout__header-donate"
-                style={{ justifyContent: "center", marginTop: 8 }}
+                style={{ justifyContent: "center" }}
               >
                 <Coffee size={14} />
                 <span>{SUPPORT_LABEL}</span>
