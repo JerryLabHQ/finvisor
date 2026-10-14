@@ -64,7 +64,7 @@ export default async function CityPage({ params }: CityPageProps) {
       <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
         {/* City Header Hero */}
         <div className="glass-panel" style={{ padding: "36px 32px" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 999, background: "rgba(0, 229, 255, 0.12)", color: "var(--primary)", fontSize: 13, fontWeight: 700, marginBottom: 16 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 999, background: "var(--primary-light)", border: "1px solid rgba(16, 185, 129, 0.3)", color: "var(--primary)", fontSize: 13, fontWeight: 700, marginBottom: 16 }}>
             <MapPin size={16} />
             <span>{city.region.toUpperCase()} PROPERTY INTELLIGENCE</span>
           </div>

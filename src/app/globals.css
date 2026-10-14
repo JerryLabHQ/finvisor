@@ -1,41 +1,62 @@
 :root {
-  --background: #0b1326;
-  --foreground: #dae2fd;
-  --surface: #0b1326;
-  --surface-dim: #0b1326;
-  --surface-bright: #31394d;
-  --surface-container-lowest: #060e20;
-  --surface-container-low: #131b2e;
-  --surface-container: #171f33;
-  --surface-container-high: #222a3d;
-  --surface-container-highest: #2d3449;
-  --on-surface: #dae2fd;
-  --on-surface-variant: #bac9cc;
+  /* Warm Slate & Modern PropTech Palette */
+  --background: #0b1120;
+  --foreground: #f1f5f9;
   
-  --primary: #00e5ff; /* Electric Teal */
-  --primary-hover: #33ebff;
-  --primary-glow: rgba(0, 229, 255, 0.15);
-  --on-primary: #00363d;
+  --surface: #0f172a;
+  --surface-dim: #0b1120;
+  --surface-bright: #334155;
   
-  --secondary: #10b981; /* Emerald Green */
-  --secondary-hover: #34d399;
-  --secondary-glow: rgba(16, 185, 129, 0.15);
-  --on-secondary: #003824;
+  --surface-container-lowest: #070d18;
+  --surface-container-low: #111c30;
+  --surface-container: #1e293b;
+  --surface-container-high: #27354a;
+  --surface-container-highest: #334155;
   
-  --tertiary: #f43f5e; /* Rose (Loss/Cost) */
-  --on-tertiary: #67001b;
+  --on-surface: #f8fafc;
+  --on-surface-variant: #94a3b8;
+  --on-surface-muted: #64748b;
+  
+  /* Primary: British Emerald (Home & Property Ladder) */
+  --primary: #10b981;
+  --primary-hover: #34d399;
+  --primary-light: rgba(16, 185, 129, 0.12);
+  --primary-glow: rgba(16, 185, 129, 0.25);
+  --on-primary: #022c22;
+  
+  /* Secondary: Vibrant Indigo (Stocks & Shares ISA Compounding) */
+  --secondary: #6366f1;
+  --secondary-hover: #818cf8;
+  --secondary-light: rgba(99, 102, 241, 0.12);
+  --secondary-glow: rgba(99, 102, 241, 0.25);
+  --on-secondary: #1e1b4b;
+  
+  /* Tertiary: Warm Coral / Rose (Sunk Costs & Interest) */
+  --tertiary: #f43f5e;
+  --tertiary-hover: #fb7185;
+  --tertiary-light: rgba(244, 63, 94, 0.12);
+  --on-tertiary: #4c0519;
 
-  --outline: #849396;
-  --outline-variant: #3b494c;
+  /* Accent Gold / Coffee */
+  --accent-gold: #f59e0b;
+  --accent-gold-light: rgba(245, 158, 11, 0.12);
+  --accent-gold-hover: #fbbf24;
+
+  --outline: #475569;
+  --outline-variant: #334155;
+  --outline-subtle: rgba(255, 255, 255, 0.08);
   
-  --round-sm: 4px;
-  --round-md: 8px;
-  --round-lg: 12px;
-  --round-xl: 24px;
+  --round-xs: 4px;
+  --round-sm: 6px;
+  --round-md: 10px;
+  --round-lg: 14px;
+  --round-xl: 20px;
   --round-full: 9999px;
   
-  --font-sans: var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-body: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --container-max: 1240px;
+  
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -45,8 +66,13 @@
 }
 
 html, body {
-  height: 100%;
+  min-height: 100%;
   background-color: var(--background);
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(16, 185, 129, 0.05) 0px, transparent 45%),
+    radial-gradient(at 85% 10%, rgba(99, 102, 241, 0.06) 0px, transparent 45%),
+    radial-gradient(at 50% 90%, rgba(15, 23, 42, 0.8) 0px, transparent 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -56,41 +82,46 @@ html, body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-sans);
-  color: #ffffff;
+  color: var(--on-surface);
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 a {
   color: var(--primary);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.15s ease;
 }
 a:hover {
   color: var(--primary-hover);
 }
 
-/* Glassmorphism class */
+/* Modern Frosted Glass Card */
 .glass-panel {
-  background: rgba(23, 31, 51, 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(17, 28, 48, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--outline-subtle);
   border-radius: var(--round-lg);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-/* Custom Scrollbar for premium feel */
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--surface-container-high);
-  border-radius: var(--round-md);
+  border-radius: var(--round-full);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--surface-container-highest);

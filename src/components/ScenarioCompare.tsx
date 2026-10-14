@@ -46,7 +46,7 @@ export function ScenarioCompare({ baseInputs }: ScenarioCompareProps) {
       {/* Comparison Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         {/* Scenario 1 */}
-        <div style={{ background: "rgba(255,255,255,0.02)", padding: 18, borderRadius: 10, border: "1px solid rgba(0, 229, 255, 0.2)" }}>
+        <div style={{ background: "rgba(255,255,255,0.02)", padding: 18, borderRadius: 10, border: "1px solid rgba(16, 185, 129, 0.3)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <span style={{ fontSize: 14, fontWeight: 800, color: "var(--primary)" }}>Scenario 1 (Current Active)</span>
             <span style={{ fontSize: 12, color: "var(--on-surface-variant)" }}>{formatGBP(baseInputs.propertyPrice)}</span>
@@ -79,7 +79,7 @@ export function ScenarioCompare({ baseInputs }: ScenarioCompareProps) {
         </div>
 
         {/* Scenario 2 */}
-        <div style={{ background: "rgba(255,255,255,0.02)", padding: 18, borderRadius: 10, border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+        <div style={{ background: "rgba(255,255,255,0.02)", padding: 18, borderRadius: 10, border: "1px solid rgba(99, 102, 241, 0.3)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <span style={{ fontSize: 14, fontWeight: 800, color: "var(--secondary)" }}>Scenario 2 (Alternative Test)</span>
             <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>

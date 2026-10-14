@@ -25,6 +25,10 @@ import {
   GitCompare,
   Table,
   Coffee,
+  HelpCircle,
+  CheckCircle2,
+  Building,
+  Scale,
 } from "lucide-react";
 import Link from "next/link";
 import { runBuyVsRentCalculation, CalculatorInputs } from "@/lib/calculator";
@@ -46,6 +50,54 @@ const formatGBP = (value: number) => {
   }).format(value);
 };
 
+// Popular UK Scenarios (Target Audience Personas)
+const UK_PERSONAS = [
+  {
+    id: "london-ftb",
+    name: "London First-Time Buyer",
+    badge: "London Starter",
+    desc: "£450k • 15% dep • £2,100 rent",
+    price: 450000,
+    deposit: 15,
+    rent: 2100,
+    ftb: true,
+    citySlug: "london",
+  },
+  {
+    id: "regional-starter",
+    name: "Regional Starter Home",
+    badge: "Manchester/Leeds",
+    desc: "£260k • 10% dep • £1,100 rent",
+    price: 260000,
+    deposit: 10,
+    rent: 1100,
+    ftb: true,
+    citySlug: "manchester",
+  },
+  {
+    id: "isa-compounder",
+    name: "Aggressive ISA Investor",
+    badge: "Index Compounding",
+    desc: "£550k • 20% dep • £2,250 rent",
+    price: 550000,
+    deposit: 20,
+    rent: 2250,
+    ftb: false,
+    citySlug: null,
+  },
+  {
+    id: "deposit-5",
+    name: "5% Deposit Ladder",
+    badge: "Low Upfront Cash",
+    desc: "£230k • 5% dep • £975 rent",
+    price: 230000,
+    deposit: 5,
+    rent: 975,
+    ftb: true,
+    citySlug: "birmingham",
+  },
+];
+
 export default function Dashboard() {
   const [mounted, setMounted] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -61,8 +113,9 @@ export default function Dashboard() {
   const [propertyPrice, setPropertyPrice] = useState(450000);
   const [depositPercent, setDepositPercent] = useState(15);
   const [initialRent, setInitialRent] = useState(1850);
-  const [timeHorizon, setTimeHorizon] = useState(15);
+  const [timeHorizon, setTimeHorizon] = useState(10);
   const [selectedCitySlug, setSelectedCitySlug] = useState<string | null>(null);
+  const [activePersonaId, setActivePersonaId] = useState<string | null>("london-ftb");
 
   // State for advanced inputs
   const [mortgageRate, setMortgageRate] = useState(UK_MARKET_DEFAULTS.defaultMortgageRate);
@@ -84,12 +137,9 @@ export default function Dashboard() {
   const [inflationPercent, setInflationPercent] = useState(UK_MARKET_DEFAULTS.defaultInflationPercent);
   const [houseAppreciationPercent, setHouseAppreciationPercent] = useState(UK_MARKET_DEFAULTS.defaultHouseAppreciation);
 
-  // Show floating toast
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3200);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   // Mount & URL Query Param Sync
@@ -178,11 +228,23 @@ export default function Dashboard() {
     return runBuyVsRentCalculation(inputs);
   }, [inputs]);
 
+  // Apply Persona
+  const handleSelectPersona = (p: typeof UK_PERSONAS[0]) => {
+    setActivePersonaId(p.id);
+    setPropertyPrice(p.price);
+    setDepositPercent(p.deposit);
+    setInitialRent(p.rent);
+    setIsFirstTimeBuyer(p.ftb);
+    setSelectedCitySlug(p.citySlug);
+    showToast(`Loaded ${p.name} Scenario`);
+  };
+
   // Apply City Preset
   const handleCitySelect = (citySlug: string) => {
     const city = UK_CITIES.find((c) => c.slug === citySlug);
     if (!city) return;
     setSelectedCitySlug(city.slug);
+    setActivePersonaId(null);
     setPropertyPrice(city.averagePrice);
     setInitialRent(city.averageRentMonthly);
     setDepositPercent(city.typicalDepositPct);
@@ -202,36 +264,19 @@ export default function Dashboard() {
     url.searchParams.set("horizon", String(timeHorizon));
 
     navigator.clipboard.writeText(url.toString()).then(() => {
-      showToast("Link copied to clipboard! Ready to share.");
+      showToast("Link copied to clipboard! Ready to share with partner.");
     });
   };
 
   // Dynamic recommendation copy
-  const advisorRecommendation = useMemo(() => {
-    const horizon = timeHorizon;
-    const diff = results.netWorthDifferenceAtHorizon;
-    const absDiff = Math.abs(diff);
+  const diff = results.netWorthDifferenceAtHorizon;
+  const absDiff = Math.abs(diff);
+  const isBuyWinner = diff > 0;
+  const lastYearData = results.annualBreakdown[results.annualBreakdown.length - 1] || results.annualBreakdown[0];
 
-    if (diff > 0) {
-      return {
-        decision: "BUY",
-        title: "Buying is mathematically superior",
-        class: "text-primary",
-        main: `Over your ${horizon}-year time horizon, buying builds ${formatGBP(absDiff)} more net worth than renting and investing.`,
-        details: results.breakEvenYear
-          ? `You recover all upfront transaction costs (Stamp Duty, solicitor, surveyor) in Year ${results.breakEvenYear}, after which debt amortization and capital growth accelerate ahead of renting.`
-          : `Compounding property equity comfortably outpaces renting despite initial acquisition frictions.`,
-      };
-    } else {
-      return {
-        decision: "RENT",
-        title: "Renting & Investing is superior",
-        class: "text-secondary",
-        main: `Renting and directing your deposit into a Stocks & Shares ISA yields ${formatGBP(absDiff)} more net worth over ${horizon} years.`,
-        details: `Due to debt service (${mortgageRate}% fixed / ${svrRate}% SVR) and running outgoings, investing the upfront difference into a global index fund compounds faster.`,
-      };
-    }
-  }, [results, timeHorizon, mortgageRate, svrRate]);
+  const depositCashNeeded = Math.round(propertyPrice * (depositPercent / 100));
+  const ltvRatio = 100 - depositPercent;
+  const estimatedMonthlyMortgage = Math.round(results.initialMonthlyMortgage);
 
   return (
     <div className="dashboard-container">
@@ -245,22 +290,32 @@ export default function Dashboard() {
 
       {/* Navigation */}
       <nav className="nav-bar glass-panel">
-        <div className="logo">
-          <TrendingUp className="logo-icon" />
+        <Link href="/" className="logo">
+          <div className="logo-icon-wrap">
+            <TrendingUp size={18} />
+          </div>
           <span>RentOrLadder</span>
-          <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 4, background: "rgba(255,255,255,0.08)", color: "var(--on-surface-variant)", fontWeight: 600 }}>
-            100% Free UK Property Tool
-          </span>
-        </div>
+          <span className="logo-badge">100% Free UK Property Engine</span>
+        </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <ul className="nav-links">
             <li>
-              <Link href="/city/london">UK Cities</Link>
+              <Link href="/city/london" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <Building size={14} />
+                <span>UK Cities</span>
+              </Link>
             </li>
             <li>
-              <a href="https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate" target="_blank" rel="noreferrer">
-                BoE Rate: {UK_MARKET_DEFAULTS.boeBaseRate}%
+              <a
+                href="https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate"
+                target="_blank"
+                rel="noreferrer"
+                className="boe-pill"
+                title="Current Bank of England Official Bank Rate"
+              >
+                <span className="pulse-dot"></span>
+                <span>BoE Base: {UK_MARKET_DEFAULTS.boeBaseRate}%</span>
               </a>
             </li>
           </ul>
@@ -272,45 +327,29 @@ export default function Dashboard() {
               target="_blank"
               rel="noopener noreferrer"
               className="layout__header-donate"
+              title="Support this free independent UK project"
             >
-              {SUPPORT_LABEL}
+              <Coffee size={14} />
+              <span>{SUPPORT_LABEL}</span>
             </a>
           )}
 
-          <button
-            onClick={handleCopyShareLink}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              color: "#fff",
-              padding: "6px 12px",
-              borderRadius: 6,
-              fontSize: 12,
-              cursor: "pointer",
-            }}
-          >
-            <Share2 size={14} />
+          <button onClick={handleCopyShareLink} className="share-nav-btn" title="Share with partner or friend">
+            <Share2 size={13} />
             <span>Share</span>
           </button>
         </div>
       </nav>
 
-      {/* Dismissible Donation Banner (fitpass style) */}
+      {/* Dismissible Donation Banner */}
       {!donationDismissed && SUPPORT_URL && (
         <div className="donation-banner" role="note">
           <span className="donation-banner__text">
-            Enjoying RentOrLadder? It&apos;s 100% free with no ads or paywalls — consider{" "}
-            <a
-              href={SUPPORT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="donation-banner__link"
-            >
-              {SUPPORT_LABEL}
-            </a>
+            👋 <strong>RentOrLadder is 100% free with no ads, trackers, or broker sales calls.</strong> If this tool helps you and your partner make a confident property decision, consider{" "}
+            <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="donation-banner__link">
+              buying me a coffee
+            </a>{" "}
+            to support hosting & data maintenance!
           </span>
           <button
             type="button"
@@ -323,79 +362,267 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Main Quick Inputs Bar */}
-      <div className="quick-inputs-bar glass-panel">
-        <div className="quick-inputs-group">
-          <div className="input-field-wrapper">
-            <label className="input-label" htmlFor="prop-price">Property Price</label>
-            <div className="input-with-symbol">
-              <span className="input-symbol">£</span>
-              <input
-                id="prop-price"
-                type="number"
-                className="numeric-input"
-                value={propertyPrice}
-                onChange={(e) => {
-                  setPropertyPrice(Math.max(0, parseInt(e.target.value) || 0));
-                  setSelectedCitySlug(null);
-                }}
-              />
-            </div>
-          </div>
+      {/* Welcoming Hero Section */}
+      <section className="hero-section">
+        <div className="hero-pill">
+          <Scale size={14} />
+          <span>Independent UK Buy vs. Rent Financial Modeling</span>
+        </div>
+        <h1 className="hero-title">
+          Should you buy a home or keep renting in the UK?
+        </h1>
+        <p className="hero-subtitle">
+          Compare the real mathematical cost of stepping onto the property ladder vs. renting and investing your deposit into a tax-free Stocks & Shares ISA. Updated with current Bank of England base rates, 2026 Stamp Duty (SDLT) thresholds, and full amortization modeling.
+        </p>
 
-          <div className="input-field-wrapper">
-            <label className="input-label" htmlFor="deposit-pct">Deposit</label>
-            <div className="input-with-symbol">
-              <input
-                id="deposit-pct"
-                type="number"
-                className="numeric-input"
-                value={depositPercent}
-                onChange={(e) => setDepositPercent(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
-                style={{ paddingLeft: "12px", paddingRight: "28px" }}
-              />
-              <span className="input-symbol-right">%</span>
-            </div>
-          </div>
-
-          <div className="input-field-wrapper">
-            <label className="input-label" htmlFor="init-rent">Monthly Rent</label>
-            <div className="input-with-symbol">
-              <span className="input-symbol">£</span>
-              <input
-                id="init-rent"
-                type="number"
-                className="numeric-input"
-                value={initialRent}
-                onChange={(e) => {
-                  setInitialRent(Math.max(0, parseInt(e.target.value) || 0));
-                  setSelectedCitySlug(null);
-                }}
-              />
-            </div>
+        {/* Quick Personas */}
+        <div className="persona-chips-wrapper">
+          <span className="persona-chips-label">Quick-Start Scenarios for First-Time Buyers & Renters:</span>
+          <div className="persona-chips">
+            {UK_PERSONAS.map((p) => (
+              <button
+                key={p.id}
+                className={`persona-chip ${activePersonaId === p.id ? "active" : ""}`}
+                onClick={() => handleSelectPersona(p)}
+              >
+                <span>{p.name}</span>
+                <span className="persona-chip-desc">({p.desc})</span>
+              </button>
+            ))}
           </div>
         </div>
+      </section>
 
-        <div style={{ display: "flex", gap: 10 }}>
+      {/* The Bottom Line: Prominent Verdict Banner */}
+      <div className={`verdict-banner ${isBuyWinner ? "buy-wins" : "rent-wins"}`}>
+        <div className="verdict-header">
+          <div>
+            <div className={`verdict-badge ${isBuyWinner ? "buy" : "rent"}`}>
+              {isBuyWinner ? (
+                <>
+                  <Sparkles size={14} />
+                  <span>Verdict: Buying Wins by {formatGBP(absDiff)}</span>
+                </>
+              ) : (
+                <>
+                  <PiggyBank size={14} />
+                  <span>Verdict: Renting & ISA Investing Wins by {formatGBP(absDiff)}</span>
+                </>
+              )}
+            </div>
+
+            <h2 className="verdict-headline">
+              {isBuyWinner
+                ? `Over ${timeHorizon} years, buying builds ${formatGBP(absDiff)} more net worth than renting.`
+                : `Over ${timeHorizon} years, renting & investing yields ${formatGBP(absDiff)} more net wealth.`}
+            </h2>
+
+            <p className="verdict-summary">
+              {isBuyWinner
+                ? `Even after paying ${formatGBP(results.buyTotalSunkCostsAtHorizon)} in non-recoverable mortgage interest, Stamp Duty (£${results.sdltCost.toLocaleString()}), and repairs, your accumulated ${formatGBP(lastYearData.buyerEquity)} in home equity easily outpaces renting.`
+                : `Because mortgage debt service (${mortgageRate}% fixed / ${svrRate}% SVR) and buying friction cost more than renting, compounding your ${formatGBP(depositCashNeeded)} deposit at ${investmentReturnPercent}% in a Stocks & Shares ISA builds wealth faster.`}
+            </p>
+          </div>
+
           <button
-            className="settings-btn"
-            style={{ background: "rgba(0, 229, 255, 0.1)", color: "var(--primary)", borderColor: "var(--primary)" }}
             onClick={() => setIsReportModalOpen(true)}
+            className="pdf-trigger-btn"
+            style={{ alignSelf: "center", whiteSpace: "nowrap" }}
           >
-            <FileText size={18} />
-            <span>Generate PDF Report</span>
-          </button>
-
-          <button className="settings-btn" onClick={() => setIsDrawerOpen(true)}>
-            <Sliders size={18} />
-            <span>Advanced Settings</span>
+            <FileText size={16} />
+            <span>Generate Free PDF Report</span>
           </button>
         </div>
 
-        {/* City Quick Presets Bar */}
-        <div className="city-presets-bar" style={{ width: "100%", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12, marginTop: 4 }}>
-          <span style={{ fontSize: 11, color: "var(--on-surface-variant)", textTransform: "uppercase", fontWeight: 700, marginRight: 4 }}>
-            Regional Presets:
+        {/* 3 Core Verdict Metrics */}
+        <div className="verdict-metrics-grid">
+          <div className="verdict-metric-card">
+            <span className="verdict-metric-label">
+              <Sparkles size={13} style={{ color: "var(--primary)" }} /> Break-Even Horizon
+            </span>
+            <div className="verdict-metric-val" style={{ color: results.breakEvenYear ? "var(--primary)" : "var(--secondary)" }}>
+              {results.breakEvenYear ? `Year ${results.breakEvenYear}` : "Renting Wins Throughout"}
+            </div>
+            <span className="verdict-metric-sub">
+              {results.breakEvenYear
+                ? `Point where equity surpasses initial Stamp Duty & buying costs`
+                : `At these rates, renting compounds faster over all ${timeHorizon} years`}
+            </span>
+          </div>
+
+          <div className="verdict-metric-card">
+            <span className="verdict-metric-label">
+              <TrendingUp size={13} style={{ color: "#38bdf8" }} /> Projected Net Worth ({timeHorizon}y)
+            </span>
+            <div className="verdict-metric-val">
+              {isBuyWinner ? formatGBP(lastYearData.buyerTotalNetWorth) : formatGBP(lastYearData.renterTotalNetWorth)}
+            </div>
+            <span className="verdict-metric-sub">
+              Buyer: {formatGBP(lastYearData.buyerTotalNetWorth)} • Renter ISA: {formatGBP(lastYearData.renterTotalNetWorth)}
+            </span>
+          </div>
+
+          <div className="verdict-metric-card">
+            <span className="verdict-metric-label">
+              <Zap size={13} style={{ color: "var(--tertiary)" }} /> Non-Recoverable Sunk Costs
+            </span>
+            <div className="verdict-metric-val" style={{ color: "var(--tertiary)" }}>
+              Buyer: {formatGBP(results.buyTotalSunkCostsAtHorizon)}
+            </div>
+            <span className="verdict-metric-sub">
+              vs. {formatGBP(results.rentTotalSunkCostsAtHorizon)} pure sunk rent over {timeHorizon} years
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Inputs Tiles (Touch-Friendly & Interactive) */}
+      <div className="quick-inputs-tiles">
+        {/* Tile 1: Property Price */}
+        <div className="input-tile glass-panel">
+          <div className="input-tile-header">
+            <label className="input-tile-title" htmlFor="prop-price">Target Property Price</label>
+            <span className="input-tile-helper">Mortgage: ~£{estimatedMonthlyMortgage.toLocaleString()}/mo</span>
+          </div>
+
+          <div className="input-field-container">
+            <span className="input-symbol-prefix">£</span>
+            <input
+              id="prop-price"
+              type="number"
+              className="tile-numeric-input"
+              value={propertyPrice}
+              onChange={(e) => {
+                setPropertyPrice(Math.max(0, parseInt(e.target.value) || 0));
+                setSelectedCitySlug(null);
+                setActivePersonaId(null);
+              }}
+            />
+          </div>
+
+          <div className="tile-steppers">
+            <button
+              type="button"
+              className="stepper-btn"
+              onClick={() => setPropertyPrice((p) => Math.max(50000, p - 10000))}
+            >
+              -£10k
+            </button>
+            <button
+              type="button"
+              className="stepper-btn"
+              onClick={() => setPropertyPrice((p) => p + 10000)}
+            >
+              +£10k
+            </button>
+            <button
+              type="button"
+              className="stepper-btn"
+              onClick={() => setPropertyPrice((p) => p + 50000)}
+            >
+              +£50k
+            </button>
+          </div>
+          <span className="tile-context-note">
+            Typical UK average: £285,000 • London average: £530,000
+          </span>
+        </div>
+
+        {/* Tile 2: Deposit Percentage */}
+        <div className="input-tile glass-panel">
+          <div className="input-tile-header">
+            <label className="input-tile-title" htmlFor="deposit-pct">Deposit Equity</label>
+            <span className="input-tile-helper">{ltvRatio}% LTV Mortgage</span>
+          </div>
+
+          <div className="input-field-container">
+            <input
+              id="deposit-pct"
+              type="number"
+              className="tile-numeric-input"
+              style={{ paddingLeft: "14px", paddingRight: "32px" }}
+              value={depositPercent}
+              onChange={(e) => {
+                setDepositPercent(Math.min(100, Math.max(1, parseFloat(e.target.value) || 0)));
+                setActivePersonaId(null);
+              }}
+            />
+            <span className="input-symbol-suffix">%</span>
+          </div>
+
+          <div className="tile-steppers">
+            {[5, 10, 15, 20, 25].map((pct) => (
+              <button
+                key={pct}
+                type="button"
+                className={`stepper-btn ${depositPercent === pct ? "active" : ""}`}
+                onClick={() => setDepositPercent(pct)}
+              >
+                {pct}%
+              </button>
+            ))}
+          </div>
+          <span className="tile-context-note">
+            Cash required: <strong>£{depositCashNeeded.toLocaleString()}</strong> (plus ~£{results.sdltCost + legalFees + surveyFees} fees)
+          </span>
+        </div>
+
+        {/* Tile 3: Monthly Rent */}
+        <div className="input-tile glass-panel">
+          <div className="input-tile-header">
+            <label className="input-tile-title" htmlFor="init-rent">Alternative Monthly Rent</label>
+            <span className="input-tile-helper">£{(initialRent * 12).toLocaleString()}/yr</span>
+          </div>
+
+          <div className="input-field-container">
+            <span className="input-symbol-prefix">£</span>
+            <input
+              id="init-rent"
+              type="number"
+              className="tile-numeric-input"
+              value={initialRent}
+              onChange={(e) => {
+                setInitialRent(Math.max(0, parseInt(e.target.value) || 0));
+                setSelectedCitySlug(null);
+                setActivePersonaId(null);
+              }}
+            />
+          </div>
+
+          <div className="tile-steppers">
+            <button
+              type="button"
+              className="stepper-btn"
+              onClick={() => setInitialRent((r) => Math.max(100, r - 100))}
+            >
+              -£100
+            </button>
+            <button
+              type="button"
+              className="stepper-btn"
+              onClick={() => setInitialRent((r) => r + 100)}
+            >
+              +£100
+            </button>
+            <button
+              type="button"
+              className="stepper-btn"
+              onClick={() => setInitialRent((r) => r + 250)}
+            >
+              +£250
+            </button>
+          </div>
+          <span className="tile-context-note">
+            Weekly equivalent: ~£{Math.round((initialRent * 12) / 52).toLocaleString()}/week
+          </span>
+        </div>
+      </div>
+
+      {/* Quick Actions & Regional City Presets */}
+      <div className="quick-actions-bar glass-panel" style={{ padding: "14px 20px" }}>
+        <div className="city-presets-bar">
+          <span style={{ fontSize: 11, color: "var(--on-surface-muted)", textTransform: "uppercase", fontWeight: 700 }}>
+            Compare UK Cities:
           </span>
           {UK_CITIES.map((c) => (
             <button
@@ -407,53 +634,64 @@ export default function Dashboard() {
             </button>
           ))}
         </div>
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <button className="settings-trigger-btn" onClick={() => setIsDrawerOpen(true)}>
+            <Sliders size={15} />
+            <span>Advanced UK Assumptions</span>
+          </button>
+        </div>
       </div>
 
-      {/* Main Grid */}
+      {/* Main Grid: Visuals on Left, Advisor on Right */}
       <div className="dashboard-grid">
-        {/* Left Side (Visuals & Modules) */}
+        {/* Left Side: Chart, Stats, Subviews */}
         <div className="visuals-area">
-          {/* Main Net Worth Chart Card */}
+          {/* Main Net Worth Chart */}
           <div className="chart-container glass-panel">
             <div className="chart-header">
               <div className="chart-title-group">
-                <h2>Net Worth Wealth Projection</h2>
+                <h2>Wealth Accumulation Trajectory</h2>
                 <span className="chart-subtitle">
-                  Comparing Total Net Worth (Property Equity + Investments) over time
+                  Total Net Worth comparison (Home Equity vs. Liquid Stocks & Shares ISA Portfolio)
                 </span>
               </div>
 
               {results.breakEvenYear ? (
                 <div className="break-even-badge">
-                  <Sparkles size={16} />
+                  <Sparkles size={15} />
                   <span>Break-Even: Year {results.breakEvenYear}</span>
                 </div>
               ) : (
                 <div className="break-even-badge no-breakeven">
-                  <X size={16} />
-                  <span>Renting Wins Throughout</span>
+                  <X size={15} />
+                  <span>Renting Compounds Faster</span>
                 </div>
               )}
             </div>
 
-            {/* Time Horizon Slider */}
-            <div className="slider-group" style={{ padding: "8px 0" }}>
-              <div className="slider-labels">
-                <span>Projection Timeframe</span>
-                <span style={{ color: "var(--primary)", fontWeight: "800" }}>{timeHorizon} Years</span>
+            {/* Time Horizon Quick Selector */}
+            <div className="timeframe-controls">
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--on-surface-variant)" }}>
+                Projection Horizon: <strong style={{ color: "#fff" }}>{timeHorizon} Years</strong>
+              </span>
+
+              <div className="timeframe-chips">
+                {[3, 5, 10, 15, 20, 25, 30].map((yr) => (
+                  <button
+                    key={yr}
+                    type="button"
+                    className={`timeframe-chip ${timeHorizon === yr ? "active" : ""}`}
+                    onClick={() => setTimeHorizon(yr)}
+                  >
+                    {yr}y
+                  </button>
+                ))}
               </div>
-              <input
-                type="range"
-                className="slider-input"
-                min="1"
-                max="40"
-                value={timeHorizon}
-                onChange={(e) => setTimeHorizon(parseInt(e.target.value, 10))}
-              />
             </div>
 
-            {/* Recharts Area */}
-            <div style={{ width: "100%", height: 320, marginTop: 12 }}>
+            {/* Interactive Area Chart */}
+            <div style={{ width: "100%", height: 340, marginTop: 8 }}>
               {mounted ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
@@ -462,22 +700,22 @@ export default function Dashboard() {
                   >
                     <defs>
                       <linearGradient id="colorBuy" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.45} />
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.02} />
                       </linearGradient>
                       <linearGradient id="colorRent" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--secondary)" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="var(--secondary)" stopOpacity={0} />
+                        <stop offset="5%" stopColor="var(--secondary)" stopOpacity={0.45} />
+                        <stop offset="95%" stopColor="var(--secondary)" stopOpacity={0.02} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                     <XAxis
                       dataKey="year"
                       stroke="var(--on-surface-variant)"
                       fontSize={12}
                       tickLine={false}
                       label={{
-                        value: "Years",
+                        value: "Years Elapsed",
                         position: "insideBottomRight",
                         offset: -5,
                         fill: "var(--on-surface-variant)",
@@ -492,12 +730,19 @@ export default function Dashboard() {
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "var(--surface-container-high)",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        backgroundColor: "#1e293b",
+                        border: "1px solid rgba(255, 255, 255, 0.12)",
                         borderRadius: "8px",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
                         color: "#fff",
+                        fontSize: "12px",
                       }}
-                      formatter={(value) => [formatGBP(Number(value || 0)), ""]}
+                      formatter={(value, name) => [
+                        formatGBP(Number(value || 0)),
+                        name === "buyerTotalNetWorth"
+                          ? "Buying Net Worth (Home Equity + Inv)"
+                          : "Renting Net Worth (ISA Pot + Deposit)",
+                      ]}
                     />
                     <Legend
                       verticalAlign="top"
@@ -506,11 +751,11 @@ export default function Dashboard() {
                         <div className="chart-legend">
                           <div className="legend-item">
                             <span className="legend-color-buy"></span>
-                            <span style={{ color: "var(--primary)" }}>Buying (Home Equity + Investments)</span>
+                            <span style={{ color: "#34d399" }}>Buying (Home Equity + Savings)</span>
                           </div>
                           <div className="legend-item">
                             <span className="legend-color-rent"></span>
-                            <span style={{ color: "var(--secondary)" }}>Renting (Stocks & Shares ISA Pot)</span>
+                            <span style={{ color: "#a5b4fc" }}>Renting (Stocks & Shares ISA Pot)</span>
                           </div>
                         </div>
                       )}
@@ -522,7 +767,7 @@ export default function Dashboard() {
                       strokeWidth={3}
                       fillOpacity={1}
                       fill="url(#colorBuy)"
-                      name="Buying Total"
+                      name="buyerTotalNetWorth"
                     />
                     <Area
                       type="monotone"
@@ -531,13 +776,13 @@ export default function Dashboard() {
                       strokeWidth={3}
                       fillOpacity={1}
                       fill="url(#colorRent)"
-                      name="Renting Total"
+                      name="renterTotalNetWorth"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
                 <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--on-surface-variant)" }}>
-                  Loading Wealth Projection Chart...
+                  Loading Wealth Trajectory...
                 </div>
               )}
             </div>
@@ -548,31 +793,33 @@ export default function Dashboard() {
             {/* Buying Stats */}
             <div className="stat-card buy-card glass-panel">
               <div className="stat-header">
-                <span className="stat-title">Buying Summary</span>
+                <span className="stat-title">Buying Position</span>
                 <Home size={18} style={{ color: "var(--primary)" }} />
               </div>
               <div className="stat-value" style={{ color: "var(--primary)" }}>
-                {formatGBP(results.annualBreakdown[results.annualBreakdown.length - 1]?.buyerTotalNetWorth || 0)}
+                {formatGBP(lastYearData.buyerTotalNetWorth)}
               </div>
-              <div className="stat-subtitle" style={{ fontSize: "12px", color: "var(--on-surface-variant)", marginTop: "-6px" }}>
-                Projected Net Worth in {timeHorizon} Years
+              <div style={{ fontSize: "12px", color: "var(--on-surface-variant)", marginTop: "-6px" }}>
+                Total Net Worth at Year {timeHorizon}
               </div>
               <div className="stat-details">
                 <div className="detail-row">
-                  <span>Home Equity:</span>
-                  <span className="detail-value">{formatGBP(results.annualBreakdown[results.annualBreakdown.length - 1]?.buyerEquity || 0)}</span>
+                  <span>Home Equity Built:</span>
+                  <span className="detail-value">{formatGBP(lastYearData.buyerEquity)}</span>
                 </div>
                 <div className="detail-row">
-                  <span>Investment Pot:</span>
-                  <span className="detail-value">{formatGBP(results.annualBreakdown[results.annualBreakdown.length - 1]?.buyerInvestmentPot || 0)}</span>
-                </div>
-                <div className="detail-row">
-                  <span>Total Sunk Costs:</span>
-                  <span className="detail-value" style={{ color: "var(--tertiary)" }}>{formatGBP(results.buyTotalSunkCostsAtHorizon)}</span>
+                  <span>Remaining Mortgage:</span>
+                  <span className="detail-value">{formatGBP(lastYearData.mortgageBalance)}</span>
                 </div>
                 <div className="detail-row">
                   <span>Upfront Cash Required:</span>
                   <span className="detail-value">{formatGBP(results.buyUpfrontCosts)}</span>
+                </div>
+                <div className="detail-row">
+                  <span>Non-Recoverable Sunk Outgoings:</span>
+                  <span className="detail-value" style={{ color: "var(--tertiary)" }}>
+                    {formatGBP(results.buyTotalSunkCostsAtHorizon)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -580,175 +827,150 @@ export default function Dashboard() {
             {/* Renting Stats */}
             <div className="stat-card rent-card glass-panel">
               <div className="stat-header">
-                <span className="stat-title">Renting Summary</span>
+                <span className="stat-title">Renting Position</span>
                 <PiggyBank size={18} style={{ color: "var(--secondary)" }} />
               </div>
-              <div className="stat-value" style={{ color: "var(--secondary)" }}>
-                {formatGBP(results.annualBreakdown[results.annualBreakdown.length - 1]?.renterTotalNetWorth || 0)}
+              <div className="stat-value" style={{ color: "#a5b4fc" }}>
+                {formatGBP(lastYearData.renterTotalNetWorth)}
               </div>
-              <div className="stat-subtitle" style={{ fontSize: "12px", color: "var(--on-surface-variant)", marginTop: "-6px" }}>
-                Projected Net Worth in {timeHorizon} Years
+              <div style={{ fontSize: "12px", color: "var(--on-surface-variant)", marginTop: "-6px" }}>
+                Total Net Worth at Year {timeHorizon}
               </div>
               <div className="stat-details">
                 <div className="detail-row">
-                  <span>Stocks ISA Pot:</span>
-                  <span className="detail-value">{formatGBP(results.annualBreakdown[results.annualBreakdown.length - 1]?.renterInvestmentPot || 0)}</span>
+                  <span>Stocks & Shares ISA Pot:</span>
+                  <span className="detail-value">{formatGBP(lastYearData.renterInvestmentPot)}</span>
                 </div>
                 <div className="detail-row">
-                  <span>Refundable Deposit:</span>
-                  <span className="detail-value">{formatGBP(results.annualBreakdown[results.annualBreakdown.length - 1]?.renterDepositRefundable || 0)}</span>
-                </div>
-                <div className="detail-row">
-                  <span>Total Sunk Rent/Fees:</span>
-                  <span className="detail-value" style={{ color: "var(--tertiary)" }}>{formatGBP(results.rentTotalSunkCostsAtHorizon)}</span>
+                  <span>Refundable Tenancy Deposit:</span>
+                  <span className="detail-value">{formatGBP(lastYearData.renterDepositRefundable)}</span>
                 </div>
                 <div className="detail-row">
                   <span>Upfront Cash Required:</span>
                   <span className="detail-value">{formatGBP(results.rentUpfrontCosts)}</span>
+                </div>
+                <div className="detail-row">
+                  <span>Total Sunk Rent Paid:</span>
+                  <span className="detail-value" style={{ color: "var(--tertiary)" }}>
+                    {formatGBP(results.rentTotalSunkCostsAtHorizon)}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Sub-view Navigation Tabs */}
-          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+          <div className="subview-tabs">
             <button
               onClick={() => setActiveTab("chart")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 6,
-                background: activeTab === "chart" ? "var(--primary)" : "rgba(255,255,255,0.05)",
-                color: activeTab === "chart" ? "#00363d" : "#fff",
-                fontWeight: 700,
-                fontSize: 13,
-                border: "none",
-                cursor: "pointer",
-              }}
+              className={`subview-tab-btn ${activeTab === "chart" ? "active" : ""}`}
             >
-              Overview
+              <span>Overview</span>
             </button>
             <button
               onClick={() => setActiveTab("table")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 6,
-                background: activeTab === "table" ? "var(--primary)" : "rgba(255,255,255,0.05)",
-                color: activeTab === "table" ? "#00363d" : "#fff",
-                fontWeight: 700,
-                fontSize: 13,
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
+              className={`subview-tab-btn ${activeTab === "table" ? "active" : ""}`}
             >
               <Table size={14} />
-              <span>Annual Breakdown Table</span>
+              <span>Year-by-Year Cash Flow Schedule</span>
             </button>
             <button
               onClick={() => setActiveTab("stress")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 6,
-                background: activeTab === "stress" ? "var(--primary)" : "rgba(255,255,255,0.05)",
-                color: activeTab === "stress" ? "#00363d" : "#fff",
-                fontWeight: 700,
-                fontSize: 13,
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
+              className={`subview-tab-btn ${activeTab === "stress" ? "active" : ""}`}
             >
               <Zap size={14} />
-              <span>Macro Stress Tests</span>
+              <span>Macro Rate Shock Tests</span>
             </button>
             <button
               onClick={() => setActiveTab("compare")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 6,
-                background: activeTab === "compare" ? "var(--primary)" : "rgba(255,255,255,0.05)",
-                color: activeTab === "compare" ? "#00363d" : "#fff",
-                fontWeight: 700,
-                fontSize: 13,
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
+              className={`subview-tab-btn ${activeTab === "compare" ? "active" : ""}`}
             >
               <GitCompare size={14} />
-              <span>Side-by-Side Compare</span>
+              <span>Side-by-Side Property Compare</span>
             </button>
           </div>
 
-          {/* Conditional Sub-views (All 100% Free) */}
-          {activeTab === "table" && (
-            <AnnualTable annualBreakdown={results.annualBreakdown} />
-          )}
-
-          {activeTab === "stress" && (
-            <StressTestView inputs={inputs} />
-          )}
-
-          {activeTab === "compare" && (
-            <ScenarioCompare baseInputs={inputs} />
-          )}
+          {/* Sub-views */}
+          {activeTab === "table" && <AnnualTable annualBreakdown={results.annualBreakdown} />}
+          {activeTab === "stress" && <StressTestView inputs={inputs} />}
+          {activeTab === "compare" && <ScenarioCompare baseInputs={inputs} />}
         </div>
 
-        {/* Right Side (Advisor & Lead Gen) */}
+        {/* Right Side: Advisor, Jargon Busters, Broker, Support */}
         <div className="advisor-area">
-          {/* Executive Advisor Recommendation Card */}
+          {/* Executive Advisor Card */}
           <div className="advisor-card glass-panel">
             <div className="advisor-header">
               <Sparkles className="advisor-icon" />
-              <h3 className="advisor-title">Advisor Verdict</h3>
+              <h3 className="advisor-title">Advisor Analysis</h3>
             </div>
-            <h4 style={{ fontSize: 16, marginTop: 4 }} className={advisorRecommendation.class}>
-              {advisorRecommendation.title}
-            </h4>
-            <p className="advisor-recommendation">{advisorRecommendation.main}</p>
-            <div className="advisor-details">{advisorRecommendation.details}</div>
+            <p className="advisor-recommendation">
+              {isBuyWinner
+                ? `Buying beats renting by ${formatGBP(absDiff)} over your ${timeHorizon}-year horizon. With a monthly mortgage of ~£${estimatedMonthlyMortgage.toLocaleString()} and initial rent of £${initialRent.toLocaleString()}, compounding home equity comfortably outpaces renting despite acquisition friction.`
+                : `Renting and directing your ${formatGBP(depositCashNeeded)} deposit into a Stocks & Shares ISA yields ${formatGBP(absDiff)} more net worth over ${timeHorizon} years. Due to debt service (${mortgageRate}% fixed / ${svrRate}% SVR) and running costs, liquid index investing compounds faster.`}
+            </p>
+            <div className="advisor-details">
+              <strong>Key takeaway:</strong>{" "}
+              {results.breakEvenYear
+                ? `If you plan to stay in the home for more than ${results.breakEvenYear} years, buying is mathematically advantageous. If you move sooner, renting avoids heavy Stamp Duty and selling friction.`
+                : `Under current interest rates and rent yields, maintaining flexibility and investing the deposit delta builds a larger total wealth pot.`}
+            </div>
 
-            <button
-              onClick={() => setIsReportModalOpen(true)}
-              style={{
-                width: "100%",
-                marginTop: 14,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 6,
-                padding: "10px",
-                borderRadius: 6,
-                background: "rgba(0, 229, 255, 0.12)",
-                color: "var(--primary)",
-                border: "1px solid var(--primary)",
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              <FileText size={16} />
-              <span>Generate Free PDF Report</span>
+            <button onClick={() => setIsReportModalOpen(true)} className="pdf-trigger-btn" style={{ width: "100%", justifyContent: "center" }}>
+              <FileText size={15} />
+              <span>Download Printable PDF Report</span>
             </button>
           </div>
 
-          {/* High-Intent FCA Broker Referral Card */}
+          {/* Plain-English UK Jargon Busters */}
+          <div className="jargon-card glass-panel">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <HelpCircle size={16} style={{ color: "var(--primary)" }} />
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>UK Jargon Demystified</h3>
+            </div>
+
+            <div className="jargon-item">
+              <div className="jargon-term">
+                <CheckCircle2 size={13} style={{ color: "var(--primary)" }} />
+                <span>Stamp Duty (SDLT)</span>
+              </div>
+              <p className="jargon-definition">
+                Tax paid to HMRC when buying property. First-time buyers pay £0 up to £425,000 (relief up to £625k). Current calculated SDLT: <strong>{formatGBP(results.sdltCost)}</strong>.
+              </p>
+            </div>
+
+            <div className="jargon-item">
+              <div className="jargon-term">
+                <CheckCircle2 size={13} style={{ color: "var(--secondary)" }} />
+                <span>Stocks & Shares ISA</span>
+              </div>
+              <p className="jargon-definition">
+                If you rent, your deposit remains invested in global index funds (typically 6-8% historical average), compounding 100% free of UK capital gains or income tax.
+              </p>
+            </div>
+
+            <div className="jargon-item">
+              <div className="jargon-term">
+                <CheckCircle2 size={13} style={{ color: "var(--tertiary)" }} />
+                <span>The &ldquo;Sunk Cost&rdquo; Truth</span>
+              </div>
+              <p className="jargon-definition">
+                Rent is 100% non-refundable. But buyers also burn money on mortgage interest, building insurance, service charges, and maintenance. We compare both strictly.
+              </p>
+            </div>
+          </div>
+
+          {/* FCA Broker Referral Card */}
           <div className="cta-card glass-panel">
-            <Briefcase size={24} style={{ color: "var(--primary)", margin: "0 auto 4px" }} />
-            <h3 className="cta-title">UK Whole-of-Market Broker Review</h3>
+            <Briefcase size={22} style={{ color: "var(--primary)", margin: "0 auto 4px" }} />
+            <h3 className="cta-title">UK Whole-of-Market Broker Check</h3>
             <p className="cta-desc">
-              Get an FCA-regulated mortgage illustration. Lock current fixed rates, calculate borrowing capacity (up to 4.5x salary), and claim first-time buyer Stamp Duty relief.
+              Get an FCA-regulated mortgage illustration. Lock current fixed rates, calculate maximum borrowing (up to 4.5x salary), and confirm first-time buyer tax relief.
             </p>
             <button className="cta-button" onClick={() => setIsBrokerModalOpen(true)}>
               Get Free Broker Illustration
             </button>
-            <div style={{ fontSize: 10, color: "var(--on-surface-variant)", textAlign: "center", marginTop: 8 }}>
+            <div style={{ fontSize: 11, color: "var(--on-surface-muted)", textAlign: "center", marginTop: 4 }}>
               Independent FCA Brokers • Zero Broker Fee Option • No Spam
             </div>
           </div>
@@ -759,14 +981,14 @@ export default function Dashboard() {
               className="glass-panel"
               style={{
                 padding: 18,
-                borderRadius: 12,
-                background: "linear-gradient(180deg, rgba(255, 221, 0, 0.06) 0%, rgba(16, 185, 129, 0.06) 100%)",
-                border: "1px solid rgba(255, 221, 0, 0.25)",
+                borderRadius: 14,
+                background: "linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, rgba(16, 185, 129, 0.06) 100%)",
+                border: "1px solid rgba(245, 158, 11, 0.3)",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <Coffee size={16} style={{ color: "#ffdd00" }} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>Support RentOrLadder</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Support RentOrLadder</span>
               </div>
               <p style={{ fontSize: 12, color: "var(--on-surface-variant)", lineHeight: 1.5, marginBottom: 12 }}>
                 RentOrLadder is 100% free with no paywalls or intrusive ads. If this calculator helped you make a confident property decision, consider buying me a coffee to support hosting & data maintenance!
@@ -775,21 +997,10 @@ export default function Dashboard() {
                 href={SUPPORT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="cta-button"
-                style={{
-                  width: "100%",
-                  padding: "9px 12px",
-                  fontSize: 12,
-                  textDecoration: "none",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  background: "#ffdd00",
-                  color: "#000",
-                  fontWeight: 700,
-                }}
+                className="layout__header-donate"
+                style={{ width: "100%", justifyContent: "center" }}
               >
+                <Coffee size={14} />
                 <span>{SUPPORT_LABEL}</span>
               </a>
             </div>
@@ -797,14 +1008,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Advanced Settings Drawer Overlay */}
+      {/* Advanced Settings Drawer */}
       <div className={`drawer-overlay ${isDrawerOpen ? "open" : ""}`} onClick={() => setIsDrawerOpen(false)}></div>
 
-      {/* Drawer */}
       <div className={`drawer ${isDrawerOpen ? "open" : ""}`}>
         <div className="drawer-header">
-          <h2 className="drawer-title">Advanced UK Settings</h2>
-          <button className="close-btn" onClick={() => setIsDrawerOpen(false)}>
+          <h2 className="drawer-title">Advanced UK Assumptions</h2>
+          <button className="close-btn" onClick={() => setIsDrawerOpen(false)} aria-label="Close drawer">
             <X size={20} />
           </button>
         </div>
@@ -812,7 +1022,7 @@ export default function Dashboard() {
         <div className="drawer-content">
           {/* Mortgage settings */}
           <div className="drawer-section">
-            <h3 className="section-title">Buying & Mortgage</h3>
+            <h3 className="section-title">Buying & Mortgage Structure</h3>
 
             <div className="checkbox-row" onClick={() => setIsFirstTimeBuyer(!isFirstTimeBuyer)}>
               <input
@@ -821,15 +1031,15 @@ export default function Dashboard() {
                 checked={isFirstTimeBuyer}
                 onChange={() => {}}
               />
-              <span className="checkbox-label">First-Time Buyer Relief</span>
+              <span className="checkbox-label">First-Time Buyer SDLT Relief</span>
             </div>
-            <p className="help-text">Saves SDLT (Stamp Duty) on purchases up to £625k in England/NI.</p>
+            <p className="help-text">Exempts Stamp Duty on purchases up to £425k in England/NI (relief up to £625k).</p>
 
             <div className="form-grid">
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Mortgage Rate (Fixed)</span>
-                  <span>{mortgageRate}%</span>
+                  <span>Initial Fixed Mortgage Rate</span>
+                  <span style={{ color: "var(--primary)", fontWeight: 700 }}>{mortgageRate}%</span>
                 </div>
                 <input
                   type="range"
@@ -844,8 +1054,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Fixed Term period</span>
-                  <span>{fixedTermYears} Years</span>
+                  <span>Fixed Deal Duration</span>
+                  <span style={{ fontWeight: 700 }}>{fixedTermYears} Years</span>
                 </div>
                 <input
                   type="range"
@@ -860,7 +1070,7 @@ export default function Dashboard() {
               <div className="slider-group">
                 <div className="slider-labels">
                   <span>Standard Variable Rate (SVR)</span>
-                  <span>{svrRate}%</span>
+                  <span style={{ color: "var(--tertiary)", fontWeight: 700 }}>{svrRate}%</span>
                 </div>
                 <input
                   type="range"
@@ -875,8 +1085,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Mortgage Term</span>
-                  <span>{mortgageTerm} Years</span>
+                  <span>Mortgage Amortization Term</span>
+                  <span style={{ fontWeight: 700 }}>{mortgageTerm} Years</span>
                 </div>
                 <input
                   type="range"
@@ -892,12 +1102,12 @@ export default function Dashboard() {
 
           {/* Running costs */}
           <div className="drawer-section">
-            <h3 className="section-title">Running Costs (Annual/Monthly)</h3>
+            <h3 className="section-title">Homeowner Running Costs</h3>
             <div className="form-grid">
               <div className="slider-group">
                 <div className="slider-labels">
                   <span>Monthly Council Tax</span>
-                  <span>£{councilTaxMonthly}</span>
+                  <span style={{ fontWeight: 700 }}>£{councilTaxMonthly}</span>
                 </div>
                 <input
                   type="range"
@@ -912,8 +1122,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Monthly Service Charge / Ground Rent</span>
-                  <span>£{serviceChargeMonthly}</span>
+                  <span>Service Charge & Ground Rent (Monthly)</span>
+                  <span style={{ fontWeight: 700 }}>£{serviceChargeMonthly}</span>
                 </div>
                 <input
                   type="range"
@@ -929,7 +1139,7 @@ export default function Dashboard() {
               <div className="slider-group">
                 <div className="slider-labels">
                   <span>Maintenance Reserve (Annual %)</span>
-                  <span>{maintenancePercent}%</span>
+                  <span style={{ fontWeight: 700 }}>{maintenancePercent}%</span>
                 </div>
                 <input
                   type="range"
@@ -944,8 +1154,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Monthly Buildings Insurance</span>
-                  <span>£{insuranceMonthly}</span>
+                  <span>Buildings Insurance (Monthly)</span>
+                  <span style={{ fontWeight: 700 }}>£{insuranceMonthly}</span>
                 </div>
                 <input
                   type="range"
@@ -960,8 +1170,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Legal & Solicitor Fees</span>
-                  <span>£{legalFees}</span>
+                  <span>Solicitor & Legal Fees</span>
+                  <span style={{ fontWeight: 700 }}>£{legalFees}</span>
                 </div>
                 <input
                   type="range"
@@ -976,8 +1186,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Survey & Valuation Fees</span>
-                  <span>£{surveyFees}</span>
+                  <span>Property Survey Fees (RICS)</span>
+                  <span style={{ fontWeight: 700 }}>£{surveyFees}</span>
                 </div>
                 <input
                   type="range"
@@ -994,12 +1204,12 @@ export default function Dashboard() {
 
           {/* Rent details */}
           <div className="drawer-section rent-section">
-            <h3 className="section-title rent-section">Renting Details</h3>
+            <h3 className="section-title rent-section">Renting Projections</h3>
             <div className="form-grid">
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Annual Rent Increase</span>
-                  <span>{rentIncreasePercent}%</span>
+                  <span>Annual Rent Increase (Inflation)</span>
+                  <span style={{ color: "var(--secondary)", fontWeight: 700 }}>{rentIncreasePercent}%</span>
                 </div>
                 <input
                   type="range"
@@ -1014,8 +1224,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Monthly Contents Insurance</span>
-                  <span>£{renterInsuranceMonthly}</span>
+                  <span>Renter Contents Insurance (Monthly)</span>
+                  <span style={{ fontWeight: 700 }}>£{renterInsuranceMonthly}</span>
                 </div>
                 <input
                   type="range"
@@ -1032,12 +1242,12 @@ export default function Dashboard() {
 
           {/* Economic variables */}
           <div className="drawer-section eco-section">
-            <h3 className="section-title eco-section">Macroeconomics (UK index values)</h3>
+            <h3 className="section-title eco-section">Macroeconomic Assumptions</h3>
             <div className="form-grid">
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Stocks/ISA Returns (Annual)</span>
-                  <span>{investmentReturnPercent}%</span>
+                  <span>Stocks/ISA Returns (Annual Net)</span>
+                  <span style={{ color: "#f59e0b", fontWeight: 700 }}>{investmentReturnPercent}%</span>
                 </div>
                 <input
                   type="range"
@@ -1052,8 +1262,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>House Appreciation (HPI Annual)</span>
-                  <span>{houseAppreciationPercent}%</span>
+                  <span>House Price Inflation (HPI Annual)</span>
+                  <span style={{ fontWeight: 700 }}>{houseAppreciationPercent}%</span>
                 </div>
                 <input
                   type="range"
@@ -1068,8 +1278,8 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>CPI Inflation (Annual)</span>
-                  <span>{inflationPercent}%</span>
+                  <span>General CPI Inflation (Annual)</span>
+                  <span style={{ fontWeight: 700 }}>{inflationPercent}%</span>
                 </div>
                 <input
                   type="range"
