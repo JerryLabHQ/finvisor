@@ -6,9 +6,9 @@
 
 export const UK_MARKET_DEFAULTS = {
   // Current Bank of England Base Rate and retail lending benchmarks
-  boeBaseRate: 4.75,
-  defaultMortgageRate: 4.4, // Typical 5-year fixed rate
-  defaultSvrRate: 7.25,     // Standard Variable Rate
+  boeBaseRate: 3.75,
+  defaultMortgageRate: 3.9, // Typical 5-year fixed rate
+  defaultSvrRate: 6.75,     // Standard Variable Rate
   defaultMortgageTerm: 25,
   defaultFixedTerm: 5,
 
