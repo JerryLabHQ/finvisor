@@ -112,6 +112,79 @@ export async function POST(request: Request) {
       });
     }
 
+    // If Resend API Key is configured, dispatch transactional confirmation email
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey) {
+      // 1. Borrower Confirmation Receipt
+      fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: process.env.SENDER_EMAIL || "LadderPass <consultation@ladderpass.com>",
+          to: [newLead.email],
+          subject: `Your UK Property Scenario & Mortgage Introduction (Ref: ${newLead.id})`,
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 580px; margin: 0 auto; padding: 24px; color: #0f172a; border: 1px solid #e2e8f0; border-radius: 8px;">
+              <div style="font-size: 20px; font-weight: 700; margin-bottom: 6px; color: #064e3b;">🇬🇧 LadderPass — The UK Financial Ladder</div>
+              <p style="font-size: 14px; color: #475569; margin-bottom: 20px;">Dear ${newLead.name},</p>
+              <p style="font-size: 14px; line-height: 1.5; color: #334155;">
+                Thank you for running your property scenario on LadderPass. As requested, we have matched your borrower criteria with an independent, whole-of-market FCA-regulated mortgage intermediary who will review your borrowing capacity without charging upfront advice fees.
+              </p>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; margin: 20px 0;">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Your Verified Scenario Criteria</div>
+                <div style="font-size: 13px; line-height: 1.8;">
+                  <strong>Target Property:</strong> £${newLead.propertyPrice.toLocaleString()}<br/>
+                  <strong>Deposit Equity:</strong> £${newLead.depositAmount.toLocaleString()} (${newLead.depositPercent}%)<br/>
+                  <strong>Loan Required:</strong> £${newLead.loanAmount.toLocaleString()} (${newLead.ltvPercent}% LTV)<br/>
+                  <strong>Est. Initial Monthly Payment:</strong> ~£${newLead.estimatedMonthlyMortgage.toLocaleString()}/mo<br/>
+                  <strong>Buying Timeline:</strong> ${newLead.buyingTimeline.replace(/_/g, " ")}
+                </div>
+              </div>
+              <p style="font-size: 12px; color: #64748b; line-height: 1.5;">
+                LadderPass is an independent mathematical simulation platform. We do not provide FCA-regulated financial advice. Your assigned intermediary will assess your full financial circumstances.
+              </p>
+            </div>
+          `,
+        }),
+      }).catch((emailErr) => {
+        console.warn("Transactional email dispatch failed:", emailErr);
+      });
+
+      // 2. Broker Notification (if BROKER_EMAIL is configured)
+      const brokerEmail = process.env.BROKER_EMAIL || process.env.LEAD_NOTIFICATION_EMAIL;
+      if (brokerEmail) {
+        fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: process.env.SENDER_EMAIL || "LadderPass Leads <leads@ladderpass.com>",
+            to: [brokerEmail],
+            subject: `[New Lead] £${newLead.propertyPrice.toLocaleString()} (${newLead.ltvPercent}% LTV) - ${newLead.name}`,
+            html: `
+              <div style="font-family: sans-serif; padding: 20px;">
+                <h2>New Qualified UK Borrower Introduction</h2>
+                <p><strong>Name:</strong> ${newLead.name}</p>
+                <p><strong>Email:</strong> ${newLead.email}</p>
+                <p><strong>Phone:</strong> ${newLead.phone || "Not provided"}</p>
+                <p><strong>Property Price:</strong> £${newLead.propertyPrice.toLocaleString()}</p>
+                <p><strong>Deposit:</strong> £${newLead.depositAmount.toLocaleString()} (${newLead.depositPercent}%)</p>
+                <p><strong>LTV:</strong> ${newLead.ltvPercent}%</p>
+                <p><strong>Est. Monthly Mortgage:</strong> ~£${newLead.estimatedMonthlyMortgage.toLocaleString()}/mo</p>
+                <p><strong>Timeline:</strong> ${newLead.buyingTimeline}</p>
+                <p><strong>Estimated Lead Value:</strong> £${newLead.estimatedLeadValueGbp}</p>
+              </div>
+            `,
+          }),
+        }).catch((err) => console.warn("Broker email notification failed:", err));
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: "Lead recorded successfully. Broker match assigned.",

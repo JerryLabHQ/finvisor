@@ -17,9 +17,47 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "LadderPass - UK Buy vs Rent Financial Intelligence & Property Calculator",
-  description: "The definitive mathematical guide to the British property ladder. Compare home equity accumulation against tax-free Stocks & Shares ISA compounding after Stamp Duty, BoE mortgage rates, and maintenance.",
+  title: "LadderPass — The UK Financial Ladder & Property Intelligence",
+  description: "The definitive mathematical guide to the British financial ladder. Institutional scenario modeling across Buy vs Rent, 60% Tax Trap, EV Salary Sacrifice, Student Loans, and BTL SPVs.",
   metadataBase: new URL("https://ladderpass.com"),
+  openGraph: {
+    title: "LadderPass — The UK Financial Ladder & Property Intelligence",
+    description: "Compare home equity accumulation against tax-free Stocks & Shares ISA compounding, calibrate the 60% marginal tax trap, and model 40-year mortgage amortizations.",
+    url: "https://ladderpass.com",
+    siteName: "LadderPass",
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LadderPass — The UK Financial Ladder",
+    description: "Institutional UK financial modeling across property, tax traps, salary sacrifice, and pensions.",
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "LadderPass",
+      "url": "https://ladderpass.com",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All",
+      "description": "The definitive mathematical modeling platform for the British property ladder and UK tax scenarios.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "GBP",
+      },
+    },
+    {
+      "@type": "Organization",
+      "name": "LadderPass",
+      "url": "https://ladderpass.com",
+      "logo": "https://ladderpass.com/icon.svg",
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -29,6 +67,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`h-full ${inter.variable} ${newsreader.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`min-h-full flex flex-col ${inter.className}`}>
         {children}
         <Analytics />
