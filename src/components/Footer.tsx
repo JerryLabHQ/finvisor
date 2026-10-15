@@ -56,7 +56,7 @@ export function Footer() {
             <ul className="ladder-footer__list">
               <li>
                 <Link href="/" className="ladder-footer__link">
-                  Buy vs Rent (Flagship)
+                  Buy vs Rent
                 </Link>
               </li>
               <li>

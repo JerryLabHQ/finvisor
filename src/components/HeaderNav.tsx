@@ -56,7 +56,7 @@ export const LADDER_MODULES = [
   {
     href: "/",
     label: "Buy vs Rent",
-    fullTitle: "Buy vs Rent & Mortgages (Flagship)",
+    fullTitle: "Buy vs Rent & Mortgages",
     icon: Scale,
   },
   ...FINANCIAL_MODELS.map((m) => ({
@@ -141,10 +141,10 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
             <Link
               href="/"
               className={`executive-nav-link ${isPropertyActive ? "active" : ""}`}
-              title="Buy vs Rent & Mortgages (Flagship Engine)"
+              title="Buy vs Rent & Mortgages"
             >
               <Scale size={14} className="executive-nav-link__icon" />
-              <span>Buy vs Rent (Flagship)</span>
+              <span>Buy vs Rent</span>
             </Link>
 
             <Link
@@ -270,7 +270,7 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
                 <Scale size={16} />
               </div>
               <div className="mobile-drawer__item-info">
-                <div className="mobile-drawer__item-title">Buy vs Rent (Flagship)</div>
+                <div className="mobile-drawer__item-title">Buy vs Rent</div>
                 <div className="mobile-drawer__item-desc">40-year mortgage amortization & SDLT relief</div>
               </div>
             </Link>
