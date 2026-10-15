@@ -9,6 +9,7 @@ import {
   Coins,
   CheckCircle,
   Car,
+  ShieldAlert,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
@@ -91,7 +92,7 @@ export default function EVPage() {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <div className="hero-pill" style={{ background: "rgba(16, 185, 129, 0.1)", color: "var(--accent-green)", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
+        <div className="hero-pill" style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--primary-border)" }}>
           <Zap size={14} />
           <span>UK Electric Vehicle Financial Strategy</span>
         </div>
@@ -176,7 +177,7 @@ export default function EVPage() {
         <div className="verdict-metrics-grid">
           <div className="metric-card">
             <span className="metric-label">Net SalSac Monthly Cost</span>
-            <span className="metric-value highlight" style={{ color: "var(--accent-green)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.salarySacrificeOption.netTotalMonthlyCost)}
             </span>
             <span className="metric-subtext">Vehicle + Insurance + Fuel</span>
@@ -184,7 +185,7 @@ export default function EVPage() {
 
           <div className="metric-card">
             <span className="metric-label">Monthly Tax Relief</span>
-            <span className="metric-value highlight">
+            <span className="metric-value highlight tabular-nums">
               {formatGBP(results.salarySacrificeOption.monthlyTaxRelief)}
             </span>
             <span className="metric-subtext">Income Tax & NI deducted</span>
@@ -192,7 +193,7 @@ export default function EVPage() {
 
           <div className="metric-card">
             <span className="metric-label">Monthly Savings vs PCP</span>
-            <span className="metric-value" style={{ color: "var(--primary)" }}>
+            <span className="metric-value tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.monthlySavingsVsPcp)}/mo
             </span>
             <span className="metric-subtext">Save {formatGBP(results.monthlySavingsVsPcp * 36)} over 3 years</span>
@@ -200,11 +201,47 @@ export default function EVPage() {
 
           <div className="metric-card">
             <span className="metric-label">Annual Fuel Savings</span>
-            <span className="metric-value" style={{ color: "var(--accent-green)" }}>
+            <span className="metric-value tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.fuelSavingsAnnual)}
             </span>
             <span className="metric-subtext">7p/kWh Home Charging vs Petrol</span>
           </div>
+        </div>
+      </div>
+
+      {/* Market Leader Editorial Callout: Martin's Rule of Thumb for Electric Vehicles */}
+      <div
+        style={{
+          padding: "16px 20px",
+          background: "#ffffff",
+          border: "1px solid var(--surface-border)",
+          borderRadius: "var(--round-lg)",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 14,
+          boxShadow: "var(--shadow-card)",
+          marginBottom: 4,
+        }}
+      >
+        <div
+          style={{
+            padding: "8px",
+            borderRadius: "6px",
+            background: "var(--accent-amber-light)",
+            color: "var(--accent-amber-text)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <ShieldAlert size={20} />
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.6 }}>
+          <strong style={{ color: "var(--text-primary)" }}>Martin&apos;s Rule of Thumb for EV Drivers (The 2% BiK Arbitrage): </strong>
+          <span style={{ color: "var(--text-secondary)" }}>
+            Financing an electric car through a private PCP or personal bank loan uses post-tax income (costing £600–£800/mo net). With employer salary sacrifice, the gross lease is deducted from your pre-tax pay, slashing income tax and National Insurance liabilities. Even after HMRC Benefit-in-Kind (BiK) tax (currently 2%, stepping up to 5% by 2027/28), higher-rate taxpayers effectively receive a ~40% to 50% state-subsidized discount on a brand new EV.
+          </span>
         </div>
       </div>
 
@@ -392,11 +429,11 @@ export default function EVPage() {
             </h3>
 
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <table className="tabular-nums editorial-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
                 <thead>
                   <tr style={{ borderBottom: "2px solid var(--surface-border)", textAlign: "left" }}>
                     <th style={{ padding: "8px 12px", color: "var(--text-muted)" }}>Component</th>
-                    <th style={{ padding: "8px 12px", color: "var(--accent-green)", fontWeight: 700 }}>1. Salary Sacrifice</th>
+                    <th style={{ padding: "8px 12px", color: "var(--primary)", fontWeight: 700 }}>1. Salary Sacrifice</th>
                     <th style={{ padding: "8px 12px", color: "var(--text-primary)" }}>2. Private PCP</th>
                     <th style={{ padding: "8px 12px", color: "var(--text-primary)" }}>3. Cash Purchase</th>
                     <th style={{ padding: "8px 12px", color: "var(--text-secondary)" }}>4. Keep Petrol</th>
@@ -412,14 +449,14 @@ export default function EVPage() {
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Income Tax & NI Relief</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-green)", fontWeight: 700 }}>-{formatGBP(results.salarySacrificeOption.monthlyTaxRelief)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--primary)", fontWeight: 700 }}>-{formatGBP(results.salarySacrificeOption.monthlyTaxRelief)}</td>
                     <td style={{ padding: "10px 12px" }}>£0</td>
                     <td style={{ padding: "10px 12px" }}>£0</td>
                     <td style={{ padding: "10px 12px" }}>£0</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>HMRC Benefit-in-Kind (BiK) Tax</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-red)" }}>+{formatGBP(results.salarySacrificeOption.monthlyBikTax)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--tertiary)" }}>+{formatGBP(results.salarySacrificeOption.monthlyBikTax)}</td>
                     <td style={{ padding: "10px 12px" }}>£0</td>
                     <td style={{ padding: "10px 12px" }}>£0</td>
                     <td style={{ padding: "10px 12px" }}>£0</td>
@@ -429,27 +466,27 @@ export default function EVPage() {
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>{formatGBP(results.salarySacrificeOption.monthlyFuelCost)}</td>
                     <td style={{ padding: "10px 12px" }}>{formatGBP(results.pcpOption.monthlyFuelCost)}</td>
                     <td style={{ padding: "10px 12px" }}>{formatGBP(results.cashPurchaseOption.monthlyFuelCost)}</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-red)" }}>{formatGBP(results.petrolStatusQuoOption.monthlyFuelCost)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--tertiary)" }}>{formatGBP(results.petrolStatusQuoOption.monthlyFuelCost)}</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Insurance, Servicing & Tyres</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-green)", fontWeight: 700 }}>£0 (Included)</td>
+                    <td style={{ padding: "10px 12px", color: "var(--primary)", fontWeight: 700 }}>£0 (Included)</td>
                     <td style={{ padding: "10px 12px" }}>+{formatGBP(results.pcpOption.monthlyInsuranceAndUpkeep)}</td>
                     <td style={{ padding: "10px 12px" }}>+{formatGBP(results.cashPurchaseOption.monthlyInsuranceAndUpkeep)}</td>
                     <td style={{ padding: "10px 12px" }}>+{formatGBP(results.petrolStatusQuoOption.monthlyInsuranceAndUpkeep)}</td>
                   </tr>
                   <tr style={{ borderBottom: "2px solid var(--surface-border)", background: "var(--surface-tray)" }}>
                     <td style={{ padding: "12px", fontWeight: 800 }}>Total Net Out-of-Pocket / Month</td>
-                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--accent-green)", fontSize: 15 }}>
+                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--primary)", fontSize: 15 }}>
                       {formatGBP(results.salarySacrificeOption.netTotalMonthlyCost)}
                     </td>
                     <td style={{ padding: "12px", fontWeight: 700 }}>{formatGBP(results.pcpOption.netTotalMonthlyCost)}</td>
                     <td style={{ padding: "12px", fontWeight: 700 }}>{formatGBP(results.cashPurchaseOption.netTotalMonthlyCost)}</td>
                     <td style={{ padding: "12px", fontWeight: 700 }}>{formatGBP(results.petrolStatusQuoOption.netTotalMonthlyCost)}</td>
                   </tr>
-                  <tr style={{ background: "rgba(16, 185, 129, 0.05)" }}>
+                  <tr style={{ background: "var(--primary-light)" }}>
                     <td style={{ padding: "12px", fontWeight: 800 }}>Total 3-Year Cost (incl. Deposit)</td>
-                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--accent-green)" }}>
+                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--primary)" }}>
                       {formatGBP(results.salarySacrificeOption.total3YearSpend)}
                     </td>
                     <td style={{ padding: "12px", fontWeight: 700 }}>{formatGBP(results.pcpOption.total3YearSpend)}</td>

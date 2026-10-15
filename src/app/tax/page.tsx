@@ -10,6 +10,7 @@ import {
   FileText,
   AlertTriangle,
   Coins,
+  ShieldAlert,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
@@ -188,7 +189,7 @@ export default function TaxPage() {
         <div className="verdict-metrics-grid">
           <div className="metric-card">
             <span className="metric-label">Marginal Tax on Next £1</span>
-            <span className="metric-value highlight" style={{ color: results.baseline.effectiveMarginalRatePercent >= 60 ? "var(--accent-red)" : "var(--primary)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: results.baseline.effectiveMarginalRatePercent >= 60 ? "var(--tertiary)" : "var(--primary)" }}>
               {results.baseline.effectiveMarginalRatePercent}%
             </span>
             <span className="metric-subtext">
@@ -198,7 +199,7 @@ export default function TaxPage() {
 
           <div className="metric-card">
             <span className="metric-label">Tax & NI Saved</span>
-            <span className="metric-value highlight" style={{ color: "var(--accent-green)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.totalTaxAndNiSaved)}
             </span>
             <span className="metric-subtext">Immediate statutory relief</span>
@@ -206,7 +207,7 @@ export default function TaxPage() {
 
           <div className="metric-card">
             <span className="metric-label">Preserved Childcare Value</span>
-            <span className="metric-value">
+            <span className="metric-value tabular-nums">
               {formatGBP(results.childcarePreservedValue + results.childBenefitRestored)}
             </span>
             <span className="metric-subtext">30h Free Childcare & Child Benefit</span>
@@ -214,7 +215,7 @@ export default function TaxPage() {
 
           <div className="metric-card">
             <span className="metric-label">True Cost per £100 in SIPP</span>
-            <span className="metric-value" style={{ color: "var(--primary)" }}>
+            <span className="metric-value tabular-nums" style={{ color: "var(--primary)" }}>
               £{results.netCostPer100PoundPension}
             </span>
             <span className="metric-subtext">Net out-of-pocket take-home impact</span>
@@ -264,6 +265,42 @@ export default function TaxPage() {
         </div>
       )}
 
+      {/* Market Leader Editorial Callout: Martin's Rule of Thumb for High Earners */}
+      <div
+        style={{
+          padding: "16px 20px",
+          background: "#ffffff",
+          border: "1px solid var(--surface-border)",
+          borderRadius: "var(--round-lg)",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 14,
+          boxShadow: "var(--shadow-card)",
+          marginBottom: 4,
+        }}
+      >
+        <div
+          style={{
+            padding: "8px",
+            borderRadius: "6px",
+            background: "var(--accent-amber-light)",
+            color: "var(--accent-amber-text)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <ShieldAlert size={20} />
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.6 }}>
+          <strong style={{ color: "var(--text-primary)" }}>Martin&apos;s Rule of Thumb for High Earners (£100k Cliff Edge): </strong>
+          <span style={{ color: "var(--text-secondary)" }}>
+            Earning £100,001 immediately revokes 30 hours of free childcare (worth up to ~£8,500/yr per child) and £2,000 Tax-Free Childcare, while triggering a 60% effective income tax rate via Personal Allowance clawback (40% tax + 20% allowance reduction + 2% NI = 62% marginal drag). Sacrificing into a workplace pension or personal SIPP brings your Adjusted Net Income back under £100k, restoring £12,570 of tax-free allowance and full childcare funding.
+          </span>
+        </div>
+      </div>
+
       {/* Main Grid: Controls vs Analysis */}
       <div className="main-grid">
         {/* Left Column: Sliders */}
@@ -302,7 +339,7 @@ export default function TaxPage() {
             />
             <div className="slider-ticks">
               <span>£40k</span>
-              <span style={{ color: "var(--accent-red)", fontWeight: 700 }}>£100k (Trap)</span>
+              <span style={{ color: "var(--tertiary)", fontWeight: 700 }}>£100k (Trap)</span>
               <span>£125k</span>
               <span>£200k</span>
             </div>
@@ -312,7 +349,7 @@ export default function TaxPage() {
           <div className="control-group">
             <div className="control-label-wrap">
               <label htmlFor="salarySacrifice" className="control-label">Annual Pension Sacrifice / SIPP</label>
-              <span className="control-value-badge" style={{ color: "var(--accent-green)", background: "rgba(16, 185, 129, 0.1)" }}>
+              <span className="control-value-badge" style={{ color: "var(--primary)", background: "var(--primary-light)" }}>
                 {formatGBP(salarySacrifice)}
               </span>
             </div>
@@ -430,13 +467,13 @@ export default function TaxPage() {
             </h3>
 
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <table className="tabular-nums editorial-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
                 <thead>
                   <tr style={{ borderBottom: "2px solid var(--surface-border)", textAlign: "left" }}>
                     <th style={{ padding: "8px 12px", color: "var(--text-muted)" }}>Metric</th>
                     <th style={{ padding: "8px 12px", color: "var(--text-primary)" }}>Without Sacrifice</th>
                     <th style={{ padding: "8px 12px", color: "var(--primary)" }}>With {formatGBP(salarySacrifice)} Sacrifice</th>
-                    <th style={{ padding: "8px 12px", color: "var(--accent-green)" }}>Net Difference</th>
+                    <th style={{ padding: "8px 12px", color: "var(--primary)" }}>Net Difference</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -444,32 +481,32 @@ export default function TaxPage() {
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Adjusted Net Income</td>
                     <td style={{ padding: "10px 12px" }}>{formatGBP(results.baseline.adjustedNetIncome)}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>{formatGBP(results.withSacrifice.adjustedNetIncome)}</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-green)" }}>-{formatGBP(salarySacrifice)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--primary)", fontWeight: 700 }}>-{formatGBP(salarySacrifice)}</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Personal Allowance</td>
                     <td style={{ padding: "10px 12px" }}>{formatGBP(results.baseline.personalAllowance)}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>{formatGBP(results.withSacrifice.personalAllowance)}</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-green)" }}>+{formatGBP(results.withSacrifice.personalAllowance - results.baseline.personalAllowance)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--primary)", fontWeight: 700 }}>+{formatGBP(results.withSacrifice.personalAllowance - results.baseline.personalAllowance)}</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Income Tax Paid</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-red)" }}>{formatGBP(results.baseline.incomeTax)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--tertiary)" }}>{formatGBP(results.baseline.incomeTax)}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>{formatGBP(results.withSacrifice.incomeTax)}</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-green)", fontWeight: 700 }}>Save {formatGBP(results.taxSaved)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--primary)", fontWeight: 700 }}>Save {formatGBP(results.taxSaved)}</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>National Insurance</td>
                     <td style={{ padding: "10px 12px" }}>{formatGBP(results.baseline.nationalInsurance)}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>{formatGBP(results.withSacrifice.nationalInsurance)}</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-green)" }}>Save {formatGBP(results.niSaved)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--primary)" }}>Save {formatGBP(results.niSaved)}</td>
                   </tr>
                   {numberOfChildren > 0 && (
                     <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                       <td style={{ padding: "10px 12px", fontWeight: 600 }}>Net Child Benefit (Post-HICBC)</td>
                       <td style={{ padding: "10px 12px" }}>{formatGBP(results.baseline.netChildBenefit)}</td>
                       <td style={{ padding: "10px 12px", fontWeight: 700 }}>{formatGBP(results.withSacrifice.netChildBenefit)}</td>
-                      <td style={{ padding: "10px 12px", color: "var(--accent-green)" }}>+{formatGBP(results.childBenefitRestored)}</td>
+                      <td style={{ padding: "10px 12px", color: "var(--primary)" }}>+{formatGBP(results.childBenefitRestored)}</td>
                     </tr>
                   )}
                   {childrenInChildcare > 0 && (
@@ -477,7 +514,7 @@ export default function TaxPage() {
                       <td style={{ padding: "10px 12px", fontWeight: 600 }}>Free Childcare Preserved Value</td>
                       <td style={{ padding: "10px 12px" }}>{formatGBP(results.baseline.childcareValuePreserved)}</td>
                       <td style={{ padding: "10px 12px", fontWeight: 700 }}>{formatGBP(results.withSacrifice.childcareValuePreserved)}</td>
-                      <td style={{ padding: "10px 12px", color: "var(--accent-green)" }}>+{formatGBP(results.childcarePreservedValue)}</td>
+                      <td style={{ padding: "10px 12px", color: "var(--primary)" }}>+{formatGBP(results.childcarePreservedValue)}</td>
                     </tr>
                   )}
                   <tr style={{ borderBottom: "2px solid var(--surface-border)", background: "var(--surface-tray)" }}>
@@ -486,11 +523,11 @@ export default function TaxPage() {
                     <td style={{ padding: "12px", fontWeight: 800, color: "var(--primary)" }}>{formatGBP(results.withSacrifice.netTakeHome)}</td>
                     <td style={{ padding: "12px", fontWeight: 700 }}>Drop of {formatGBP(results.netCostToTakeHome)}</td>
                   </tr>
-                  <tr style={{ background: "rgba(16, 185, 129, 0.05)" }}>
-                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--accent-green)" }}>Annual Pension Pot Added</td>
+                  <tr style={{ background: "var(--primary-light)" }}>
+                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--primary)" }}>Annual Pension Pot Added</td>
                     <td style={{ padding: "12px" }}>£0</td>
-                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--accent-green)" }}>+{formatGBP(salarySacrifice)}</td>
-                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--accent-green)" }}>+{formatGBP(salarySacrifice)}</td>
+                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--primary)" }}>+{formatGBP(salarySacrifice)}</td>
+                    <td style={{ padding: "12px", fontWeight: 800, color: "var(--primary)" }}>+{formatGBP(salarySacrifice)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -500,7 +537,7 @@ export default function TaxPage() {
           {/* SIPP Compound Wealth Projection Table */}
           <div className="glass-panel" style={{ padding: 24, borderRadius: "var(--round-lg)", background: "var(--surface)", border: "1px solid var(--surface-border)" }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
-              <TrendingUp size={18} style={{ color: "var(--accent-green)" }} />
+              <TrendingUp size={18} style={{ color: "var(--primary)" }} />
               <span>Projected SIPP / Pension Wealth Growth (at {formatGBP(salarySacrifice || 10000)}/yr)</span>
             </h3>
             <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>
@@ -520,10 +557,10 @@ export default function TaxPage() {
                   }}
                 >
                   <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)" }}>After {p.years} Years</div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: "var(--accent-green)", margin: "4px 0" }}>
+                  <div className="tabular-nums" style={{ fontSize: 16, fontWeight: 800, color: "var(--primary)", margin: "4px 0" }}>
                     {formatGBP(p.projectedPotAt7Percent)}
                   </div>
-                  <div style={{ fontSize: 10, color: "var(--text-secondary)" }}>
+                  <div className="tabular-nums" style={{ fontSize: 10, color: "var(--text-secondary)" }}>
                     Contributed: {formatGBP(p.totalContributed)}
                   </div>
                 </div>

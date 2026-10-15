@@ -1,42 +1,45 @@
 :root {
-  /* British Financial Editorial Palette — Warm, Pristine, Human */
-  --background: #fafaf9; /* Warm Porcelain / Paper Chalk */
-  --foreground: #0f172a; /* Obsidian Charcoal Ink */
+  /* British Financial Editorial Palette — Archival, Warm, Precision Crafted */
+  --background: #fafaf9; /* Archival Warm Stone / Newsprint Parchment */
+  --foreground: #0f172a; /* Deep Archival Ink */
   
   --surface: #ffffff; /* Optical White Container */
   --surface-subtle: #f8fafc; /* Crisp Slate Tint */
-  --surface-tray: #f1f5f9; /* Recessed Segmented Tray */
+  --surface-tray: #f5f5f4; /* Warm Stone Tray */
   --surface-border: #e2e8f0; /* Razor-thin Hairline Border */
   --surface-border-subtle: #f1f5f9;
   --surface-border-hover: #cbd5e1;
 
-  --text-primary: #0f172a; /* Deep Ink */
+  --text-primary: #0f172a; /* Deep Archival Ink */
   --text-secondary: #475569; /* Slate Stone */
-  --text-muted: #64748b; /* Muted Caption */
+  --text-muted: #64748b; /* Muted Editorial Caption */
   --text-faint: #94a3b8;
   
   /* Primary: British Racing Green (Equity, Wealth, Long-term Asset) */
   --primary: #064e3b;
   --primary-hover: #047857;
+  --primary-dark: #022c22;
   --primary-light: #ecfdf5;
   --primary-border: #a7f3d0;
   --on-primary: #ffffff;
   
-  /* Secondary: Deep Royal Navy / Oxford Indigo (Stocks & Shares ISA Index) */
+  /* Secondary: Deep Oxford Navy / Royal Indigo (Stocks & Shares ISA Index) */
   --secondary: #1e3a8a;
   --secondary-hover: #2563eb;
+  --secondary-dark: #172554;
   --secondary-light: #eff6ff;
   --secondary-border: #bfdbfe;
   --on-secondary: #ffffff;
   
-  /* Tertiary: Brick Wine / Cotswold Terracotta (Non-recoverable Sunk Costs) */
+  /* Tertiary: Cotswold Terracotta / Brick Wine (Non-recoverable Sunk Costs & Tax Drag) */
   --tertiary: #991b1b;
   --tertiary-hover: #b91c1c;
+  --tertiary-dark: #7f1d1d;
   --tertiary-light: #fef2f2;
   --tertiary-border: #fecaca;
   --on-tertiary: #ffffff;
 
-  /* Accent: Muted Buff Amber (Bank of England Base Rate / Policy Benchmark) */
+  /* Accent: Bank of England Buff Amber (Monetary Policy Benchmark) */
   --accent-amber: #d97706;
   --accent-amber-light: #fef3c7;
   --accent-amber-border: #fde68a;
@@ -47,8 +50,8 @@
   --accent-coffee-border: #facc15;
   --accent-coffee-text: #713f12;
 
-  --round-xs: 3px;
-  --round-sm: 5px;
+  --round-xs: 4px;
+  --round-sm: 6px;
   --round-md: 8px;
   --round-lg: 12px;
   --round-xl: 16px;
@@ -56,9 +59,9 @@
   
   --container-max: 1240px;
   
-  /* Typographic Hierarchy: Editorial Serif + Tabular Sans */
-  --font-serif: "Newsreader", "Charter", "Bitstream Charter", "Sitka Text", "Cambria", Georgia, serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Typographic Hierarchy: Editorial Serif (Newsreader) + Precision Sans (Inter) */
+  --font-serif: var(--font-serif), "Newsreader", "Charter", "Bitstream Charter", "Sitka Text", Georgia, serif;
+  --font-sans: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
 
   /* Organic Paper Drop Shadows (No Blurry Neon) */
@@ -83,6 +86,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum" 1;
 }
 
 /* Serif Headings with Editorial Restraint */

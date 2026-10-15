@@ -54,7 +54,7 @@ export function AnnualTable({ annualBreakdown }: AnnualTableProps) {
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, textAlign: "right" }}>
+        <table className="tabular-nums" style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
           <thead>
             <tr style={{ borderBottom: "2px solid var(--surface-border)", color: "var(--text-secondary)" }}>
               <th style={{ textAlign: "left", padding: "10px 8px", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em" }}>Year</th>

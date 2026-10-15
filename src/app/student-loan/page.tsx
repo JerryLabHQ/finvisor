@@ -9,6 +9,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Scale,
+  ShieldAlert,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
@@ -97,7 +98,7 @@ export default function StudentLoanPage() {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <div className="hero-pill" style={{ background: "rgba(59, 130, 246, 0.1)", color: "#3b82f6", border: "1px solid rgba(59, 130, 246, 0.3)" }}>
+        <div className="hero-pill" style={{ background: "var(--secondary-light)", color: "var(--secondary)", border: "1px solid var(--secondary-border)" }}>
           <GraduationCap size={14} />
           <span>UK Graduate Tax & Lifetime Loan Modeler</span>
         </div>
@@ -186,7 +187,7 @@ export default function StudentLoanPage() {
         <div className="verdict-metrics-grid">
           <div className="metric-card">
             <span className="metric-label">Current Monthly Deduction</span>
-            <span className="metric-value highlight" style={{ color: "var(--accent-red)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: "var(--tertiary)" }}>
               {formatGBP(results.currentMonthlyRepayment)}/mo
             </span>
             <span className="metric-subtext">Automatically deducted from salary</span>
@@ -194,7 +195,7 @@ export default function StudentLoanPage() {
 
           <div className="metric-card">
             <span className="metric-label">Projected Debt Cancelled</span>
-            <span className="metric-value highlight" style={{ color: "var(--accent-green)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.debtWipedOutStandard)}
             </span>
             <span className="metric-subtext">Statutory write-off at year 30/40</span>
@@ -202,7 +203,7 @@ export default function StudentLoanPage() {
 
           <div className="metric-card">
             <span className="metric-label">Total Lifetime Paid</span>
-            <span className="metric-value">
+            <span className="metric-value tabular-nums">
               {formatGBP(results.totalLifetimePaidStandard)}
             </span>
             <span className="metric-subtext">Principal + Accrued Interest</span>
@@ -210,11 +211,47 @@ export default function StudentLoanPage() {
 
           <div className="metric-card">
             <span className="metric-label">Mortgage Borrowing Drag</span>
-            <span className="metric-value" style={{ color: "var(--accent-red)" }}>
+            <span className="metric-value tabular-nums" style={{ color: "var(--tertiary)" }}>
               -{formatGBP(results.estimatedMortgageBorrowingReductionGbp)}
             </span>
             <span className="metric-subtext">Lender affordability reduction</span>
           </div>
+        </div>
+      </div>
+
+      {/* Market Leader Editorial Callout: Martin's Rule of Thumb for Student Loans */}
+      <div
+        style={{
+          padding: "16px 20px",
+          background: "#ffffff",
+          border: "1px solid var(--surface-border)",
+          borderRadius: "var(--round-lg)",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 14,
+          boxShadow: "var(--shadow-card)",
+          marginBottom: 4,
+        }}
+      >
+        <div
+          style={{
+            padding: "8px",
+            borderRadius: "6px",
+            background: "var(--accent-amber-light)",
+            color: "var(--accent-amber-text)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <ShieldAlert size={20} />
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.6 }}>
+          <strong style={{ color: "var(--text-primary)" }}>Martin&apos;s Rule of Thumb on UK Student Loans (It Is a 9% Graduate Tax): </strong>
+          <span style={{ color: "var(--text-secondary)" }}>
+            Treat your student loan as a 9% graduate tax above the statutory threshold (£27,295 on Plan 2, £25,000 on Plan 5), NOT as commercial debt. Any remaining balance wipes completely clean after 30 years (Plan 2) or 40 years (Plan 5) regardless of interest accumulated. Overpaying is only financially rational for career high-flyers who are mathematically certain to clear the debt before the wipeout clock expires. For everyone else, keep the cash for your house deposit or pension.
+          </span>
         </div>
       </div>
 
@@ -405,7 +442,7 @@ export default function StudentLoanPage() {
             </h3>
 
             <div style={{ overflowX: "auto", maxHeight: 420 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <table className="tabular-nums editorial-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontVariantNumeric: "tabular-nums" }}>
                 <thead style={{ position: "sticky", top: 0, background: "var(--surface)", zIndex: 2 }}>
                   <tr style={{ borderBottom: "2px solid var(--surface-border)", textAlign: "left" }}>
                     <th style={{ padding: "8px 10px", color: "var(--text-muted)" }}>Year</th>
@@ -413,7 +450,7 @@ export default function StudentLoanPage() {
                     <th style={{ padding: "8px 10px" }}>Starting Debt</th>
                     <th style={{ padding: "8px 10px" }}>Interest Rate</th>
                     <th style={{ padding: "8px 10px" }}>Interest Added</th>
-                    <th style={{ padding: "8px 10px", color: "var(--accent-red)" }}>Mandatory Repaid</th>
+                    <th style={{ padding: "8px 10px", color: "var(--tertiary)" }}>Mandatory Repaid</th>
                     <th style={{ padding: "8px 10px", fontWeight: 700 }}>Ending Debt</th>
                   </tr>
                 </thead>
@@ -423,7 +460,7 @@ export default function StudentLoanPage() {
                       key={row.year}
                       style={{
                         borderBottom: "1px solid var(--surface-border)",
-                        background: row.isWrittenOff ? "rgba(16, 185, 129, 0.08)" : "transparent",
+                        background: row.isWrittenOff ? "var(--primary-light)" : "transparent",
                       }}
                     >
                       <td style={{ padding: "8px 10px", fontWeight: 600 }}>
@@ -432,7 +469,7 @@ export default function StudentLoanPage() {
                       <td style={{ padding: "8px 10px" }}>{formatGBP(row.salary)}</td>
                       <td style={{ padding: "8px 10px" }}>{formatGBP(row.startingBalance)}</td>
                       <td style={{ padding: "8px 10px" }}>{row.interestRatePercent}%</td>
-                      <td style={{ padding: "8px 10px", color: "var(--accent-red)" }}>+{formatGBP(row.interestAccrued)}</td>
+                      <td style={{ padding: "8px 10px", color: "var(--tertiary)" }}>+{formatGBP(row.interestAccrued)}</td>
                       <td style={{ padding: "8px 10px", fontWeight: 700 }}>-{formatGBP(row.mandatoryRepayment)}</td>
                       <td style={{ padding: "8px 10px", fontWeight: 800 }}>
                         {row.isWrittenOff ? "£0 (Cancelled)" : formatGBP(row.endingBalance)}

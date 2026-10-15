@@ -1,6 +1,20 @@
 import type { Metadata } from "next";
+import { Inter, Newsreader } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "LadderPass - UK Buy vs Rent Financial Intelligence & Property Calculator",
@@ -14,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className={`h-full ${inter.variable} ${newsreader.variable}`}>
+      <body className={`min-h-full flex flex-col ${inter.className}`}>
         {children}
         <Analytics />
       </body>

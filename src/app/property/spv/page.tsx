@@ -10,6 +10,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Scale,
+  ShieldAlert,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
@@ -193,7 +194,7 @@ export default function SpvPage() {
         <div className="verdict-metrics-grid">
           <div className="metric-card">
             <span className="metric-label">Section 24 Tax Drag</span>
-            <span className="metric-value highlight" style={{ color: "var(--accent-red)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: "var(--tertiary)" }}>
               {formatGBP(results.section24TaxDragAnnual)}/yr
             </span>
             <span className="metric-subtext">Disallowed mortgage relief</span>
@@ -201,7 +202,7 @@ export default function SpvPage() {
 
           <div className="metric-card">
             <span className="metric-label">SPV Net Cashflow</span>
-            <span className="metric-value highlight" style={{ color: "var(--accent-green)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.spv.netAnnualCashflow)}/yr
             </span>
             <span className="metric-subtext">{formatGBP(results.spv.netMonthlyCashflow)}/month net</span>
@@ -209,7 +210,7 @@ export default function SpvPage() {
 
           <div className="metric-card">
             <span className="metric-label">Personal Net Cashflow</span>
-            <span className="metric-value">
+            <span className="metric-value tabular-nums">
               {formatGBP(results.personal.netAnnualCashflow)}/yr
             </span>
             <span className="metric-subtext">{formatGBP(results.personal.netMonthlyCashflow)}/month net</span>
@@ -217,11 +218,47 @@ export default function SpvPage() {
 
           <div className="metric-card">
             <span className="metric-label">5% HRAD Stamp Duty</span>
-            <span className="metric-value" style={{ color: "var(--primary)" }}>
+            <span className="metric-value tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.sdltCost)}
             </span>
             <span className="metric-subtext">Higher Rate for Additional Dwellings</span>
           </div>
+        </div>
+      </div>
+
+      {/* Market Leader Editorial Callout: Martin's Rule of Thumb for Landlords */}
+      <div
+        style={{
+          padding: "16px 20px",
+          background: "#ffffff",
+          border: "1px solid var(--surface-border)",
+          borderRadius: "var(--round-lg)",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 14,
+          boxShadow: "var(--shadow-card)",
+          marginBottom: 4,
+        }}
+      >
+        <div
+          style={{
+            padding: "8px",
+            borderRadius: "6px",
+            background: "var(--accent-amber-light)",
+            color: "var(--accent-amber-text)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <ShieldAlert size={20} />
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.6 }}>
+          <strong style={{ color: "var(--text-primary)" }}>Martin&apos;s Rule of Thumb for Landlords (Section 24 Squeeze): </strong>
+          <span style={{ color: "var(--text-secondary)" }}>
+            If you are a 40% higher-rate or 45% additional-rate taxpayer, buying rental property in your personal name means HMRC taxes phantom profit—you pay income tax on gross rental turnover, with only a 20% basic tax credit for mortgage interest. A Limited Company SPV preserves full 100% mortgage interest deductibility at 19% Corporation Tax, offsetting the 5% HRAD SDLT surcharge within ~3 to 5 years if you reinvest profits into future properties.
+          </span>
         </div>
       </div>
 
@@ -457,13 +494,13 @@ export default function SpvPage() {
             </h3>
 
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <table className="tabular-nums editorial-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
                 <thead>
                   <tr style={{ borderBottom: "2px solid var(--surface-border)", textAlign: "left" }}>
                     <th style={{ padding: "8px 12px", color: "var(--text-muted)" }}>Financial Item</th>
                     <th style={{ padding: "8px 12px", color: "var(--text-primary)" }}>Personal Ownership</th>
                     <th style={{ padding: "8px 12px", color: "var(--primary)", fontWeight: 700 }}>Limited Co SPV</th>
-                    <th style={{ padding: "8px 12px", color: "var(--accent-green)" }}>SPV Advantage</th>
+                    <th style={{ padding: "8px 12px", color: "var(--primary)" }}>SPV Advantage</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -477,29 +514,29 @@ export default function SpvPage() {
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Mortgage Interest (Annual)</td>
                     <td style={{ padding: "10px 12px" }}>-{formatGBP(results.personal.annualMortgagePayment)} ({personalRate}%)</td>
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>-{formatGBP(results.spv.annualMortgagePayment)} ({spvRate}%)</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-red)" }}>-{formatGBP(results.spv.annualMortgagePayment - results.personal.annualMortgagePayment)} (Higher Rate)</td>
+                    <td style={{ padding: "10px 12px", color: "var(--tertiary)" }}>-{formatGBP(results.spv.annualMortgagePayment - results.personal.annualMortgagePayment)} (Higher Rate)</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Management, Maintenance & Accountancy</td>
                     <td style={{ padding: "10px 12px" }}>-{formatGBP(results.personal.annualOperatingExpenses)}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>-{formatGBP(results.spv.annualOperatingExpenses)}</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-red)" }}>-£1,200 (Accountant)</td>
+                    <td style={{ padding: "10px 12px", color: "var(--tertiary)" }}>-£1,200 (Accountant)</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Taxable Profit Calculated</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-red)" }}>
+                    <td style={{ padding: "10px 12px", color: "var(--tertiary)" }}>
                       {formatGBP(results.personal.taxableProfit)} <span style={{ fontSize: 11 }}>(No mortgage deduction!)</span>
                     </td>
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>
                       {formatGBP(results.spv.taxableProfit)} <span style={{ fontSize: 11 }}>(Full mortgage deduction)</span>
                     </td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-green)" }}>Shielded from income tax</td>
+                    <td style={{ padding: "10px 12px", color: "var(--primary)" }}>Shielded from income tax</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--surface-border)" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>Tax Actually Paid</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-red)", fontWeight: 700 }}>-{formatGBP(results.personal.taxPaid)}</td>
+                    <td style={{ padding: "10px 12px", color: "var(--tertiary)", fontWeight: 700 }}>-{formatGBP(results.personal.taxPaid)}</td>
                     <td style={{ padding: "10px 12px", fontWeight: 700 }}>-{formatGBP(results.spv.taxPaid)} (19% Corp Tax)</td>
-                    <td style={{ padding: "10px 12px", color: "var(--accent-green)", fontWeight: 700 }}>
+                    <td style={{ padding: "10px 12px", color: "var(--primary)", fontWeight: 700 }}>
                       {results.personal.taxPaid > results.spv.taxPaid
                         ? `Save ${formatGBP(results.personal.taxPaid - results.spv.taxPaid)} in tax`
                         : "Similar"}
@@ -511,7 +548,7 @@ export default function SpvPage() {
                     <td style={{ padding: "12px", fontWeight: 800, color: "var(--primary)", fontSize: 15 }}>
                       {formatGBP(results.spv.netAnnualCashflow)}
                     </td>
-                    <td style={{ padding: "12px", fontWeight: 800, color: isSpvWinner ? "var(--accent-green)" : "var(--accent-red)" }}>
+                    <td style={{ padding: "12px", fontWeight: 800, color: isSpvWinner ? "var(--primary)" : "var(--tertiary)" }}>
                       {isSpvWinner ? `+${formatGBP(results.annualCashflowDifference)}/yr` : `-${formatGBP(Math.abs(results.annualCashflowDifference))}/yr`}
                     </td>
                   </tr>

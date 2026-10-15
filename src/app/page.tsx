@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -28,8 +29,10 @@ import {
   HelpCircle,
   CheckCircle2,
   Scale,
+  ShieldAlert,
+  ShieldCheck,
 } from "lucide-react";
-import { runBuyVsRentCalculation, CalculatorInputs } from "@/lib/calculator";
+import { runBuyVsRentCalculation, calculateSDLT, CalculatorInputs, AnnualData } from "@/lib/calculator";
 import { UK_CITIES } from "@/lib/cities";
 import { UK_MARKET_DEFAULTS, SUPPORT_URL, SUPPORT_LABEL } from "@/lib/constants";
 import { ReportModal } from "@/components/ReportModal";
@@ -37,6 +40,7 @@ import { BrokerModal } from "@/components/BrokerModal";
 import { StressTestView } from "@/components/StressTestView";
 import { ScenarioCompare } from "@/components/ScenarioCompare";
 import { AnnualTable } from "@/components/AnnualTable";
+import { TrueCostView } from "@/components/TrueCostView";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
 import "./dashboard.css";
@@ -49,6 +53,104 @@ const formatGBP = (value: number) => {
     maximumFractionDigits: 0,
   }).format(value);
 };
+
+// Institutional British Financial Editorial Recharts Tooltip
+interface TooltipPayloadItem {
+  value: number;
+  name: string;
+  dataKey: string;
+  payload: AnnualData;
+}
+
+interface EditorialChartTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string | number;
+}
+
+function EditorialChartTooltip({ active, payload }: EditorialChartTooltipProps) {
+  if (!active || !payload || !payload.length) return null;
+  const data = payload[0]?.payload;
+  if (!data) return null;
+
+  const buyerNW = data.buyerTotalNetWorth || 0;
+  const renterNW = data.renterTotalNetWorth || 0;
+  const diff = Math.abs(buyerNW - renterNW);
+  const buyerAhead = buyerNW >= renterNW;
+
+  return (
+    <div
+      style={{
+        backgroundColor: "#ffffff",
+        border: "1px solid var(--surface-border)",
+        borderRadius: "8px",
+        padding: "12px 16px",
+        boxShadow: "0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08)",
+        fontSize: "12px",
+        minWidth: "260px",
+        fontVariantNumeric: "tabular-nums",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "8px",
+          borderBottom: "1px solid var(--surface-border)",
+          paddingBottom: "6px",
+        }}
+      >
+        <span style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", fontSize: "11px" }}>
+          Year {data.year} Projection
+        </span>
+        <span
+          style={{
+            fontSize: "10px",
+            fontWeight: 700,
+            padding: "2px 7px",
+            borderRadius: "4px",
+            backgroundColor: buyerAhead ? "var(--primary-light)" : "var(--secondary-light)",
+            color: buyerAhead ? "var(--primary)" : "var(--secondary)",
+            border: `1px solid ${buyerAhead ? "var(--primary-border)" : "var(--secondary-border)"}`,
+          }}
+        >
+          {buyerAhead ? `Buyer +${formatGBP(diff)}` : `Renter +${formatGBP(diff)}`}
+        </span>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--primary)" }}></span>
+            <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Buyer Net Worth</span>
+          </div>
+          <span style={{ fontWeight: 700, color: "var(--primary)", fontFamily: "var(--font-serif)", fontSize: "14px" }}>
+            {formatGBP(buyerNW)}
+          </span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-muted)", paddingLeft: "14px" }}>
+          <span>Home Equity: {formatGBP(data.buyerEquity)}</span>
+          {data.buyerInvestmentPot > 0 && <span>ISA: {formatGBP(data.buyerInvestmentPot)}</span>}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--secondary)" }}></span>
+            <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Renter ISA Pot</span>
+          </div>
+          <span style={{ fontWeight: 700, color: "var(--secondary)", fontFamily: "var(--font-serif)", fontSize: "14px" }}>
+            {formatGBP(renterNW)}
+          </span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--text-muted)", paddingLeft: "14px" }}>
+          <span>S&S ISA: {formatGBP(data.renterInvestmentPot)}</span>
+          <span>Deposit: {formatGBP(data.renterDepositRefundable)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Popular UK Scenarios (Target Audience Personas)
 const UK_PERSONAS = [
@@ -107,7 +209,7 @@ export default function Dashboard() {
   const [donationDismissed, setDonationDismissed] = useState(false);
 
   // Active View Tab
-  const [activeTab, setActiveTab] = useState<"chart" | "table" | "stress" | "compare">("chart");
+  const [activeTab, setActiveTab] = useState<"chart" | "table" | "stress" | "compare" | "truecost">("chart");
 
   // State for basic inputs
   const [propertyPrice, setPropertyPrice] = useState(450000);
@@ -272,6 +374,9 @@ export default function Dashboard() {
   const absDiff = Math.abs(diff);
   const isBuyWinner = diff > 0;
   const lastYearData = results.annualBreakdown[results.annualBreakdown.length - 1] || results.annualBreakdown[0];
+  const totalCombinedWealth = Math.max(1, (lastYearData?.buyerTotalNetWorth || 0) + (lastYearData?.renterTotalNetWorth || 0));
+  const standardSdltCost = calculateSDLT(propertyPrice, false);
+  const sdltSavings = Math.max(0, standardSdltCost - results.sdltCost);
 
   const depositCashNeeded = Math.round(propertyPrice * (depositPercent / 100));
   const ltvRatio = 100 - depositPercent;
@@ -394,43 +499,112 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 3 Core Verdict Metrics */}
-        <div className="verdict-metrics-grid">
+        {/* Wealth Distribution Bar */}
+        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, fontWeight: 700, flexWrap: "wrap", gap: 8 }}>
+            <span style={{ color: "var(--primary)" }}>
+              Buyer Net Worth: {formatGBP(lastYearData.buyerTotalNetWorth)} ({Math.round((lastYearData.buyerTotalNetWorth / totalCombinedWealth) * 100)}%)
+            </span>
+            <span style={{ color: isBuyWinner ? "var(--primary)" : "var(--secondary)", background: isBuyWinner ? "var(--primary-light)" : "var(--secondary-light)", padding: "3px 10px", borderRadius: 9999, border: `1px solid ${isBuyWinner ? "var(--primary-border)" : "var(--secondary-border)"}`, fontSize: 11, fontWeight: 800 }}>
+              {isBuyWinner ? `+${formatGBP(absDiff)} Buyer Advantage` : `+${formatGBP(absDiff)} Renter Advantage`}
+            </span>
+            <span style={{ color: "var(--secondary)" }}>
+              Renter ISA: {formatGBP(lastYearData.renterTotalNetWorth)} ({Math.round((lastYearData.renterTotalNetWorth / totalCombinedWealth) * 100)}%)
+            </span>
+          </div>
+          <div style={{ display: "flex", width: "100%", height: 10, borderRadius: 9999, overflow: "hidden", background: "#e2e8f0" }}>
+            <div style={{ width: `${Math.max(5, Math.min(95, Math.round((lastYearData.buyerTotalNetWorth / totalCombinedWealth) * 100)))}%`, background: "var(--primary)", transition: "width 0.3s ease" }} />
+            <div style={{ flex: 1, background: "var(--secondary)", transition: "width 0.3s ease" }} />
+          </div>
+        </div>
+
+        {/* 4 Core Verdict Precision Metric Tiles */}
+        <div className="verdict-metrics-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))" }}>
           <div className="verdict-metric-card">
             <span className="verdict-metric-label">
-              <Sparkles size={13} style={{ color: "var(--primary)" }} /> Break-Even Horizon
+              <Sparkles size={13} style={{ color: "var(--primary)" }} /> Financial Cross-Over
             </span>
             <div className="verdict-metric-val" style={{ color: results.breakEvenYear ? "var(--primary)" : "var(--secondary)" }}>
-              {results.breakEvenYear ? `Year ${results.breakEvenYear}` : "Renting Wins Throughout"}
+              {results.breakEvenYear ? `Year ${results.breakEvenYear}` : "Renting Wins"}
             </div>
             <span className="verdict-metric-sub">
               {results.breakEvenYear
-                ? `Point where equity surpasses initial Stamp Duty & buying costs`
+                ? `Point where equity surpasses initial Stamp Duty & conveyancing`
                 : `At these rates, renting compounds faster over all ${timeHorizon} years`}
             </span>
           </div>
 
           <div className="verdict-metric-card">
             <span className="verdict-metric-label">
-              <TrendingUp size={13} style={{ color: "#38bdf8" }} /> Projected Net Worth ({timeHorizon}y)
+              <Home size={13} style={{ color: "var(--primary)" }} /> Buyer Equity ({timeHorizon}y)
             </span>
-            <div className="verdict-metric-val">
-              {isBuyWinner ? formatGBP(lastYearData.buyerTotalNetWorth) : formatGBP(lastYearData.renterTotalNetWorth)}
+            <div className="verdict-metric-val" style={{ color: "var(--primary)" }}>
+              {formatGBP(lastYearData.buyerEquity)}
             </div>
             <span className="verdict-metric-sub">
-              Buyer: {formatGBP(lastYearData.buyerTotalNetWorth)} • Renter ISA: {formatGBP(lastYearData.renterTotalNetWorth)}
+              Property value minus mortgage debt remaining
             </span>
           </div>
 
           <div className="verdict-metric-card">
             <span className="verdict-metric-label">
-              <Zap size={13} style={{ color: "var(--tertiary)" }} /> Non-Recoverable Sunk Costs
+              <TrendingUp size={13} style={{ color: "var(--secondary)" }} /> Renter S&S ISA ({timeHorizon}y)
             </span>
-            <div className="verdict-metric-val" style={{ color: "var(--tertiary)" }}>
-              Buyer: {formatGBP(results.buyTotalSunkCostsAtHorizon)}
+            <div className="verdict-metric-val" style={{ color: "var(--secondary)" }}>
+              {formatGBP(lastYearData.renterInvestmentPot)}
             </div>
             <span className="verdict-metric-sub">
-              vs. {formatGBP(results.rentTotalSunkCostsAtHorizon)} pure sunk rent over {timeHorizon} years
+              Compounded deposit & cashflow surplus @ {investmentReturnPercent}%
+            </span>
+          </div>
+
+          <div className="verdict-metric-card">
+            <span className="verdict-metric-label">
+              <Zap size={13} style={{ color: "var(--tertiary)" }} /> Sunk Cost Comparison
+            </span>
+            <div className="verdict-metric-val" style={{ color: "var(--tertiary)", fontSize: 20 }}>
+              {formatGBP(results.buyTotalSunkCostsAtHorizon)} vs {formatGBP(results.rentTotalSunkCostsAtHorizon)}
+            </div>
+            <span className="verdict-metric-sub">
+              Buyer (Interest + SDLT + Maint) vs Pure Sunk Rent
+            </span>
+          </div>
+        </div>
+
+        {/* Market Leader Editorial Callout: Martin's Rules of Thumb & Statutory Watchdog */}
+        <div
+          style={{
+            marginTop: 14,
+            padding: "14px 18px",
+            background: "#ffffff",
+            border: "1px solid var(--surface-border)",
+            borderRadius: 8,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 12,
+            boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
+          }}
+        >
+          <div
+            style={{
+              padding: "6px",
+              borderRadius: "6px",
+              background: "var(--accent-amber-light)",
+              color: "var(--accent-amber-text)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <ShieldAlert size={18} />
+          </div>
+          <div style={{ fontSize: 13, lineHeight: 1.55 }}>
+            <strong style={{ color: "var(--text-primary)" }}>Martin&apos;s Rule of Thumb for UK Property: </strong>
+            <span style={{ color: "var(--text-secondary)" }}>
+              {isBuyWinner
+                ? `At a ${depositPercent}% deposit (£${depositCashNeeded.toLocaleString()}), buying works if you plan to stay past Year ${results.breakEvenYear || 4}. Because SDLT (£${results.sdltCost.toLocaleString()}) and legal conveyancing (~£1,800) are pure sunk friction costs, selling before Year ${results.breakEvenYear || 4} leaves you worse off than renting. Keep a 3-month emergency fund before committing.`
+                : `With current mortgage rates (${mortgageRate}%) and high initial sunk costs, renting is mathematically superior over a ${timeHorizon}-year horizon ONLY IF you rigorously invest the £${depositCashNeeded.toLocaleString()} deposit difference into a low-cost global index fund (S&S ISA) yielding ~${investmentReturnPercent}%. If that cash sits uninvested in a current account, buying always wins.`}
             </span>
           </div>
         </div>
@@ -578,6 +752,44 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* SDLT Statutory Relief Breakdown Card */}
+      <div className="glass-panel" style={{ padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 38, height: 38, borderRadius: "var(--round-md)", background: "var(--primary-light)", border: "1px solid var(--primary-border)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary)", flexShrink: 0 }}>
+            <Scale size={18} />
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span>HMRC Stamp Duty (SDLT) Assessment: <strong style={{ color: "var(--primary)" }}>{formatGBP(results.sdltCost)}</strong></span>
+              {isFirstTimeBuyer && propertyPrice <= 625000 && (
+                <span className="editorial-badge-institution editorial-badge-hmrc">
+                  FTB Statutory Relief Applied
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.4 }}>
+              {isFirstTimeBuyer
+                ? propertyPrice <= 425000
+                  ? `0% nil-rate up to £425,000. Statutory relief saved: ${formatGBP(standardSdltCost)} vs standard residential rates.`
+                  : propertyPrice <= 625000
+                    ? `0% on first £425,000, 5% on £425,001–£${propertyPrice.toLocaleString()}. Statutory relief saved: ${formatGBP(sdltSavings)}.`
+                    : `Property price exceeds £625,000 FTB ceiling. Standard residential rates apply (£${results.sdltCost.toLocaleString()}).`
+                : `Standard residential SDLT: 0% up to £250,000, 5% to £925,000 (£${results.sdltCost.toLocaleString()} due).`}
+            </div>
+          </div>
+        </div>
+
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 600, color: "var(--text-primary)", cursor: "pointer", background: "var(--surface-tray)", padding: "8px 14px", borderRadius: "var(--round-full)", border: "1px solid var(--surface-border)" }}>
+          <input
+            type="checkbox"
+            checked={isFirstTimeBuyer}
+            onChange={(e) => setIsFirstTimeBuyer(e.target.checked)}
+            style={{ cursor: "pointer" }}
+          />
+          <span>First-Time Buyer Relief Eligible</span>
+        </label>
+      </div>
+
       {/* Quick Actions & Regional City Presets */}
       <div className="quick-actions-bar glass-panel" style={{ padding: "14px 20px" }}>
         <div className="city-presets-bar">
@@ -593,6 +805,13 @@ export default function Dashboard() {
               {c.name} (£{(c.averagePrice / 1000).toFixed(0)}k)
             </button>
           ))}
+          <Link
+            href="/city/london"
+            className="preset-pill"
+            style={{ background: "var(--primary-light)", color: "var(--primary)", borderColor: "var(--primary-border)", fontWeight: 700 }}
+          >
+            🏛️ All 10 UK City Hubs
+          </Link>
         </div>
 
         <div style={{ display: "flex", gap: 10 }}>
@@ -637,7 +856,7 @@ export default function Dashboard() {
               </span>
 
               <div className="timeframe-chips">
-                {[3, 5, 10, 15, 20, 25, 30].map((yr) => (
+                {[3, 5, 10, 15, 20, 25, 30, 40].map((yr) => (
                   <button
                     key={yr}
                     type="button"
@@ -688,24 +907,7 @@ export default function Dashboard() {
                       tickLine={false}
                       tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`}
                     />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 12px rgba(15, 23, 42, 0.08)",
-                        color: "#0f172a",
-                        fontSize: "12px",
-                      }}
-                      itemStyle={{ color: "#0f172a" }}
-                      labelStyle={{ color: "#475569", fontWeight: 600, marginBottom: 4 }}
-                      formatter={(value, name) => [
-                        formatGBP(Number(value || 0)),
-                        name === "buyerTotalNetWorth"
-                          ? "Buying Net Worth (Home Equity + Inv)"
-                          : "Renting Net Worth (ISA Pot + Deposit)",
-                      ]}
-                    />
+                    <Tooltip content={<EditorialChartTooltip />} />
                     <Legend
                       verticalAlign="top"
                       height={36}
@@ -850,9 +1052,17 @@ export default function Dashboard() {
               <GitCompare size={14} />
               <span>Side-by-Side Property Compare</span>
             </button>
+            <button
+              onClick={() => setActiveTab("truecost")}
+              className={`subview-tab-btn ${activeTab === "truecost" ? "active" : ""}`}
+            >
+              <ShieldCheck size={14} />
+              <span>True Cost of Borrowing</span>
+            </button>
           </div>
 
           {/* Sub-views */}
+          {activeTab === "truecost" && <TrueCostView results={results} inputs={inputs} />}
           {activeTab === "table" && <AnnualTable annualBreakdown={results.annualBreakdown} />}
           {activeTab === "stress" && <StressTestView inputs={inputs} />}
           {activeTab === "compare" && <ScenarioCompare baseInputs={inputs} />}

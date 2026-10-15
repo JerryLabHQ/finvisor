@@ -52,7 +52,7 @@ export function ScenarioCompare({ baseInputs }: ScenarioCompareProps) {
             <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>{formatGBP(baseInputs.propertyPrice)}</span>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
+          <div className="tabular-nums" style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--text-secondary)" }}>Upfront Cash Required:</span>
               <strong style={{ color: "var(--text-primary)" }}>{formatGBP(scenarioA.buyUpfrontCosts)}</strong>
@@ -140,7 +140,7 @@ export function ScenarioCompare({ baseInputs }: ScenarioCompareProps) {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
+          <div className="tabular-nums" style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--text-secondary)" }}>Upfront Cash Required:</span>
               <strong style={{ color: "var(--text-primary)" }}>{formatGBP(scenarioB.buyUpfrontCosts)}</strong>

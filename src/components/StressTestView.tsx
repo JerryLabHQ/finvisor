@@ -65,13 +65,13 @@ export function StressTestView({ inputs }: StressTestViewProps) {
               <div style={{ borderTop: "1px solid var(--surface-border)", paddingTop: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
                   <span style={{ color: "var(--text-secondary)" }}>Net Difference:</span>
-                  <span style={{ fontWeight: 700, color: isPositive ? "var(--primary)" : "var(--secondary)" }}>
+                  <span className="tabular-nums" style={{ fontWeight: 700, color: isPositive ? "var(--primary)" : "var(--secondary)", fontVariantNumeric: "tabular-nums" }}>
                     {isPositive ? "+" : ""}{formatGBP(scenario.netWorthDiff)}
                   </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
                   <span style={{ color: "var(--text-secondary)" }}>Break-Even:</span>
-                  <span style={{ fontWeight: 600, color: scenario.breakEven ? "var(--text-primary)" : "var(--tertiary)" }}>
+                  <span className="tabular-nums" style={{ fontWeight: 600, color: scenario.breakEven ? "var(--text-primary)" : "var(--tertiary)", fontVariantNumeric: "tabular-nums" }}>
                     {scenario.breakEven ? `Yr ${scenario.breakEven}` : "Renting Wins"}
                   </span>
                 </div>

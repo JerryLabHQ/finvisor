@@ -1957,6 +1957,158 @@
   flex-wrap: wrap;
 }
 
+/* Institutional British Financial Editorial Components */
+.editorial-serif {
+  font-family: var(--font-serif);
+  letter-spacing: -0.02em;
+}
+
+.editorial-stat-hero {
+  font-family: var(--font-serif);
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.editorial-badge-institution {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 3px 8px;
+  border-radius: var(--round-full);
+}
+
+.editorial-badge-boe {
+  background: var(--accent-amber-light);
+  color: var(--accent-amber-text);
+  border: 1px solid var(--accent-amber-border);
+}
+
+.editorial-badge-hmrc {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--primary-border);
+}
+
+.editorial-badge-isa {
+  background: var(--secondary-light);
+  color: var(--secondary);
+  border: 1px solid var(--secondary-border);
+}
+
+.editorial-badge-drag {
+  background: var(--tertiary-light);
+  color: var(--tertiary);
+  border: 1px solid var(--tertiary-border);
+}
+
+.editorial-callout {
+  padding: 16px 20px;
+  border-radius: var(--round-md);
+  border-left: 3px solid var(--primary);
+  background: var(--surface-tray);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.editorial-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.editorial-table th {
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--surface-border);
+}
+
+.editorial-table td {
+  padding: 10px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.editorial-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 12px;
+}
+
+/* Mobile Touch Targets & Ergonomics (WCAG 2.5.5 / 2.5.8) */
+@media (max-width: 640px) {
+  .timeframe-chip,
+  .persona-chip,
+  .settings-trigger-btn,
+  .pdf-trigger-btn,
+  .share-nav-btn,
+  .form-input,
+  .form-select,
+  .ladder-nav__mobile-toggle,
+  .mobile-drawer__item {
+    min-height: 44px;
+  }
+
+  .timeframe-chips {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .timeframe-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .timeframe-chip {
+    padding: 8px 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .persona-chips {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .persona-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .persona-chip {
+    padding: 10px 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .slider-input::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+
+  .slider-input::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+}
+
 /* Print Styles */
 @media print {
   body {

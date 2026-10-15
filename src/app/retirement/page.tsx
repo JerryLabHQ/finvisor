@@ -9,6 +9,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Scale,
+  ShieldAlert,
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
@@ -195,7 +196,7 @@ export default function RetirementPage() {
         <div className="verdict-metrics-grid">
           <div className="metric-card">
             <span className="metric-label">Initial Withdrawal Rate</span>
-            <span className="metric-value highlight" style={{ color: results.initialDrawdownRatePercent <= 4.0 ? "var(--accent-green)" : "var(--accent-red)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: results.initialDrawdownRatePercent <= 4.0 ? "var(--primary)" : "var(--tertiary)" }}>
               {results.initialDrawdownRatePercent}%
             </span>
             <span className="metric-subtext">UK Safe Withdrawal Benchmark: 3.8%</span>
@@ -203,7 +204,7 @@ export default function RetirementPage() {
 
           <div className="metric-card">
             <span className="metric-label">25% Tax-Free Lump Sum (PCLS)</span>
-            <span className="metric-value highlight" style={{ color: "var(--accent-green)" }}>
+            <span className="metric-value highlight tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.pclsLumpSumTaken)}
             </span>
             <span className="metric-subtext">Capped at £268,275 statutory limit</span>
@@ -211,7 +212,7 @@ export default function RetirementPage() {
 
           <div className="metric-card">
             <span className="metric-label">Guaranteed Lifetime Annuity</span>
-            <span className="metric-value" style={{ color: "var(--primary)" }}>
+            <span className="metric-value tabular-nums" style={{ color: "var(--primary)" }}>
               {formatGBP(results.guaranteedAnnuityAnnualIncome)}/yr
             </span>
             <span className="metric-subtext">Benchmark 6.5% level annuity rate</span>
@@ -219,11 +220,47 @@ export default function RetirementPage() {
 
           <div className="metric-card">
             <span className="metric-label">Est. 2027 IHT Exposure</span>
-            <span className="metric-value" style={{ color: results.estimatedPost2027IhtExposure > 0 ? "var(--accent-red)" : "var(--accent-green)" }}>
+            <span className="metric-value tabular-nums" style={{ color: results.estimatedPost2027IhtExposure > 0 ? "var(--tertiary)" : "var(--primary)" }}>
               {formatGBP(results.estimatedPost2027IhtExposure)}
             </span>
             <span className="metric-subtext">40% IHT on unspent pension</span>
           </div>
+        </div>
+      </div>
+
+      {/* Market Leader Editorial Callout: Martin's Rule of Thumb for Retirement & IHT */}
+      <div
+        style={{
+          padding: "16px 20px",
+          background: "#ffffff",
+          border: "1px solid var(--surface-border)",
+          borderRadius: "var(--round-lg)",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 14,
+          boxShadow: "var(--shadow-card)",
+          marginBottom: 4,
+        }}
+      >
+        <div
+          style={{
+            padding: "8px",
+            borderRadius: "6px",
+            background: "var(--accent-amber-light)",
+            color: "var(--accent-amber-text)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <ShieldAlert size={20} />
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.6 }}>
+          <strong style={{ color: "var(--text-primary)" }}>Martin&apos;s Rule of Thumb for Retirement &amp; 2027 IHT: </strong>
+          <span style={{ color: "var(--text-secondary)" }}>
+            You can withdraw up to 25% of your defined contribution pension completely tax-free (capped at £268,275 PCLS). Subsequent withdrawals are taxed at your marginal income tax rate. Crucially, under Autumn Budget statutory reforms, unspent pension pots will no longer bypass Inheritance Tax (IHT) after April 2027. If your total estate exceeds £325k (or £1m with the Residence Nil Rate Band), unspent pension wealth faces up to 40% IHT, making planned decumulation and lifetime gifting essential.
+          </span>
         </div>
       </div>
 
@@ -448,14 +485,14 @@ export default function RetirementPage() {
             </h3>
 
             <div style={{ overflowX: "auto", maxHeight: 420 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <table className="tabular-nums editorial-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontVariantNumeric: "tabular-nums" }}>
                 <thead style={{ position: "sticky", top: 0, background: "var(--surface)", zIndex: 2 }}>
                   <tr style={{ borderBottom: "2px solid var(--surface-border)", textAlign: "left" }}>
                     <th style={{ padding: "8px 10px", color: "var(--text-muted)" }}>Age</th>
                     <th style={{ padding: "8px 10px" }}>Starting SIPP</th>
                     <th style={{ padding: "8px 10px" }}>Starting ISA</th>
-                    <th style={{ padding: "8px 10px", color: "var(--accent-green)" }}>State Pension</th>
-                    <th style={{ padding: "8px 10px", color: "var(--accent-red)" }}>SIPP Drawdown</th>
+                    <th style={{ padding: "8px 10px", color: "var(--primary)" }}>State Pension</th>
+                    <th style={{ padding: "8px 10px", color: "var(--tertiary)" }}>SIPP Drawdown</th>
                     <th style={{ padding: "8px 10px" }}>Tax Paid</th>
                     <th style={{ padding: "8px 10px", fontWeight: 700 }}>Total Net Worth</th>
                   </tr>
@@ -466,7 +503,7 @@ export default function RetirementPage() {
                       key={row.age}
                       style={{
                         borderBottom: "1px solid var(--surface-border)",
-                        background: row.isPotDepleted ? "rgba(239, 68, 68, 0.08)" : "transparent",
+                        background: row.isPotDepleted ? "var(--tertiary-light)" : "transparent",
                       }}
                     >
                       <td style={{ padding: "8px 10px", fontWeight: 700 }}>
@@ -474,10 +511,10 @@ export default function RetirementPage() {
                       </td>
                       <td style={{ padding: "8px 10px" }}>{formatGBP(row.startingPensionPot)}</td>
                       <td style={{ padding: "8px 10px" }}>{formatGBP(row.startingIsaPot)}</td>
-                      <td style={{ padding: "8px 10px", color: "var(--accent-green)" }}>
+                      <td style={{ padding: "8px 10px", color: "var(--primary)" }}>
                         {row.statePensionReceived > 0 ? `+${formatGBP(row.statePensionReceived)}` : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", color: "var(--accent-red)" }}>
+                      <td style={{ padding: "8px 10px", color: "var(--tertiary)" }}>
                         {row.drawdownFromPension > 0 ? `-${formatGBP(row.drawdownFromPension)}` : "—"}
                       </td>
                       <td style={{ padding: "8px 10px" }}>
