@@ -149,9 +149,7 @@ export default function Dashboard() {
 
     if (typeof window !== "undefined") {
       if (
-        localStorage.getItem("ladderpass_donation_dismissed") === "true" ||
-        localStorage.getItem("rentorladder_donation_dismissed") === "true" ||
-        localStorage.getItem("finvisor_donation_dismissed") === "true"
+        localStorage.getItem("ladderpass_donation_dismissed") === "true"
       ) {
         setDonationDismissed(true);
       }

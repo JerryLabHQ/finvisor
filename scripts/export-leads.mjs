@@ -20,7 +20,7 @@ try {
   const leads = JSON.parse(raw);
 
   console.log("=================================================");
-  console.log("  FINVISOR BROKER AFFILIATE LEADS AUDIT         ");
+  console.log("  LADDERPASS BROKER AFFILIATE LEADS AUDIT        ");
   console.log("=================================================");
   console.log(`Total Leads Captured: ${leads.length}`);
 

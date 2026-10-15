@@ -2,7 +2,7 @@
 
 import { ProStatus } from "./types";
 
-const PRO_STORAGE_KEY = "finvisor_pro_status_v1";
+const PRO_STORAGE_KEY = "ladderpass_pro_status_v1";
 
 export function getProStatus(): ProStatus {
   if (typeof window === "undefined") {
@@ -22,7 +22,7 @@ export function saveProStatus(status: ProStatus): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(PRO_STORAGE_KEY, JSON.stringify(status));
-    window.dispatchEvent(new Event("finvisor-pro-change"));
+    window.dispatchEvent(new Event("ladderpass-pro-change"));
   } catch (err) {
     console.error("Failed to save pro status:", err);
   }
@@ -42,5 +42,5 @@ export function activatePro(plan: "lifetime" | "monthly" | "demo" = "lifetime", 
 export function resetProStatus(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(PRO_STORAGE_KEY);
-  window.dispatchEvent(new Event("finvisor-pro-change"));
+  window.dispatchEvent(new Event("ladderpass-pro-change"));
 }
