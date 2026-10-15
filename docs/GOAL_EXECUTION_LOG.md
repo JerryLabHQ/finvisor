@@ -97,5 +97,33 @@
 
 ---
 
+## Market Leader Mastery Sprint: Institutional Editorial Elevation
+
+### Sprint Objectives & Market Leader Inspiration
+1. **Financial Times / Bloomberg UK**: Live Macroeconomic Data Bar (BoE 4.5%, 2y/5y fixed mortgages, CPI inflation, HPI, and statutory April 2026 SDLT threshold sunset alert).
+2. **Institute for Fiscal Studies / FT Alphaville**: Statutory Sources & Mathematical Methodology citations (HMRC manuals, SLC 2009 statutory instruments, Section 24, Autumn Budget 2024 IHT).
+3. **Which? / MoneySavingExpert**: Interactive Life-Stage Action Checklists (FTB offer verification, 60% tax trap mitigation, Landlord SPV setup, EV salary sacrifice, Student loan payoff vs write-off, Retirement drawdown).
+4. **Hargreaves Lansdown / AJ Bell**: Universal Lender-Ready Dossier & Executive PDF Memorandums across all 6 financial modules.
+5. **Mobile & Visual Polish**: Razor-thin double hairline dividers, serif title treatments, and zero visual regressions.
+
+### Phase Plan
+- [x] **Phase 1: Institutional Macro Ticker & Statutory Sunset Warning (FT / Bloomberg style)**
+  - Implemented `src/components/MacroDataTicker.tsx` with live macroeconomic benchmarks: BoE Base Rate (4.50%), 2-year fixed mortgages (4.30%), 5-year fixed mortgages (4.10%), CPI Inflation (2.8%), ONS Average Private Rent (£1,320/mo), and a high-priority statutory alert highlighting the Chancellor's April 2026 Stamp Duty FTB threshold sunset (£425k reverting to £300k).
+  - Integrated into `src/components/HeaderNav.tsx` across all pages.
+- [x] **Phase 2: Universal Statutory Sources & Mathematical Methodology (IFS / FT style)**
+  - Implemented `src/components/StatutoryMethodology.tsx` featuring an institutional collapsible methodology accordion with official statutory instruments and government manuals (HMRC SDLT manual, BoE MPC minutes, Income Tax Act 2007, Section 24 Finance Act 2015, Education Act 2009, Finance Act 2024).
+  - Embedded across all 6 financial modules.
+- [x] **Phase 3: Interactive Life-Stage Action Checklists (Which? / MSE style)**
+  - Implemented `src/components/ActionChecklist.tsx` providing 5-step bounded, actionable workflows for each life stage with local storage state persistence, interactive progress bars, and one-click clipboard export.
+  - Deployed across all 6 financial modules.
+- [x] **Phase 4: Universal Institutional Printable Dossiers across all 6 Engines**
+  - Implemented `src/components/ExecutiveDossierModal.tsx` delivering institutional executive memorandums formatted for `@media print` clean PDF generation and one-click CSV raw data export.
+  - Fully wired into `/`, `/tax`, `/property/spv`, `/ev`, `/student-loan`, and `/retirement`.
+- [x] **Phase 5: Verification Suite, Production Turbopack Build & Live Vercel Deployment**
+  - Unit tests: 100% pass across all 6 calculation modules and API routes (`npm test`).
+  - Mathematical audit: 100% pass across all verified UK financial benchmarks (`npm run verify:math`).
+  - Linting: 0 errors, 0 warnings (`npm run lint`).
+  - Production build: Succeeded with Next.js 16 Turbopack generating 32 static and dynamic routes (`npm run build`).
+
 <!-- GOAL_COMPLETE -->
 

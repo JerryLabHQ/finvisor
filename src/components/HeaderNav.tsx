@@ -18,6 +18,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { UK_MARKET_DEFAULTS, SUPPORT_URL, SUPPORT_LABEL } from "@/lib/constants";
+import { MacroDataTicker } from "@/components/MacroDataTicker";
 
 export const FINANCIAL_MODELS = [
   {
@@ -255,6 +256,9 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
           </button>
         </div>
       </nav>
+
+      {/* Institutional FT-style Live Macro Data Ticker */}
+      <MacroDataTicker />
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (

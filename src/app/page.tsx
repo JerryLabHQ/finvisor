@@ -43,6 +43,8 @@ import { AnnualTable } from "@/components/AnnualTable";
 import { TrueCostView } from "@/components/TrueCostView";
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
+import { StatutoryMethodology, CitationItem } from "@/components/StatutoryMethodology";
+import { ActionChecklist, ChecklistItem } from "@/components/ActionChecklist";
 import "./dashboard.css";
 
 // Helper for formatting GBP
@@ -53,6 +55,71 @@ const formatGBP = (value: number) => {
     maximumFractionDigits: 0,
   }).format(value);
 };
+
+const BUY_VS_RENT_CITATIONS: CitationItem[] = [
+  {
+    act: "Finance Act 2003 (as amended)",
+    section: "Part 4, Stamp Duty Land Tax",
+    description: "Statutory SDLT bands for England & Northern Ireland, including First-Time Buyer relief up to £425,000 and 5% higher rates for additional dwellings (HRAD).",
+    govUrl: "https://www.gov.uk/stamp-duty-land-tax",
+  },
+  {
+    act: "Bank of England Act 1998",
+    section: "Section 12, Monetary Policy Committee",
+    description: "Official Bank Rate benchmark determining commercial Standard Variable Rate (SVR) spreads and lender liquidity margins.",
+    govUrl: "https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate",
+  },
+  {
+    act: "Housing Act 1988 & Tenant Fees Act 2019",
+    section: "Section 2 & Schedule 1",
+    description: "Statutory assured shorthold tenancy structures and mandatory 5-week refundable deposit protection cap.",
+    govUrl: "https://www.legislation.gov.uk/ukpga/1988/50/contents",
+  },
+  {
+    act: "Individual Savings Account (ISA) Regulations 1998",
+    section: "SI 1998/1870",
+    description: "Statutory £20,000 annual subscription limit shielding capital gains and dividend yields from UK income tax for disciplined renters.",
+    govUrl: "https://www.gov.uk/individual-savings-accounts",
+  },
+];
+
+const BUY_VS_RENT_CHECKLIST: ChecklistItem[] = [
+  {
+    id: "dip",
+    stepNumber: 1,
+    title: "Obtain a Decision in Principle (DIP)",
+    detail: "Approach an FCA-regulated mortgage broker to benchmark your maximum borrowing (typically 4.5x household income) and test affordability at stressed rates.",
+    actionTag: "Crucial First Step",
+  },
+  {
+    id: "sdlt-reserve",
+    stepNumber: 2,
+    title: "Verify First-Time Buyer Stamp Duty Relief",
+    detail: "Confirm property purchase price is under £425,000 for 0% SDLT in England/NI, and note the statutory sunset reducing the threshold back to £300,000.",
+    actionTag: "Tax Reserve",
+  },
+  {
+    id: "rics-survey",
+    stepNumber: 3,
+    title: "Commission an Independent RICS Survey",
+    detail: "Budget ~£500-£900 for a RICS Level 2 Homebuyer or Level 3 Building survey to detect structural defects, damp, or roof maintenance liabilities.",
+    actionTag: "Property Due Diligence",
+  },
+  {
+    id: "conveyancing",
+    stepNumber: 4,
+    title: "Instruct an SRA-Regulated Conveyancer",
+    detail: "Obtain fixed-fee quotes for legal conveyancing (~£1,500-£2,000 including local authority searches, Land Registry fees, and bank transfer charges).",
+    actionTag: "Legal Binding",
+  },
+  {
+    id: "emergency-fund",
+    stepNumber: 5,
+    title: "Ringfence a 3-Month Emergency Liquid Fund",
+    detail: "Never commit 100% of your cash savings to the property deposit; keep at least 3 months of basic living costs accessible in an instant-access cash ISA.",
+    actionTag: "Capital Protection",
+  },
+];
 
 // Institutional British Financial Editorial Recharts Tooltip
 interface TooltipPayloadItem {
@@ -1180,6 +1247,22 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Statutory Sources & Mathematical Methodology (IFS / FT Style) */}
+      <StatutoryMethodology
+        moduleTitle="Buy vs Rent & Mortgages"
+        formulaDescription="Standard French constant-amortization equation M = P[r(1+r)^n]/[(1+r)^n - 1] executed monthly with up to 40-year horizon, calibrated with UK HPI capital appreciation, compound maintenance drag (1% annual), and opportunistic S&S ISA compounding net of management expense ratios (0.22% global tracker index benchmark)."
+        citations={BUY_VS_RENT_CITATIONS}
+        defaultOpen={false}
+      />
+
+      {/* Interactive First-Time Buyer & Property Mover Checklist (Which? & MSE Style) */}
+      <ActionChecklist
+        id="buy-vs-rent"
+        title="UK Homebuyer & Mover Execution Checklist"
+        subtitle="5 bounded statutory and financial verification steps before submitting a legally binding offer"
+        items={BUY_VS_RENT_CHECKLIST}
+      />
 
       {/* Advanced Settings Drawer */}
       <div className={`drawer-overlay ${isDrawerOpen ? "open" : ""}`} onClick={() => setIsDrawerOpen(false)}></div>

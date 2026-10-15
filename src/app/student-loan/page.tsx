@@ -14,6 +14,9 @@ import {
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
 import { ConsultationModal } from "@/components/ConsultationModal";
+import { ExecutiveDossierModal } from "@/components/ExecutiveDossierModal";
+import { StatutoryMethodology, CitationItem } from "@/components/StatutoryMethodology";
+import { ActionChecklist, ChecklistItem } from "@/components/ActionChecklist";
 import {
   runStudentLoanCalculation,
   StudentLoanInputs,
@@ -23,6 +26,69 @@ import "../dashboard.css";
 
 const formatGBP = (v: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(v);
+
+const STUDENT_LOAN_CITATIONS: CitationItem[] = [
+  {
+    act: "Education (Student Loans) (Repayment) Regulations 2009",
+    section: "Statutory Instrument 2009/470 (as amended)",
+    description: "Statutory basis for income-contingent deductions: 9% calculated strictly on earnings exceeding the repayment threshold via HMRC PAYE.",
+    govUrl: "https://www.legislation.gov.uk/uksi/2009/470/contents/made",
+  },
+  {
+    act: "Higher Education and Research Act 2017",
+    description: "Defines Plan 2 repayment terms (£27,295 statutory threshold, RPI to RPI+3% interest rate scale, and complete debt cancellation after 30 years).",
+    govUrl: "https://www.gov.uk/repaying-your-student-loan/which-repayment-plan-you-are-on",
+  },
+  {
+    act: "The Student Loans (Repayment) (Amendment) Regulations 2023",
+    description: "Enacts Plan 5 for students starting August 2023 onwards: £25,000 threshold frozen until 2027, RPI-only interest, and 40-year statutory cancellation horizon.",
+    govUrl: "https://www.gov.uk/government/publications/student-loans-a-guide-to-terms-and-conditions",
+  },
+  {
+    act: "FCA Handbook: Mortgage Conduct of Business (MCOB)",
+    section: "MCOB 11.6 (Assessing Affordability)",
+    description: "Requires UK mortgage lenders to factor mandatory monthly student loan deductions as committed expenditure, directly restricting borrowing capacity.",
+    govUrl: "https://www.handbook.fca.org.uk/handbook/MCOB/11/6.html",
+  },
+];
+
+const STUDENT_LOAN_CHECKLIST: ChecklistItem[] = [
+  {
+    id: "slc-plan-verify",
+    stepNumber: 1,
+    title: "Verify Exact Loan Plan & Balance on SLC Portal",
+    detail: "Sign in to your Student Loans Company (SLC) online account to record exact outstanding balance and verify whether you are on Plan 1, Plan 2, Plan 4, or Plan 5.",
+    actionTag: "SLC Portal",
+  },
+  {
+    id: "write-off-date",
+    stepNumber: 2,
+    title: "Note Statutory Debt Cancellation Horizon",
+    detail: "Mark your statutory write-off date (e.g. 30 years after graduation for Plan 2, 40 years for Plan 5). If career earnings won't repay it in full, any voluntary payment is wasted money.",
+    actionTag: "Statutory Wipeout",
+  },
+  {
+    id: "opp-cost-isa",
+    stepNumber: 3,
+    title: "Redirect Overpayment Cash into Stocks & Shares ISA",
+    detail: "Rather than voluntarily overpaying a loan that will be forgiven, compound extra savings inside a tax-free Stocks & Shares ISA for your house deposit or emergency fund.",
+    actionTag: "Wealth Strategy",
+  },
+  {
+    id: "mortgage-stress",
+    stepNumber: 4,
+    title: "Stress Test Mortgage Borrowing Capacity",
+    detail: "Account for your monthly 9% PAYE student loan deduction in lender affordability calculators; it reduces maximum mortgage borrowing by approx 4.5x the annual repayment.",
+    actionTag: "Borrowing Impact",
+  },
+  {
+    id: "p60-audit",
+    stepNumber: 5,
+    title: "Perform Annual P60 & Deduction Audit",
+    detail: "Cross-check your annual P60 with SLC statements to ensure payroll deductions match your gross pay and prevent over-deductions in the final repayment year.",
+    actionTag: "PAYE Integrity",
+  },
+];
 
 export default function StudentLoanPage() {
   const [salary, setSalary] = useState(38000);
@@ -35,6 +101,7 @@ export default function StudentLoanPage() {
 
   const [donationDismissed, setDonationDismissed] = useState(false);
   const [showBrokerModal, setShowBrokerModal] = useState(false);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const inputs: StudentLoanInputs = useMemo(
     () => ({
@@ -62,10 +129,6 @@ export default function StudentLoanPage() {
     setPlan(planVal);
     setGrowth(growthVal);
     setOverpay(0);
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const isDoNotOverpay = results.verdict === "DO_NOT_OVERPAY";
@@ -165,12 +228,12 @@ export default function StudentLoanPage() {
 
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", alignSelf: "center" }}>
             <button
-              onClick={handlePrint}
+              onClick={() => setIsDossierOpen(true)}
               className="pdf-trigger-btn"
               style={{ whiteSpace: "nowrap" }}
             >
               <FileText size={16} />
-              <span>Print Loan Report</span>
+              <span>Generate Loan Dossier</span>
             </button>
             <button
               onClick={() => setShowBrokerModal(true)}
@@ -494,6 +557,22 @@ export default function StudentLoanPage() {
         </div>
       </div>
 
+      {/* Statutory Sources & Mathematical Methodology (IFS / FT Style) */}
+      <StatutoryMethodology
+        moduleTitle="Student Loan Repayment & Mortgage Affordability"
+        formulaDescription="Simulates statutory income-contingent repayments (9% on earnings above Plan 2 £27,295 and Plan 5 £25,000), monthly compounding interest based on prevailing RPI, 30y/40y statutory debt cancellation horizons, and impact on FCA borrowing capacity (approx 4.5x annual repayments)."
+        citations={STUDENT_LOAN_CITATIONS}
+        defaultOpen={false}
+      />
+
+      {/* Interactive Graduate Loan Checklist (Which? & MSE Style) */}
+      <ActionChecklist
+        id="student-loan"
+        title="Graduate Student Loan & Mortgage Affordability Checklist"
+        subtitle="5 bounded steps to avoid wasteful overpayments and optimize mortgage borrowing capacity"
+        items={STUDENT_LOAN_CHECKLIST}
+      />
+
       {/* Graduate Mortgage Borrowing Review Modal */}
       <ConsultationModal
         isOpen={showBrokerModal}
@@ -514,6 +593,34 @@ export default function StudentLoanPage() {
           quaternaryValue: formatGBP(results.debtWipedOutStandard),
           quaternarySub: isDoNotOverpay ? "Wipeout expected" : "Full payoff",
         }}
+      />
+
+      {/* Institutional Printable Student Loan Dossier Modal */}
+      <ExecutiveDossierModal
+        isOpen={isDossierOpen}
+        onClose={() => setIsDossierOpen(false)}
+        title="UK Student Loan Repayment & Affordability Dossier"
+        subtitle="Plan 2 vs Plan 5 statutory debt write-off analysis and FCA mortgage borrowing impact"
+        badge={isDoNotOverpay ? "Statutory Wipeout Projected" : "Full Payoff Expected"}
+        metrics={[
+          { label: "Gross Salary", value: formatGBP(salary), sub: plan.replace("_", " ") },
+          { label: "Loan Balance", value: formatGBP(balance), sub: `Plan: ${plan.replace("_", " ")}` },
+          { label: "Monthly Repayment", value: `${formatGBP(results.currentMonthlyRepayment)}/mo`, sub: "Automatic 9% PAYE" },
+          { label: "Statutory Debt Cancelled", value: formatGBP(results.debtWipedOutStandard), sub: isDoNotOverpay ? "Projected debt write-off" : "Full payoff" },
+        ]}
+        summaryParagraph={results.verdictReasoning}
+        breakdownTable={{
+          headers: ["Year", "Projected Salary", "Mandatory Repayment", "Interest Accrued", "Year-End Balance"],
+          rows: results.projectionsStandard.slice(0, 15).map((row) => [
+            `Year ${row.year}`,
+            formatGBP(row.salary),
+            formatGBP(row.mandatoryRepayment),
+            formatGBP(row.interestAccrued),
+            row.isWrittenOff ? "£0 (Wiped Out)" : formatGBP(row.endingBalance),
+          ]),
+        }}
+        statutoryCitations={STUDENT_LOAN_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
+        csvFilename="ladderpass_student_loan_audit"
       />
 
       {/* Global Institutional Editorial Footer */}

@@ -14,6 +14,9 @@ import {
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
 import { ConsultationModal } from "@/components/ConsultationModal";
+import { ExecutiveDossierModal } from "@/components/ExecutiveDossierModal";
+import { StatutoryMethodology, CitationItem } from "@/components/StatutoryMethodology";
+import { ActionChecklist, ChecklistItem } from "@/components/ActionChecklist";
 import {
   runEVCalculation,
   EVInputs,
@@ -23,6 +26,69 @@ import "../dashboard.css";
 
 const formatGBP = (v: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(v);
+
+const EV_CITATIONS: CitationItem[] = [
+  {
+    act: "Income Tax (Earnings and Pensions) Act 2003 (ITEPA 2003)",
+    section: "Sections 120-148 (Chapter 6: Cars and Vans)",
+    description: "Statutory Benefit-in-Kind (BiK) framework assessing company car tax on the vehicle's published P11D list price multiplied by legislated CO2 emission bands.",
+    govUrl: "https://www.legislation.gov.uk/ukpga/2003/1/part/3/chapter/6",
+  },
+  {
+    act: "Finance Act 2024",
+    section: "Company Car Tax Rates for Electric Vehicles",
+    description: "Statutory BiK rates established by HM Treasury: 2% for 2024/25, rising by 1% annually to 3% (2025/26), 4% (2026/27), and 5% (2027/28).",
+    govUrl: "https://www.gov.uk/guidance/company-car-benefit-in-kind-bik-rates",
+  },
+  {
+    act: "Social Security Contributions and Benefits Act 1992",
+    description: "Employer Class 1A National Insurance savings on pre-tax salary sacrifice deductions (13.8% rising to 15.0% post-April 2025) frequently passed back to employees.",
+    govUrl: "https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2024-to-2025",
+  },
+  {
+    act: "Automated and Electric Vehicles Act 2018",
+    description: "Regulations governing private electric vehicle chargepoints, smart metering interoperability, and access to domestic time-of-use tariffs.",
+    govUrl: "https://www.legislation.gov.uk/ukpga/2018/18/contents",
+  },
+];
+
+const EV_CHECKLIST: ChecklistItem[] = [
+  {
+    id: "scheme-eligibility",
+    stepNumber: 1,
+    title: "Verify Employer Scheme Eligibility",
+    detail: "Confirm your employer offers an authorized salary sacrifice scheme (e.g. Octopus EV, Tusker, Zenith) and check your post-sacrifice salary remains above National Minimum Wage.",
+    actionTag: "HR & Eligibility",
+  },
+  {
+    id: "p11d-bik",
+    stepNumber: 2,
+    title: "Audit P11D Value & Monthly BiK Deductions",
+    detail: "Verify the vehicle's exact P11D price to calculate your monthly Benefit-in-Kind tax liability at 2% (2024/25), 3% (2025/26), and 4% (2026/27).",
+    actionTag: "HMRC Tax Check",
+  },
+  {
+    id: "smart-charger",
+    stepNumber: 3,
+    title: "Install Home Smart Charger & Switch Tariff",
+    detail: "Install a 7kW home charger and switch to a dedicated EV energy tariff (e.g. Octopus Intelligent Go at 7p/kWh off-peak) to cut fueling costs by up to 80% vs petrol.",
+    actionTag: "Fuel Optimization",
+  },
+  {
+    id: "all-inclusive-audit",
+    stepNumber: 4,
+    title: "Confirm All-Inclusive Inclusions",
+    detail: "Ensure the lease quote includes fully comprehensive motor insurance, annual servicing, MOT, replacement premium tyres, and roadside breakdown assistance.",
+    actionTag: "Contract Terms",
+  },
+  {
+    id: "early-exit",
+    stepNumber: 5,
+    title: "Review Early Termination & Redundancy Cover",
+    detail: "Examine policy terms regarding maternity/paternity leave, resignation, or involuntary redundancy to ensure employer scheme protection cushions early exit fees.",
+    actionTag: "Risk Management",
+  },
+];
 
 export default function EVPage() {
   const [p11d, setP11d] = useState(48000);
@@ -37,6 +103,7 @@ export default function EVPage() {
 
   const [donationDismissed, setDonationDismissed] = useState(false);
   const [showBrokerModal, setShowBrokerModal] = useState(false);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const inputs: EVInputs = useMemo(
     () => ({
@@ -58,10 +125,6 @@ export default function EVPage() {
   const applyCarPreset = (p11dVal: number, leaseVal: number) => {
     setP11d(p11dVal);
     setGrossLease(leaseVal);
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   return (
@@ -155,12 +218,12 @@ export default function EVPage() {
 
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", alignSelf: "center" }}>
             <button
-              onClick={handlePrint}
+              onClick={() => setIsDossierOpen(true)}
               className="pdf-trigger-btn"
               style={{ whiteSpace: "nowrap" }}
             >
               <FileText size={16} />
-              <span>Print EV Report</span>
+              <span>Generate EV Dossier</span>
             </button>
             <button
               onClick={() => setShowBrokerModal(true)}
@@ -527,6 +590,22 @@ export default function EVPage() {
         </div>
       </div>
 
+      {/* Statutory Sources & Mathematical Methodology (IFS / FT Style) */}
+      <StatutoryMethodology
+        moduleTitle="EV Employer Salary Sacrifice vs Private PCP"
+        formulaDescription="Models employer gross salary sacrifice deductions against personal income tax (20%, 40%, 45%), employee Class 1 National Insurance, HMRC legislated Benefit-in-Kind (2% to 5%), smart off-peak EV electricity tariffs (7p/kWh vs 28p/kWh peak), and all-inclusive maintenance packages."
+        citations={EV_CITATIONS}
+        defaultOpen={false}
+      />
+
+      {/* Interactive EV Salary Sacrifice Checklist (Which? & MSE Style) */}
+      <ActionChecklist
+        id="ev-mobility"
+        title="EV Salary Sacrifice Order & Transition Checklist"
+        subtitle="5 bounded statutory verification and home charging setup steps for UK drivers"
+        items={EV_CHECKLIST}
+      />
+
       {/* Fleet Provider & Salary Sacrifice Consultation Modal */}
       <ConsultationModal
         isOpen={showBrokerModal}
@@ -547,6 +626,33 @@ export default function EVPage() {
           quaternaryValue: formatGBP(results.monthlySavingsVsPcp * 36),
           quaternarySub: `Save ${formatGBP(results.monthlySavingsVsPcp)}/mo`,
         }}
+      />
+
+      {/* Institutional Printable EV Salary Sacrifice Dossier Modal */}
+      <ExecutiveDossierModal
+        isOpen={isDossierOpen}
+        onClose={() => setIsDossierOpen(false)}
+        title="EV Salary Sacrifice Mobility Memorandum"
+        subtitle="HMRC Benefit-in-Kind (BiK) company car tax arbitrage vs private PCP financing"
+        badge={results.monthlySavingsVsPcp > 0 ? "Salary Sacrifice Beats Private PCP" : "PCP Comparison"}
+        metrics={[
+          { label: "Vehicle P11D Value", value: formatGBP(p11d), sub: `Gross Lease: ${formatGBP(grossLease)}/mo` },
+          { label: "Net Monthly Cost", value: formatGBP(results.salarySacrificeOption.netTotalMonthlyCost), sub: "All-inclusive (vehicle, ins, fuel)" },
+          { label: "Monthly Tax & NI Relief", value: formatGBP(results.salarySacrificeOption.monthlyTaxRelief), sub: `${results.effectiveEmployeeTaxRatePercent}% marginal relief` },
+          { label: "3-Year Total Savings", value: formatGBP(results.monthlySavingsVsPcp * 36), sub: `Save ${formatGBP(results.monthlySavingsVsPcp)}/mo vs PCP` },
+        ]}
+        summaryParagraph={`By sacrificing gross pre-tax salary of ${formatGBP(grossLease)} per month, you reduce statutory income tax and employee National Insurance liability, saving ${formatGBP(results.salarySacrificeOption.monthlyTaxRelief)} every month. Adding monthly electricity (${formatGBP(results.salarySacrificeOption.monthlyFuelCost)} using smart off-peak tariffs) and BiK tax (${formatGBP(results.salarySacrificeOption.monthlyBikTax)}), total monthly mobility expenditure is ${formatGBP(results.salarySacrificeOption.netTotalMonthlyCost)}, saving ${formatGBP(results.monthlySavingsVsPcp)} every month compared to private PCP financing.`}
+        breakdownTable={{
+          headers: ["Ownership Route", "Monthly Vehicle / Lease", "Tax & NI Relief", "BiK / Insurance", "Fuel / Electricity", "Total Net Monthly", "3-Year Total Spend"],
+          rows: [
+            ["Employer Salary Sacrifice", formatGBP(results.salarySacrificeOption.monthlyVehicleCost), `-${formatGBP(results.salarySacrificeOption.monthlyTaxRelief)}`, formatGBP(results.salarySacrificeOption.monthlyBikTax), formatGBP(results.salarySacrificeOption.monthlyFuelCost), formatGBP(results.salarySacrificeOption.netTotalMonthlyCost), formatGBP(results.salarySacrificeOption.total3YearSpend)],
+            ["Private PCP Financing", formatGBP(results.pcpOption.monthlyVehicleCost), "£0", formatGBP(results.pcpOption.monthlyInsuranceAndUpkeep), formatGBP(results.pcpOption.monthlyFuelCost), formatGBP(results.pcpOption.netTotalMonthlyCost), formatGBP(results.pcpOption.total3YearSpend)],
+            ["Outright Cash Purchase", formatGBP(results.cashPurchaseOption.monthlyVehicleCost), "£0", formatGBP(results.cashPurchaseOption.monthlyInsuranceAndUpkeep), formatGBP(results.cashPurchaseOption.monthlyFuelCost), formatGBP(results.cashPurchaseOption.netTotalMonthlyCost), formatGBP(results.cashPurchaseOption.total3YearSpend)],
+            ["Keep Existing Petrol Car", "£0", "£0", formatGBP(results.petrolStatusQuoOption.monthlyInsuranceAndUpkeep), formatGBP(results.petrolStatusQuoOption.monthlyFuelCost), formatGBP(results.petrolStatusQuoOption.netTotalMonthlyCost), formatGBP(results.petrolStatusQuoOption.total3YearSpend)],
+          ],
+        }}
+        statutoryCitations={EV_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
+        csvFilename="ladderpass_ev_salary_sacrifice_audit"
       />
 
       {/* Global Institutional Editorial Footer */}

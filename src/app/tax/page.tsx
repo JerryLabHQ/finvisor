@@ -15,6 +15,9 @@ import {
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
 import { ConsultationModal } from "@/components/ConsultationModal";
+import { ExecutiveDossierModal } from "@/components/ExecutiveDossierModal";
+import { StatutoryMethodology, CitationItem } from "@/components/StatutoryMethodology";
+import { ActionChecklist, ChecklistItem } from "@/components/ActionChecklist";
 import {
   runTaxOptimization,
   TaxInputs,
@@ -25,6 +28,69 @@ import "../dashboard.css";
 const formatGBP = (v: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(v);
 
+const TAX_CITATIONS: CitationItem[] = [
+  {
+    act: "Income Tax Act 2007",
+    section: "Section 35",
+    description: "Statutory clawback reducing the standard Personal Allowance (£12,570) by £1 for every £2 of adjusted net income above £100,000, creating an effective 60% income tax rate (62% including employee NI).",
+    govUrl: "https://www.legislation.gov.uk/ukpga/2007/3/section/35",
+  },
+  {
+    act: "Childcare Act 2006 & Early Education Regulations",
+    description: "Strict £100,000 adjusted net income statutory ceiling beyond which entitlement to 30 hours of government-funded childcare and Tax-Free Childcare (£2,000/child) is entirely lost.",
+    govUrl: "https://www.gov.uk/tax-free-childcare",
+  },
+  {
+    act: "Finance Act 2004",
+    section: "Part 4, Registered Pension Schemes",
+    description: "Statutory exemption for registered pension contributions (SIPP / employer salary sacrifice) from income tax and National Insurance, reducing adjusted net income below the £100,000 threshold.",
+    govUrl: "https://www.gov.uk/tax-on-your-private-pension/pension-tax-relief",
+  },
+  {
+    act: "Social Security Contributions and Benefits Act 1992",
+    description: "High Income Child Benefit Charge (HICBC) statutory taper recovering child benefit at 1% per £200 earned between £60,000 and £80,000.",
+    govUrl: "https://www.gov.uk/child-benefit-tax-charge",
+  },
+];
+
+const TAX_CHECKLIST: ChecklistItem[] = [
+  {
+    id: "ani-calc",
+    stepNumber: 1,
+    title: "Calculate Exact Adjusted Net Income",
+    detail: "Take total gross income (salary, bonuses, rental profits, dividends) and deduct gross pension contributions and allowable charitable Gift Aid.",
+    actionTag: "Statutory Base",
+  },
+  {
+    id: "workplace-salsac",
+    stepNumber: 2,
+    title: "Maximize Workplace Pension Salary Sacrifice",
+    detail: "Request employer payroll sacrifice down to £100,000 before 5 April to eliminate 40% income tax and 2% employee National Insurance at source.",
+    actionTag: "Payroll Action",
+  },
+  {
+    id: "sipp-topup",
+    stepNumber: 3,
+    title: "Execute Direct Personal SIPP Contribution",
+    detail: "If payroll cutoff has passed, contribute net cash into a personal SIPP. The provider reclaims 20% basic-rate tax automatically from HMRC.",
+    actionTag: "Immediate Relief",
+  },
+  {
+    id: "sa-relief-claim",
+    stepNumber: 4,
+    title: "Claim Higher-Rate Relief via Self Assessment",
+    detail: "Declare gross SIPP contributions on your HMRC SA100 tax return to recover the additional 20% higher-rate relief as a direct refund or tax code adjustment.",
+    actionTag: "HMRC Filing",
+  },
+  {
+    id: "childcare-recertify",
+    stepNumber: 5,
+    title: "Re-confirm 30 Hours Funded Childcare Entitlement",
+    detail: "Log in to the government Childcare Service account and re-confirm income below £100k every 3 months to protect up to £9,000/yr in free childcare.",
+    actionTag: "Cliff Edge Defense",
+  },
+];
+
 export default function TaxPage() {
   const [grossSalary, setGrossSalary] = useState(115000);
   const [salarySacrifice, setSalarySacrifice] = useState(15000);
@@ -34,6 +100,7 @@ export default function TaxPage() {
   const [hasPostgrad, setHasPostgrad] = useState(false);
   const [donationDismissed, setDonationDismissed] = useState(false);
   const [showIfaModal, setShowIfaModal] = useState(false);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const inputs: TaxInputs = useMemo(
     () => ({
@@ -60,10 +127,6 @@ export default function TaxPage() {
     } else {
       setSalarySacrifice(5000);
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const isInTrap = grossSalary > 100000 && grossSalary <= 125140;
@@ -167,12 +230,12 @@ export default function TaxPage() {
 
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", alignSelf: "center" }}>
             <button
-              onClick={handlePrint}
+              onClick={() => setIsDossierOpen(true)}
               className="pdf-trigger-btn"
               style={{ whiteSpace: "nowrap" }}
             >
               <FileText size={16} />
-              <span>Print Tax Report</span>
+              <span>Generate Tax Dossier</span>
             </button>
             <button
               onClick={() => setShowIfaModal(true)}
@@ -570,6 +633,22 @@ export default function TaxPage() {
         </div>
       </div>
 
+      {/* Statutory Sources & Mathematical Methodology (IFS / FT Style) */}
+      <StatutoryMethodology
+        moduleTitle="60% Marginal Tax Trap & SIPP Pension Optimizer"
+        formulaDescription="Computes exact statutory income tax bands under the Income Tax Act 2007 (Basic 20%, Higher 40%, Additional 45%), Personal Allowance clawback at £0.50 per £1 between £100,000 and £125,140, Class 1 Employee National Insurance (8% and 2%), and the all-or-nothing loss of 30 hours funded childcare."
+        citations={TAX_CITATIONS}
+        defaultOpen={false}
+      />
+
+      {/* Interactive 60% Tax Trap Mitigation Checklist (Which? & MSE Style) */}
+      <ActionChecklist
+        id="tax-trap"
+        title="60% Marginal Tax Trap Recovery Checklist"
+        subtitle="5 actionable steps to restore your Personal Allowance and preserve 30h free childcare before 5 April"
+        items={TAX_CHECKLIST}
+      />
+
       {/* Chartered Tax & IFA Consultation Modal */}
       <ConsultationModal
         isOpen={showIfaModal}
@@ -590,6 +669,39 @@ export default function TaxPage() {
           quaternaryValue: formatGBP(results.childcarePreservedValue),
           quaternarySub: "30h + Tax-Free top-up",
         }}
+      />
+
+      {/* Institutional Printable Tax Dossier Modal */}
+      <ExecutiveDossierModal
+        isOpen={isDossierOpen}
+        onClose={() => setIsDossierOpen(false)}
+        title="60% Marginal Tax Trap Mitigation Dossier"
+        subtitle="HMRC statutory income tax, National Insurance, and SIPP salary sacrifice optimization audit"
+        badge={isInTrap ? "62% Marginal Trap Active" : "Standard Marginal Rate"}
+        metrics={[
+          { label: "Gross Salary", value: formatGBP(grossSalary), sub: `${results.baseline.effectiveMarginalRatePercent}% Marginal Rate` },
+          { label: "SIPP Contribution", value: formatGBP(salarySacrifice), sub: `Net Cost: ${formatGBP(results.netCostToTakeHome)}` },
+          { label: "Immediate Tax & NI Saved", value: formatGBP(results.totalTaxAndNiSaved), sub: `£${results.netCostPer100PoundPension} per £100 SIPP` },
+          { label: "Childcare Retained", value: formatGBP(results.childcarePreservedValue), sub: "30h statutory funded" },
+        ]}
+        summaryParagraph={
+          salarySacrifice > 0
+            ? `By allocating ${formatGBP(salarySacrifice)} into an approved registered pension scheme (SIPP), adjusted net income is reduced to ${formatGBP(results.withSacrifice.adjustedNetIncome)}. This completely eliminates the 60% Personal Allowance clawback, saving ${formatGBP(results.totalTaxAndNiSaved)} in statutory deductions and preserving ${formatGBP(results.childcarePreservedValue)} in funded childcare entitlements.`
+            : `Gross earnings of ${formatGBP(grossSalary)} place you squarely in the 60% marginal tax trap between £100,000 and £125,140. Every £100 earned in this band loses £40 to Higher Rate income tax, £20 from Personal Allowance clawback, and £2 in Class 1 employee NI, leaving only £38 take-home.`
+        }
+        breakdownTable={{
+          headers: ["Horizon", "Gross Salary", "Annual SIPP", "Total Contributed", "Compound Value (7.0%)", "Net Tax Saved"],
+          rows: results.pensionGrowthProjections.map((p) => [
+            `${p.years} Years`,
+            formatGBP(grossSalary),
+            formatGBP(salarySacrifice),
+            formatGBP(p.totalContributed),
+            formatGBP(p.projectedPotAt7Percent),
+            formatGBP(results.totalTaxAndNiSaved * p.years),
+          ]),
+        }}
+        statutoryCitations={TAX_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
+        csvFilename="ladderpass_60_tax_trap_audit"
       />
 
       {/* Global Institutional Editorial Footer */}

@@ -14,6 +14,9 @@ import {
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
 import { ConsultationModal } from "@/components/ConsultationModal";
+import { ExecutiveDossierModal } from "@/components/ExecutiveDossierModal";
+import { StatutoryMethodology, CitationItem } from "@/components/StatutoryMethodology";
+import { ActionChecklist, ChecklistItem } from "@/components/ActionChecklist";
 import {
   runPensionCalculation,
   PensionInputs,
@@ -23,6 +26,71 @@ import "../dashboard.css";
 
 const formatGBP = (v: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(v);
+
+const RETIREMENT_CITATIONS: CitationItem[] = [
+  {
+    act: "Finance Act 2004",
+    section: "Schedule 29 (Authorized Lump Sums)",
+    description: "Statutory 25% Pension Commencement Lump Sum (PCLS) tax-free entitlement, subject to the legislated Lump Sum Allowance cap of £268,275.",
+    govUrl: "https://www.gov.uk/tax-on-your-private-pension/pension-tax-free-lump-sum",
+  },
+  {
+    act: "Finance Act 2024 & Autumn Budget 2024",
+    section: "Inheritance Tax Reform (Pensions)",
+    description: "Statutory transition bringing unused registered pension funds and death benefits into the scope of UK Inheritance Tax (IHT) starting 6 April 2027.",
+    govUrl: "https://www.gov.uk/government/publications/inheritance-tax-on-pensions",
+  },
+  {
+    act: "Pensions Act 2014",
+    section: "Part 1 (State Pension)",
+    description: "Statutory single-tier State Pension requiring 35 qualifying National Insurance years for full payout, indexed via the statutory triple lock formula.",
+    govUrl: "https://www.gov.uk/new-state-pension",
+  },
+  {
+    act: "Income Tax (Earnings and Pensions) Act 2003",
+    section: "Part 9 (Pension Income)",
+    description: "Governs PAYE income tax withholding on flexible drawdown withdrawals (20% basic, 40% higher, and 45% additional rate brackets).",
+    govUrl: "https://www.legislation.gov.uk/ukpga/2003/1/part/9",
+  },
+];
+
+const RETIREMENT_CHECKLIST: ChecklistItem[] = [
+  {
+    id: "dwp-forecast",
+    stepNumber: 1,
+    title: "Obtain Official DWP State Pension Forecast",
+    detail: "Log in to Check Your State Pension online (gov.uk) to verify qualifying National Insurance years (35 required for full amount) and pinpoint your statutory State Pension Age.",
+    actionTag: "DWP Government Record",
+  },
+  {
+    id: "pension-tracing",
+    stepNumber: 2,
+    title: "Consolidate Legacy Workplace Pension Pots",
+    detail: "Trace older employer pensions to eliminate duplicate annual management charges (AMCs) and transfer into a modern low-cost SIPP with flexible drawdown capabilities.",
+    actionTag: "Fee Reduction",
+  },
+  {
+    id: "pcls-timing",
+    stepNumber: 3,
+    title: "Schedule 25% Tax-Free Lump Sum (PCLS)",
+    detail: "Plan your Pension Commencement Lump Sum withdrawal (statutory cap £268,275) to pay off remaining mortgage debt or fund early retirement bridges without triggering tax.",
+    actionTag: "Tax-Free Allowance",
+  },
+  {
+    id: "swr-calibration",
+    stepNumber: 4,
+    title: "Calibrate Safe Withdrawal Rate (3.5% - 4.0%)",
+    detail: "Establish dynamic withdrawal guardrails during early retirement years to preserve capital longevity and insulate your portfolio from sequence-of-returns shocks.",
+    actionTag: "Portfolio Longevity",
+  },
+  {
+    id: "iht-2027-review",
+    stepNumber: 5,
+    title: "Implement April 2027 Pension IHT Estate Plan",
+    detail: "Because unspent pensions enter the 40% Inheritance Tax net from 6 April 2027, review spending sequences: drawdown taxable pension pots before depleting tax-exempt ISAs.",
+    actionTag: "Estate & IHT Defense",
+  },
+];
 
 export default function RetirementPage() {
   const [pensionPot, setPensionPot] = useState(550000);
@@ -38,6 +106,7 @@ export default function RetirementPage() {
 
   const [donationDismissed, setDonationDismissed] = useState(false);
   const [showIfaModal, setShowIfaModal] = useState(false);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const inputs: PensionInputs = useMemo(
     () => ({
@@ -71,10 +140,6 @@ export default function RetirementPage() {
     setCurrentAge(curAgeVal);
     setRetireAge(retAgeVal);
     setIncomeNet(incVal);
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const isSustainable = results.verdict === "SUSTAINABLE_DRAWDOWN";
@@ -174,12 +239,12 @@ export default function RetirementPage() {
 
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", alignSelf: "center" }}>
             <button
-              onClick={handlePrint}
+              onClick={() => setIsDossierOpen(true)}
               className="pdf-trigger-btn"
               style={{ whiteSpace: "nowrap" }}
             >
               <FileText size={16} />
-              <span>Print Retirement Plan</span>
+              <span>Generate Retirement Dossier</span>
             </button>
             <button
               onClick={() => setShowIfaModal(true)}
@@ -543,6 +608,22 @@ export default function RetirementPage() {
         </div>
       </div>
 
+      {/* Statutory Sources & Mathematical Methodology (IFS / FT Style) */}
+      <StatutoryMethodology
+        moduleTitle="Retirement & FIRE: Drawdown, Annuity & 2027 IHT"
+        formulaDescription="Simulates variable annual drawdown rates net of basic and higher rate income tax (PAYE), 25% tax-free PCLS withdrawal up to the £268,275 statutory cap, portfolio compounding net of inflation, single-tier State Pension bridge commencing at age 68, and 40% Inheritance Tax exposure on unspent funds post-April 2027."
+        citations={RETIREMENT_CITATIONS}
+        defaultOpen={false}
+      />
+
+      {/* Interactive Retirement Preparation Checklist (Which? & MSE Style) */}
+      <ActionChecklist
+        id="retirement-fire"
+        title="Retirement Drawdown & April 2027 IHT Defense Checklist"
+        subtitle="5 bounded statutory and portfolio milestones to secure financial independence"
+        items={RETIREMENT_CHECKLIST}
+      />
+
       {/* Chartered Financial Planner & Pension Consultation Modal */}
       <ConsultationModal
         isOpen={showIfaModal}
@@ -563,6 +644,36 @@ export default function RetirementPage() {
           quaternaryValue: isSustainable ? "Sustainable Drawdown" : "Depletion Risk",
           quaternarySub: isSustainable ? `Survives past age ${lifeAge}` : "Requires reduction",
         }}
+      />
+
+      {/* Institutional Printable Retirement Dossier Modal */}
+      <ExecutiveDossierModal
+        isOpen={isDossierOpen}
+        onClose={() => setIsDossierOpen(false)}
+        title="Retirement Drawdown & April 2027 IHT Memorandum"
+        subtitle="Sustainable drawdown modeling, State Pension bridge, and Autumn Budget 2027 IHT exposure"
+        badge={isSustainable ? "Sustainable Drawdown Horizon" : "Depletion Alert"}
+        metrics={[
+          { label: "Total Pension Pot", value: formatGBP(pensionPot), sub: `S&S ISA: ${formatGBP(isaPot)}` },
+          { label: "Target Annual Net Income", value: `${formatGBP(incomeNet)}/yr`, sub: `Retire at ${retireAge}` },
+          { label: "25% Tax-Free PCLS", value: formatGBP(takePcls ? Math.min(268275, pensionPot * 0.25) : 0), sub: "£268,275 statutory cap" },
+          { label: "Projected Legacy Surplus", value: formatGBP(results.finalLegacyPotAtLifeExpectancy), sub: `At age ${lifeAge}` },
+        ]}
+        summaryParagraph={results.verdictReasoning}
+        breakdownTable={{
+          headers: ["Age", "Starting Pension", "Starting ISA", "State Pension", "Pension Drawdown", "Tax Paid", "Total Net Worth"],
+          rows: results.projections.slice(0, 20).map((row) => [
+            `Age ${row.age}${row.isPotDepleted ? " (Depleted)" : ""}`,
+            formatGBP(row.startingPensionPot),
+            formatGBP(row.startingIsaPot),
+            row.statePensionReceived > 0 ? formatGBP(row.statePensionReceived) : "£0",
+            row.drawdownFromPension > 0 ? formatGBP(row.drawdownFromPension) : "£0",
+            formatGBP(row.taxPaidOnDrawdown),
+            formatGBP(row.totalNetWorth),
+          ]),
+        }}
+        statutoryCitations={RETIREMENT_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
+        csvFilename="ladderpass_retirement_drawdown_audit"
       />
 
       {/* Global Institutional Editorial Footer */}

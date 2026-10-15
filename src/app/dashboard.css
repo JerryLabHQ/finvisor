@@ -2169,3 +2169,536 @@
     color: #0f172a !important;
   }
 }
+
+/* ==========================================================================
+   Financial Times Style Institutional Macro Data Ticker
+   ========================================================================== */
+.macro-ticker {
+  background-color: #fbfbfa;
+  border-bottom: 1px solid var(--surface-border);
+  border-top: 1px solid var(--surface-border-subtle);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  position: relative;
+  z-index: 30;
+}
+
+.macro-ticker__inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 6px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.macro-ticker__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  font-size: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border-right: 1px solid var(--surface-border);
+  padding-right: 12px;
+}
+
+.macro-ticker__live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  display: inline-block;
+  animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.macro-ticker__items {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+}
+
+.macro-ticker__items::-webkit-scrollbar {
+  display: none;
+}
+
+.macro-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.macro-ticker__key {
+  color: var(--text-muted);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.macro-ticker__val {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+.macro-ticker__badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--primary-border);
+  letter-spacing: 0.04em;
+}
+
+.macro-ticker__sub {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.macro-ticker__divider {
+  color: var(--surface-border);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.macro-ticker__item--alert {
+  background-color: var(--accent-amber-light);
+  border: 1px solid var(--accent-amber-border);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--accent-amber-text);
+}
+
+.macro-ticker__alert-text {
+  font-size: 11px;
+}
+
+.macro-ticker__alert-link {
+  font-weight: 700;
+  color: var(--accent-amber-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-left: 4px;
+}
+
+.macro-ticker__alert-link:hover {
+  color: #78350f;
+}
+
+/* ==========================================================================
+   Statutory Sources & Mathematical Methodology Drawer (IFS / FT Style)
+   ========================================================================== */
+.statutory-methodology {
+  margin-top: 28px;
+  border: 1px solid var(--surface-border);
+  background-color: #ffffff;
+  border-radius: var(--round-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-subtle);
+}
+
+.statutory-methodology__header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.statutory-methodology__header:hover {
+  background-color: var(--surface-tray);
+}
+
+.statutory-methodology__title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statutory-methodology__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--round-sm);
+  background-color: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statutory-methodology__title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.statutory-methodology__subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.statutory-methodology__toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statutory-methodology__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--primary-border);
+  padding: 3px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.statutory-methodology__chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.statutory-methodology__chevron.open {
+  transform: rotate(180deg);
+}
+
+.statutory-methodology__content {
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid var(--surface-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.statutory-methodology__formula-card {
+  margin-top: 16px;
+  background-color: var(--surface-tray);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--round-md);
+  padding: 14px 16px;
+}
+
+.statutory-methodology__formula-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.statutory-methodology__formula-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.statutory-methodology__citations {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.statutory-methodology__citations-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.statutory-methodology__citations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.statutory-citation-card {
+  background-color: #ffffff;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--round-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statutory-citation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.statutory-citation-section {
+  background-color: var(--surface-tray);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.statutory-citation-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.statutory-citation-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.statutory-citation-link:hover {
+  color: var(--secondary-hover);
+}
+
+/* ==========================================================================
+   Interactive Life-Stage Action Checklist (Which? & MSE Style)
+   ========================================================================== */
+.action-checklist {
+  margin-top: 24px;
+  border: 1px solid var(--surface-border);
+  background-color: #ffffff;
+  border-radius: var(--round-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-subtle);
+}
+
+.action-checklist__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.action-checklist__title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-checklist__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--round-sm);
+  background-color: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.action-checklist__title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.action-checklist__subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.action-checklist__copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--round-sm);
+  background-color: var(--surface-tray);
+  border: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-checklist__copy-btn:hover {
+  background-color: #ffffff;
+  border-color: var(--surface-border-hover);
+  color: var(--text-primary);
+}
+
+.action-checklist__progress-wrap {
+  margin-bottom: 18px;
+  background-color: var(--surface-tray);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--round-sm);
+  padding: 10px 14px;
+}
+
+.action-checklist__progress-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.action-checklist__progress-status {
+  color: var(--text-secondary);
+}
+
+.action-checklist__progress-percent {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.action-checklist__progress-bar {
+  width: 100%;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.action-checklist__progress-fill {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: 9999px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-checklist__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-checklist__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--round-sm);
+  border: 1px solid var(--surface-border);
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  min-height: 44px;
+}
+
+.action-checklist__item:hover {
+  border-color: var(--primary-border);
+  background-color: #fafbf9;
+}
+
+.action-checklist__item--checked {
+  background-color: var(--surface-tray);
+  border-color: var(--surface-border-subtle);
+  opacity: 0.85;
+}
+
+.action-checklist__checkbox {
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.action-checklist__item-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.action-checklist__item-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.action-checklist__step-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background-color: var(--surface-tray);
+  border: 1px solid var(--surface-border);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.action-checklist__item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.action-checklist__item--checked .action-checklist__item-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.action-checklist__action-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background-color: var(--secondary-light);
+  color: var(--secondary);
+  border: 1px solid var(--secondary-border);
+}
+
+.action-checklist__item-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+
+

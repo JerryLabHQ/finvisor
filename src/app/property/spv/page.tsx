@@ -15,6 +15,9 @@ import {
 import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
 import { ConsultationModal } from "@/components/ConsultationModal";
+import { ExecutiveDossierModal } from "@/components/ExecutiveDossierModal";
+import { StatutoryMethodology, CitationItem } from "@/components/StatutoryMethodology";
+import { ActionChecklist, ChecklistItem } from "@/components/ActionChecklist";
 import {
   runBTLCalculation,
   BTLInputs,
@@ -24,6 +27,70 @@ import "../../dashboard.css";
 
 const formatGBP = (v: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(v);
+
+const SPV_CITATIONS: CitationItem[] = [
+  {
+    act: "Finance (No. 2) Act 2015",
+    section: "Section 24",
+    description: "Statutory restriction preventing individual landlords from deducting mortgage interest as an allowable expense, taxing gross rental turnover less running costs and granting only a 20% basic-rate tax reduction.",
+    govUrl: "https://www.legislation.gov.uk/ukpga/2015/33/section/24/enacted",
+  },
+  {
+    act: "Corporation Tax Act 2010",
+    section: "Part 3, Companies Carrying on a Property Business",
+    description: "Allows Limited Company SPVs to deduct 100% of mortgage interest as a commercial trading expense, applying 19% small profits rate up to £50,000.",
+    govUrl: "https://www.gov.uk/corporation-tax-rates",
+  },
+  {
+    act: "Finance Act 2003 & Autumn Budget 2024",
+    section: "Schedule 4ZA (Higher Rates for Additional Dwellings)",
+    description: "Statutory 5% Stamp Duty Land Tax surcharge levied on corporate and additional residential property purchases across all price tiers.",
+    govUrl: "https://www.gov.uk/guidance/stamp-duty-land-tax-buying-an-additional-residential-property",
+  },
+  {
+    act: "Companies Act 2006",
+    description: "Special Purpose Vehicle (SPV) incorporation under SIC code 68209 ('Other letting and operating of own or leased real estate') required by UK commercial buy-to-let mortgage lenders.",
+    govUrl: "https://www.gov.uk/set-up-limited-company",
+  },
+];
+
+const SPV_CHECKLIST: ChecklistItem[] = [
+  {
+    id: "spv-incorp",
+    stepNumber: 1,
+    title: "Incorporate SPV Limited Company",
+    detail: "Register a private limited company with Companies House using Standard Industrial Classification (SIC) code 68209 ('Other letting and operating of own or leased real estate').",
+    actionTag: "Companies House",
+  },
+  {
+    id: "biz-bank-acc",
+    stepNumber: 2,
+    title: "Open a Commercial Business Bank Account",
+    detail: "Set up a UK business bank account in the exact name of the Limited Company SPV to ringfence rental revenues and expense transactions.",
+    actionTag: "Banking Compliance",
+  },
+  {
+    id: "specialist-broker",
+    stepNumber: 3,
+    title: "Obtain Commercial BTL Mortgage DIP",
+    detail: "Work with a specialist mortgage broker to test lender Interest Cover Ratios (ICRs) — typically 125% stressed at 5.5% for SPVs vs 145% at 5.5% for personal names.",
+    actionTag: "Mortgage Sourcing",
+  },
+  {
+    id: "hrad-reserve",
+    stepNumber: 4,
+    title: "Reserve 5% Higher Rate SDLT Surcharge",
+    detail: "Factor in the autumn budget legislated 5% Higher Rates for Additional Dwellings (HRAD) Stamp Duty surcharge due within 14 days of completion.",
+    actionTag: "Tax Capital",
+  },
+  {
+    id: "director-loan",
+    stepNumber: 5,
+    title: "Document Director's Loan Agreement",
+    detail: "Structure the initial deposit funds introduced by the director as an official Director's Loan, allowing future rental profits to be drawn out 100% tax-free until repaid.",
+    actionTag: "Extraction Strategy",
+  },
+];
 
 export default function SpvPage() {
   const [price, setPrice] = useState(280000);
@@ -36,6 +103,7 @@ export default function SpvPage() {
 
   const [donationDismissed, setDonationDismissed] = useState(false);
   const [showBrokerModal, setShowBrokerModal] = useState(false);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const inputs: BTLInputs = useMemo(
     () => ({
@@ -69,10 +137,6 @@ export default function SpvPage() {
     setRent(rVal);
     setTaxBracket(bracketVal);
     setStrategy(strategyVal);
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const isSpvWinner = results.verdict === "SPV_WINS";
@@ -172,12 +236,12 @@ export default function SpvPage() {
 
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", alignSelf: "center" }}>
             <button
-              onClick={handlePrint}
+              onClick={() => setIsDossierOpen(true)}
               className="pdf-trigger-btn"
               style={{ whiteSpace: "nowrap" }}
             >
               <FileText size={16} />
-              <span>Print BTL Report</span>
+              <span>Generate BTL Dossier</span>
             </button>
             <button
               onClick={() => setShowBrokerModal(true)}
@@ -570,6 +634,22 @@ export default function SpvPage() {
         </div>
       </div>
 
+      {/* Statutory Sources & Mathematical Methodology (IFS / FT Style) */}
+      <StatutoryMethodology
+        moduleTitle="Buy-to-Let SPV vs Personal Ownership"
+        formulaDescription="Calculates exact section 24 phantom tax drag (full rental turnover added to personal taxable income, basic 20% interest tax credit relief) vs 19% small profits Corporation Tax, 5% HRAD Stamp Duty surcharge, and commercial mortgage interest deductibility."
+        citations={SPV_CITATIONS}
+        defaultOpen={false}
+      />
+
+      {/* Interactive SPV Setup Checklist (Which? & MSE Style) */}
+      <ActionChecklist
+        id="btl-spv"
+        title="BTL Limited Company SPV Formation Checklist"
+        subtitle="5 essential corporate and financing steps for UK property portfolio investors"
+        items={SPV_CHECKLIST}
+      />
+
       {/* Commercial BTL Broker & SPV Accountant Modal */}
       <ConsultationModal
         isOpen={showBrokerModal}
@@ -592,6 +672,35 @@ export default function SpvPage() {
           quaternaryValue: formatGBP(results.tenYearCumulativeDifference),
           quaternarySub: isSpvWinner ? "SPV Advantage" : "Personal Advantage",
         }}
+      />
+
+      {/* Institutional Printable BTL SPV Dossier Modal */}
+      <ExecutiveDossierModal
+        isOpen={isDossierOpen}
+        onClose={() => setIsDossierOpen(false)}
+        title="BTL Limited Company SPV Investment Memorandum"
+        subtitle="Section 24 mortgage relief audit, 19% Corporation Tax, and 5% HRAD Stamp Duty feasibility"
+        badge={isSpvWinner ? "SPV Advantage" : "Personal Ownership Favored"}
+        metrics={[
+          { label: "Purchase Price", value: formatGBP(price), sub: `${deposit}% Deposit` },
+          { label: "Monthly Gross Rent", value: `${formatGBP(rent)}/mo`, sub: `Gross Yield: ${((rent * 12 / price) * 100).toFixed(1)}%` },
+          { label: "Section 24 Drag", value: `${formatGBP(results.section24TaxDragAnnual)}/yr`, sub: "Phantom tax on personal" },
+          { label: "10-Year Advantage", value: formatGBP(results.tenYearCumulativeDifference), sub: isSpvWinner ? "SPV Ahead" : "Personal Ahead" },
+        ]}
+        summaryParagraph={results.verdictReasoning}
+        breakdownTable={{
+          headers: ["Category", "Personal Name", "Limited Co SPV", "Variance / Advantage"],
+          rows: [
+            ["Gross Annual Rent", formatGBP(rent * 12), formatGBP(rent * 12), "£0"],
+            ["Annual Mortgage Payment", formatGBP(results.personal.annualMortgagePayment), formatGBP(results.spv.annualMortgagePayment), formatGBP(results.spv.annualMortgagePayment - results.personal.annualMortgagePayment)],
+            ["Allowable Finance Deduction", "£0 (Section 24 Disallowed)", formatGBP(results.spv.annualMortgagePayment), formatGBP(results.spv.annualMortgagePayment)],
+            ["Annual Tax Liability", formatGBP(results.personal.taxPaid), formatGBP(results.spv.taxPaid), formatGBP(results.personal.taxPaid - results.spv.taxPaid)],
+            ["Net Annual Cashflow", formatGBP(results.personal.netAnnualCashflow), formatGBP(results.spv.netAnnualCashflow), formatGBP(results.annualCashflowDifference)],
+            ["10-Year Cumulative Cashflow", formatGBP(results.personal.netAnnualCashflow * 10), formatGBP(results.spv.netAnnualCashflow * 10), formatGBP(results.tenYearCumulativeDifference)],
+          ],
+        }}
+        statutoryCitations={SPV_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
+        csvFilename="ladderpass_btl_spv_audit"
       />
 
       {/* Global Institutional Editorial Footer */}
