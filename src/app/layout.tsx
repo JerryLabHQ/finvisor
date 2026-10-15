@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Newsreader } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,11 +20,11 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "LadderPass — The UK Financial Ladder & Property Intelligence",
   description: "The definitive mathematical guide to the British financial ladder. Institutional scenario modeling across Buy vs Rent, 60% Tax Trap, EV Salary Sacrifice, Student Loans, and BTL SPVs.",
-  metadataBase: new URL("https://ladderpass.com"),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     title: "LadderPass — The UK Financial Ladder & Property Intelligence",
     description: "Compare home equity accumulation against tax-free Stocks & Shares ISA compounding, calibrate the 60% marginal tax trap, and model 40-year mortgage amortizations.",
-    url: "https://ladderpass.com",
+    url: SITE_URL,
     siteName: "LadderPass",
     locale: "en_GB",
     type: "website",
@@ -41,7 +42,7 @@ const jsonLd = {
     {
       "@type": "WebApplication",
       "name": "LadderPass",
-      "url": "https://ladderpass.com",
+      "url": SITE_URL,
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "All",
       "description": "The definitive mathematical modeling platform for the British property ladder and UK tax scenarios.",
@@ -54,8 +55,8 @@ const jsonLd = {
     {
       "@type": "Organization",
       "name": "LadderPass",
-      "url": "https://ladderpass.com",
-      "logo": "https://ladderpass.com/icon.svg",
+      "url": SITE_URL,
+      "logo": `${SITE_URL}/icon.svg`,
     },
   ],
 };

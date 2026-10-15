@@ -13,7 +13,7 @@ import { HeaderNav } from "@/components/HeaderNav";
 import { Footer } from "@/components/Footer";
 import { CityAffordabilityWidget } from "@/components/CityAffordabilityWidget";
 import { calculateMonthlyMortgage, calculateSDLT } from "@/lib/calculator";
-import { UK_MARKET_DEFAULTS } from "@/lib/constants";
+import { UK_MARKET_DEFAULTS, SITE_URL } from "@/lib/constants";
 import "../../dashboard.css";
 
 interface CityPageProps {
@@ -40,12 +40,12 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
     title: `Buy vs Rent in ${city.name} (${currentYear}) - Property Prices, Rental Yields & Breakeven | LadderPass`,
     description: `Should you buy or rent in ${city.name}? Compare average house prices (£${city.averagePrice.toLocaleString()}), rental costs (£${city.averageRentMonthly.toLocaleString()}/mo), Stamp Duty relief, and mortgage affordability.`,
     alternates: {
-      canonical: `https://ladderpass.com/city/${city.slug}`,
+      canonical: `${SITE_URL}/city/${city.slug}`,
     },
     openGraph: {
       title: `Buy vs Rent in ${city.name} - The UK Financial Ladder`,
       description: `Detailed housing market analysis for ${city.name}: Average price £${city.averagePrice.toLocaleString()}, typical rent £${city.averageRentMonthly.toLocaleString()}/mo, price-to-rent ratio ${city.priceToRentRatio}x.`,
-      url: `https://ladderpass.com/city/${city.slug}`,
+      url: `${SITE_URL}/city/${city.slug}`,
       siteName: "LadderPass",
       locale: "en_GB",
       type: "article",

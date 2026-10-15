@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
 import { UK_CITIES } from "@/lib/cities";
+import { SITE_URL } from "@/lib/constants";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://ladderpass.com";
+  const baseUrl = SITE_URL;
   const currentDate = new Date();
 
   const coreRoutes: MetadataRoute.Sitemap = [

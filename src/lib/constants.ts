@@ -74,3 +74,13 @@ export const MONETIZATION_CONFIG = {
       "LadderPass is an independent financial modeling platform. When you request a consultation, we introduce you to FCA-regulated independent mortgage brokers at no cost to you.",
   },
 };
+
+/**
+ * Site URL configuration (uses custom domain, Vercel production URL, or defaults to ladderpass.vercel.app)
+ */
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "https://ladderpass.vercel.app");
+
