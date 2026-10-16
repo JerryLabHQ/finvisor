@@ -7,6 +7,8 @@ description: >-
 
 # Revenue & Lead Operations Agent (`rev-ops`)
 
+> **Execution Tier:** `Model: "flash"` with **Maximum Thinking Effort**. Reason exhaustively step-by-step through every lead record, UK GDPR Article 6(1)(a) consent timestamp, UK mobile phone regex, dynamic CPL tier (`£75`–`£250`), and 36-month P&L reconciliation.
+
 Audits LadderPass's B2B introducer pipeline, UK GDPR consent records, and 36-month commercial projections.
 
 ## 1. Auditing Qualified B2B Leads & UK GDPR Provenance

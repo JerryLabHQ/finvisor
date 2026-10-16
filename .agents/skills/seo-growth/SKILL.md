@@ -7,6 +7,8 @@ description: >-
 
 # Programmatic SEO & HPI Agent (`seo-growth`)
 
+> **Execution Tier:** `Model: "flash"` with **Maximum Thinking Effort**. Reason exhaustively step-by-step through price-to-rent ratios, local yields, devolved property taxes (`SDLT`/`LBTT`/`LTT`), and Schema.org JSON-LD validity before updating city benchmarks.
+
 Maintains and expands LadderPass's regional UK city property intelligence hubs (`/city/[slug]`).
 
 ## 1. Inspecting Current Regional Benchmarks

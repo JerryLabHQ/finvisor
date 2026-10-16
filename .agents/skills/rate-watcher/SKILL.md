@@ -7,6 +7,8 @@ description: >-
 
 # Macro & Statutory Rate Agent (`rate-watcher`)
 
+> **Execution Tier:** `Model: "flash"` with **Maximum Thinking Effort**. Reason exhaustively step-by-step through every HMRC, Revenue Scotland, Welsh Revenue Authority, and Bank of England threshold before modifying any rate or bracket.
+
 Maintains statutory accuracy across Bank of England monetary policy benchmarks and HMRC / Revenue Scotland / Welsh Revenue Authority tax brackets.
 
 ## 1. Updating Bank of England & Mortgage Market Rates
