@@ -90,7 +90,7 @@ LadderPass is operated by an autonomous 5-agent team orchestrated by the **Virtu
 
 | Role | Skill / Subagent | Model Tier (`invoke_subagent`) | Reasoning Depth |
 |---|---|:---:|---|
-| **Virtual CEO (Orchestrator)** | [`.agents/skills/virtual-ceo/SKILL.md`](.agents/skills/virtual-ceo/SKILL.md) (`virtual-ceo`) | `pro` (Smartest Model) | Strategic synthesis, P&L allocation, and final release sign-off |
+| **Virtual CEO (Orchestrator)** | [`.agents/skills/virtual-ceo/SKILL.md`](.agents/skills/virtual-ceo/SKILL.md) (`virtual-ceo`) | `pro` (Smartest Model; fallback to `inherit` if quota constrained) | Strategic synthesis, P&L allocation, and final release sign-off |
 | **Macro & Statutory Rate Agent** | [`.agents/skills/rate-watcher/SKILL.md`](.agents/skills/rate-watcher/SKILL.md) (`rate-watcher`) | `flash` | Max thinking effort — BoE rates & `SDLT`/`LBTT`/`LTT` brackets |
 | **Programmatic SEO & HPI Agent** | [`.agents/skills/seo-growth/SKILL.md`](.agents/skills/seo-growth/SKILL.md) (`seo-growth`) | `flash` | Max thinking effort — Land Registry HPI, ONS rents & `/city/[slug]` |
 | **Revenue & Lead Ops Agent** | [`.agents/skills/rev-ops/SKILL.md`](.agents/skills/rev-ops/SKILL.md) (`rev-ops`) | `flash` | Max thinking effort — FCA lead audit, UK GDPR & 36m P&L |
