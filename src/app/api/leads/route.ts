@@ -36,6 +36,18 @@ function saveLeads(leads: BrokerLead[]) {
   }
 }
 
+export function validateUkMobilePhone(rawPhone?: string): { valid: boolean; normalized?: string } {
+  if (!rawPhone || typeof rawPhone !== "string" || rawPhone.trim().length === 0) {
+    return { valid: true, normalized: undefined };
+  }
+  const stripped = rawPhone.replace(/[\s\-()]/g, "");
+  const normalized = stripped.startsWith("+4407")
+    ? "+447" + stripped.slice(5)
+    : stripped;
+  const isValid = /^(\+44|0)7\d{9}$/.test(normalized);
+  return { valid: isValid, normalized: isValid ? normalized : undefined };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -49,6 +61,9 @@ export async function POST(request: Request) {
       mortgageTerm = 25,
       buyerType = "FIRST_TIME_BUYER",
       buyingTimeline = "WITHIN_6M",
+      privacyPolicyAccepted,
+      consentGrantedAt,
+      qualificationMetrics,
     } = body;
 
     // Validation
@@ -58,6 +73,21 @@ export async function POST(request: Request) {
 
     if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 });
+    }
+
+    if (privacyPolicyAccepted === false) {
+      return NextResponse.json(
+        { error: "Explicit UK GDPR consent is required before dispatching advisor introductions." },
+        { status: 400 }
+      );
+    }
+
+    const phoneCheck = validateUkMobilePhone(phone);
+    if (!phoneCheck.valid) {
+      return NextResponse.json(
+        { error: "Please provide a valid UK mobile telephone number (e.g. 07700 900123 or +447700900123)." },
+        { status: 400 }
+      );
     }
 
     const price = Math.max(10000, Number(propertyPrice) || 350000);
@@ -70,20 +100,25 @@ export async function POST(request: Request) {
       calculateMonthlyMortgage(loanAmount, Number(mortgageRate) || 4.5, Number(mortgageTerm) || 25)
     );
 
-    // Compute Lead Value Tier for Broker monetization
-    let leadValue = MONETIZATION_CONFIG.brokerReferral.averageBrokerCommissionPerLeadGbp;
-    if (ltvPercent <= 85 && buyingTimeline === "IMMEDIATE_3M") {
-      leadValue = 250; // Premium ready-to-transact borrower
+    // Compute dynamic Vertical CPL for Broker / IFA / Fleet monetization
+    let leadValue = MONETIZATION_CONFIG.brokerReferral.averageBrokerCommissionPerLeadGbp; // £75 baseline residential mortgage
+    if (buyerType === "HIGH_EARNER_TAX" || buyerType === "RETIREMENT_PLANNING") {
+      leadValue = 220; // IFA / Chartered Tax Adviser wealth lead (>£100k salary/pot)
+    } else if (buyerType === "EV_SALARY_SACRIFICE" || buyerType === "BUY_TO_LET_INVESTOR") {
+      leadValue = 150; // Commercial Fleet / Corporate SPV BTL lead
+    } else if (ltvPercent <= 85 && buyingTimeline === "IMMEDIATE_3M") {
+      leadValue = 250; // Premium <85% LTV immediate residential mortgage borrower
     } else if (buyingTimeline === "JUST_RESEARCHING") {
-      leadValue = 100; // Early nurture lead
+      leadValue = 75;
     }
 
+    const nowIso = new Date().toISOString();
     const newLead: BrokerLead = {
       id: `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      createdAt: new Date().toISOString(),
+      createdAt: nowIso,
       name: name.trim(),
       email: email.trim().toLowerCase(),
-      phone: phone ? String(phone).trim() : undefined,
+      phone: phoneCheck.normalized,
       propertyPrice: price,
       depositAmount,
       depositPercent: depPct,
@@ -94,6 +129,19 @@ export async function POST(request: Request) {
       buyingTimeline,
       status: "NEW",
       estimatedLeadValueGbp: leadValue,
+      privacyPolicyAccepted: privacyPolicyAccepted ?? true,
+      consentGrantedAt: typeof consentGrantedAt === "string" && consentGrantedAt ? consentGrantedAt : nowIso,
+      qualificationMetrics:
+        qualificationMetrics && typeof qualificationMetrics === "object"
+          ? {
+              grossSalary: Number(qualificationMetrics.grossSalary) || undefined,
+              pensionPot: Number(qualificationMetrics.pensionPot) || undefined,
+              evP11dValue: Number(qualificationMetrics.evP11dValue) || undefined,
+              btlPortfolioSize: Number(qualificationMetrics.btlPortfolioSize) || undefined,
+              studentLoanPlan: qualificationMetrics.studentLoanPlan ? String(qualificationMetrics.studentLoanPlan) : undefined,
+              jurisdiction: qualificationMetrics.jurisdiction,
+            }
+          : undefined,
     };
 
     const existingLeads = getStoredLeads();
@@ -195,6 +243,11 @@ export async function POST(request: Request) {
         depositAmount: newLead.depositAmount,
         estimatedMonthlyMortgage: newLead.estimatedMonthlyMortgage,
         ltvPercent: newLead.ltvPercent,
+        estimatedLeadValueGbp: newLead.estimatedLeadValueGbp,
+        buyerType: newLead.buyerType,
+        privacyPolicyAccepted: newLead.privacyPolicyAccepted,
+        consentGrantedAt: newLead.consentGrantedAt,
+        qualificationMetrics: newLead.qualificationMetrics,
       },
     });
   } catch (error) {
@@ -203,9 +256,20 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request?: Request) {
+  const adminKey = process.env.ADMIN_API_KEY;
+  const authHeader = request?.headers?.get("authorization") || request?.headers?.get("Authorization");
+
+  if (adminKey) {
+    if (authHeader !== `Bearer ${adminKey}`) {
+      return NextResponse.json({ error: "Unauthorized: Invalid or missing ADMIN_API_KEY Bearer token." }, { status: 401 });
+    }
+  } else if (process.env.NODE_ENV === "production" || (authHeader && !authHeader.startsWith("Bearer test-"))) {
+    return NextResponse.json({ error: "Unauthorized: Valid Bearer ADMIN_API_KEY required." }, { status: 401 });
+  }
+
   const leads = getStoredLeads();
-  const totalPipelineValue = leads.reduce((sum, l) => sum + (l.estimatedLeadValueGbp || 175), 0);
+  const totalPipelineValue = leads.reduce((sum, l) => sum + (l.estimatedLeadValueGbp || 75), 0);
   return NextResponse.json({
     totalLeads: leads.length,
     totalPipelineValueGbp: totalPipelineValue,
@@ -217,6 +281,9 @@ export async function GET() {
       propertyPrice: l.propertyPrice,
       depositAmount: l.depositAmount,
       estimatedLeadValueGbp: l.estimatedLeadValueGbp,
+      privacyPolicyAccepted: l.privacyPolicyAccepted ?? true,
+      consentGrantedAt: l.consentGrantedAt,
+      qualificationMetrics: l.qualificationMetrics,
     })),
   });
 }

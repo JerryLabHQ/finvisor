@@ -45,7 +45,7 @@
   --accent-amber-border: #fde68a;
   --accent-amber-text: #92400e;
 
-  /* Accent: Warm Cafe Gold (Buy Me a Coffee) */
+  /* Accent: Institutional Gold */
   --accent-coffee-bg: #fef08a;
   --accent-coffee-border: #facc15;
   --accent-coffee-text: #713f12;
@@ -60,8 +60,8 @@
   --container-max: 1240px;
   
   /* Typographic Hierarchy: Editorial Serif (Newsreader) + Precision Sans (Inter) */
-  --font-serif: var(--font-serif), "Newsreader", "Charter", "Bitstream Charter", "Sitka Text", Georgia, serif;
-  --font-sans: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: "Newsreader", "Charter", "Bitstream Charter", "Sitka Text", Georgia, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
 
   /* Organic Paper Drop Shadows (No Blurry Neon) */

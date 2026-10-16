@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Calculator, ArrowRight, CheckCircle2, TrendingUp } from "lucide-react";
-import { calculateMonthlyMortgage, calculateSDLT } from "@/lib/calculator";
+import {
+  calculateMonthlyMortgage,
+  calculatePropertyTax,
+  getJurisdictionFromCity,
+  getPropertyTaxLabel,
+  runBuyVsRentCalculation,
+} from "@/lib/calculator";
 import { UK_MARKET_DEFAULTS } from "@/lib/constants";
 
 interface CityAffordabilityWidgetProps {
@@ -31,13 +37,52 @@ export function CityAffordabilityWidget({
   const [depositPercent, setDepositPercent] = useState<10 | 15 | 20>(15);
   const [isFtb, setIsFtb] = useState(true);
 
+  const jurisdiction = getJurisdictionFromCity(citySlug);
+  const taxLabel = getPropertyTaxLabel(jurisdiction);
+
   const depositAmount = averagePrice * (depositPercent / 100);
   const loanAmount = averagePrice - depositAmount;
   const mortgageRate = UK_MARKET_DEFAULTS.defaultMortgageRate; // e.g. 3.9%
   const monthlyMortgage = calculateMonthlyMortgage(loanAmount, mortgageRate, 25);
-  const stampDuty = calculateSDLT(averagePrice, isFtb);
+  const stampDuty = calculatePropertyTax(averagePrice, isFtb, false, jurisdiction);
   const totalMonthlyOwnership = monthlyMortgage + typicalServiceChargeMonthly;
   const monthlyDelta = totalMonthlyOwnership - averageRentMonthly;
+
+  const liveSimulation = useMemo(() => {
+    return runBuyVsRentCalculation({
+      propertyPrice: averagePrice,
+      depositPercent,
+      mortgageRate: UK_MARKET_DEFAULTS.defaultMortgageRate,
+      mortgageTerm: UK_MARKET_DEFAULTS.defaultMortgageTerm,
+      fixedTermYears: UK_MARKET_DEFAULTS.defaultFixedTerm,
+      svrRate: UK_MARKET_DEFAULTS.defaultSvrRate,
+      isFirstTimeBuyer: isFtb,
+      stampDutyOverride: null,
+      jurisdiction: getJurisdictionFromCity(citySlug),
+      legalFees: UK_MARKET_DEFAULTS.defaultLegalFees,
+      surveyFees: UK_MARKET_DEFAULTS.defaultSurveyFees,
+      councilTaxMonthly: typicalCouncilTaxMonthly,
+      serviceChargeMonthly: typicalServiceChargeMonthly,
+      maintenancePercent: UK_MARKET_DEFAULTS.defaultMaintenancePercent,
+      insuranceMonthly: UK_MARKET_DEFAULTS.defaultInsuranceMonthly,
+      initialRent: averageRentMonthly,
+      rentIncreasePercent: UK_MARKET_DEFAULTS.defaultRentIncreasePercent,
+      renterInsuranceMonthly: UK_MARKET_DEFAULTS.defaultRenterInsuranceMonthly,
+      investmentReturnPercent: UK_MARKET_DEFAULTS.defaultStockReturnPercent,
+      inflationPercent: UK_MARKET_DEFAULTS.defaultInflationPercent,
+      houseAppreciationPercent: historicalHpi5YrAvg,
+      timeHorizonYears: 15,
+    });
+  }, [
+    averagePrice,
+    depositPercent,
+    isFtb,
+    citySlug,
+    typicalCouncilTaxMonthly,
+    typicalServiceChargeMonthly,
+    averageRentMonthly,
+    historicalHpi5YrAvg,
+  ]);
 
   const calculatorUrl = `/?price=${averagePrice}&deposit=${depositPercent}&rent=${averageRentMonthly}&councilTax=${typicalCouncilTaxMonthly}&serviceCharge=${typicalServiceChargeMonthly}&hpi=${historicalHpi5YrAvg}&ftb=${isFtb}&city=${citySlug}`;
 
@@ -54,7 +99,7 @@ export function CityAffordabilityWidget({
             {cityName} Ownership vs. Rental Outflow Breakdown
           </h2>
           <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 6, lineHeight: 1.5 }}>
-            Calibrate your initial deposit and view exact monthly capital requirements based on HM Land Registry benchmarks and live BoE MPC rates.
+            Calibrate your initial deposit and view exact monthly capital requirements based on HM Land Registry benchmarks, {taxLabel}, and live BoE MPC rates.
           </p>
         </div>
 
@@ -96,9 +141,19 @@ export function CityAffordabilityWidget({
         {/* First-Time Buyer Toggle */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--surface-tray)", borderRadius: "var(--round-md)", border: "1px solid var(--surface-border)" }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>First-Time Buyer SDLT Relief</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+              First-Time Buyer {taxLabel} Relief
+            </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-              {isFtb ? `Relief applies up to £425k (SDLT: ${formatGBP(stampDuty)})` : `Standard residential rate applies (SDLT: ${formatGBP(stampDuty)})`}
+              {jurisdiction === "SCOTLAND"
+                ? isFtb
+                  ? `Scottish LBTT FTB relief up to £175k (LBTT: ${formatGBP(stampDuty)})`
+                  : `Standard Scottish LBTT up to £145k nil-rate (LBTT: ${formatGBP(stampDuty)})`
+                : jurisdiction === "WALES"
+                  ? `Welsh LTT 0% up to £225k (LTT: ${formatGBP(stampDuty)})`
+                  : isFtb
+                    ? `Post-April 2025 relief: 0% up to £300k, £500k cap (SDLT: ${formatGBP(stampDuty)})`
+                    : `Post-April 2025 standard residential rate (SDLT: ${formatGBP(stampDuty)})`}
             </div>
           </div>
           <input
@@ -113,14 +168,14 @@ export function CityAffordabilityWidget({
         {/* Breakdown Ledger */}
         <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid var(--surface-border)", paddingTop: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
-            <span style={{ color: "var(--text-secondary)" }}>Monthly Mortgage Principal & Interest</span>
+            <span style={{ color: "var(--text-secondary)" }}>Monthly Mortgage Principal &amp; Interest</span>
             <span style={{ fontWeight: 700, color: "var(--primary)", fontFamily: "var(--font-sans)", fontVariantNumeric: "tabular-nums" }}>
               {formatGBP(monthlyMortgage)}/mo
             </span>
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
-            <span style={{ color: "var(--text-secondary)" }}>Est. Service Charge & Ground Rent</span>
+            <span style={{ color: "var(--text-secondary)" }}>Est. Service Charge &amp; Ground Rent</span>
             <span style={{ fontWeight: 600, color: "var(--text-primary)", fontFamily: "var(--font-sans)", fontVariantNumeric: "tabular-nums" }}>
               {formatGBP(typicalServiceChargeMonthly)}/mo
             </span>
@@ -173,22 +228,22 @@ export function CityAffordabilityWidget({
         </Link>
       </div>
 
-      {/* Right Column: Local Breakeven Verdict & Macro Assumptions */}
+      {/* Right Column: Live Calculated Local Breakeven Verdict & Macro Assumptions */}
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <div className="verdict-banner buy-wins" style={{ padding: 24, borderRadius: "var(--round-lg)" }}>
           <div className="verdict-badge buy">
             <TrendingUp size={14} />
-            <span>{cityName} Breakeven Horizon</span>
+            <span>{cityName} Calculated Breakeven Horizon</span>
           </div>
 
           <h3 className="verdict-headline" style={{ fontSize: 20, margin: "8px 0" }}>
-            {historicalHpi5YrAvg >= 3.0
-              ? `Buying in ${cityName} typically reaches breakeven in 3.8 to 4.5 years.`
-              : `Buying in ${cityName} achieves breakeven in 4.8 to 5.5 years.`}
+            {liveSimulation.breakEvenYear
+              ? `Buying in ${cityName} reaches net-worth breakeven in Year ${liveSimulation.breakEvenYear} (at ${depositPercent}% deposit).`
+              : `In ${cityName}, renting & compounding a Stocks & Shares ISA remains ahead over 15 years.`}
           </h3>
 
           <p className="verdict-summary" style={{ fontSize: 13, margin: 0 }}>
-            Under historical 5-year capital appreciation of <strong>+{historicalHpi5YrAvg}%/yr</strong> and compound rental inflation, ownership builds equity faster than renting and investing the deposit differential into index funds.
+            Factoring in {formatGBP(stampDuty)} in {taxLabel}, £{typicalServiceChargeMonthly}/mo service charge, £{typicalCouncilTaxMonthly}/mo council tax, and <strong>+{historicalHpi5YrAvg}%/yr</strong> historical HPI, {liveSimulation.netWorthDifferenceAtHorizon >= 0 ? `buying builds ${formatGBP(liveSimulation.netWorthDifferenceAtHorizon)} more net wealth over 15 years` : `renting and investing in an ISA builds ${formatGBP(Math.abs(liveSimulation.netWorthDifferenceAtHorizon))} more net wealth over 15 years`}.
           </p>
         </div>
 
@@ -204,11 +259,11 @@ export function CityAffordabilityWidget({
             </div>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13 }}>
               <CheckCircle2 size={16} style={{ color: "var(--primary)", flexShrink: 0, marginTop: 2 }} />
-              <span>Stamp Duty Land Tax (SDLT) computed with statutory first-time buyer relief thresholds.</span>
+              <span>{taxLabel} computed dynamically with statutory post-April 2025 thresholds.</span>
             </div>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13 }}>
               <CheckCircle2 size={16} style={{ color: "var(--primary)", flexShrink: 0, marginTop: 2 }} />
-              <span>Includes estimated local ground rent and service charges typical for {cityName} apartments and houses.</span>
+              <span>Includes estimated local ground rent, service charges (£{typicalServiceChargeMonthly}/mo), and selling friction.</span>
             </div>
           </div>
         </div>

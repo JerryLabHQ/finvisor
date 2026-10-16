@@ -5,6 +5,8 @@
  * Verified against UK statutory benchmarks.
  */
 
+import { calculateIncomeTax } from "./tax-calculator";
+
 export interface PensionInputs {
   currentPensionPot: number;          // Total DC Pension / SIPP balance (£)
   currentIsaPot: number;              // Tax-free Stocks & Shares ISA balance (£)
@@ -13,8 +15,8 @@ export interface PensionInputs {
   lifeExpectancyAge: number;          // e.g. 88
   desiredAnnualIncomeNet: number;     // Target post-tax spending (£/year)
   takeTaxFreeLumpSumAtRetirement: boolean; // Take 25% PCLS up to £268,275 cap
-  assumedRealReturnPercent: number;   // Expected return after fees (e.g. 5.5%)
-  inflationPercent: number;           // CPI inflation (e.g. 2.5%)
+  assumedRealReturnPercent: number;   // Real portfolio return after fees & inflation (e.g. 5.5%)
+  inflationPercent: number;           // CPI inflation reference (e.g. 2.5%)
   statePensionAge: number;            // e.g. 67
   qualifiesForFullStatePension: boolean;
   annuityQuoteRatePercent: number;    // e.g. 6.5% for age 65 benchmark
@@ -52,42 +54,61 @@ export interface PensionResults {
 }
 
 export const PENSION_CONSTANTS = {
-  // UK Full New State Pension (2024/2026 benchmark)
-  fullNewStatePensionAnnual: 11502, // £221.20 per week * 52
+  // UK Full New State Pension (2025/2026 statutory Triple Lock benchmark: £230.25/wk * 52)
+  fullNewStatePensionAnnual: 11973,
   // Maximum Tax-Free Lump Sum (Lump Sum Allowance LSA introduced April 2024)
   lumpSumAllowanceCap: 268275, // 25% of old Lifetime Allowance £1,073,100
-  // Standard Personal Allowance
+  // Standard Personal Allowance & bands
   personalAllowance: 12570,
   basicRateThreshold: 50270,
+  higherRateThreshold: 125140,
   basicRate: 0.20,
   higherRate: 0.40,
+  additionalRate: 0.45,
   // IHT Rate on unused pension from April 2027
   ihtStandardRate: 0.40,
   nilRateBand: 325000,
 };
 
 /**
- * Calculates income tax on gross taxable pension drawdown
+ * Calculates income tax attributable to gross taxable pension drawdown
+ * (accounting for Personal Allowance, Basic 20%, Higher 40% + PA taper, and Additional 45%)
  */
 export function calculatePensionDrawdownTax(
   taxablePensionIncome: number,
   statePension: number
 ): number {
-  const totalIncome = taxablePensionIncome + statePension;
-  const taxableAbovePa = Math.max(0, totalIncome - PENSION_CONSTANTS.personalAllowance);
+  if (taxablePensionIncome <= 0) return 0;
+  const totalTax = calculateIncomeTax(taxablePensionIncome + statePension).tax;
+  const statePensionTax = calculateIncomeTax(statePension).tax;
+  return Math.max(0, Math.round(totalTax - statePensionTax));
+}
 
-  if (taxableAbovePa === 0) return 0;
+/**
+ * Exact inverse tax-band solver: finds the gross taxable pension withdrawal required
+ * to deliver `targetNetFromPension` after PAYE income tax across all UK tax bands.
+ */
+export function solveGrossPensionDrawdownForNet(
+  targetNetFromPension: number,
+  statePension: number
+): number {
+  if (targetNetFromPension <= 0) return 0;
 
-  const basicRateBandSize = PENSION_CONSTANTS.basicRateThreshold - PENSION_CONSTANTS.personalAllowance;
-  const basicTaxable = Math.min(taxableAbovePa, basicRateBandSize);
-  let tax = basicTaxable * PENSION_CONSTANTS.basicRate;
+  let low = targetNetFromPension;
+  let high = Math.ceil(targetNetFromPension * 2.2) + 10000;
 
-  if (taxableAbovePa > basicRateBandSize) {
-    const higherTaxable = taxableAbovePa - basicRateBandSize;
-    tax += higherTaxable * PENSION_CONSTANTS.higherRate;
+  for (let i = 0; i < 32; i++) {
+    const mid = (low + high) / 2;
+    const tax = calculatePensionDrawdownTax(mid, statePension);
+    const net = mid - tax;
+    if (net < targetNetFromPension) {
+      low = mid;
+    } else {
+      high = mid;
+    }
   }
 
-  return Math.round(tax);
+  return Math.round((low + high) / 2);
 }
 
 /**
@@ -97,8 +118,8 @@ export function runPensionCalculation(inputs: PensionInputs): PensionResults {
   const yearsToRetirement = Math.max(0, inputs.targetRetirementAge - inputs.currentAge);
   const retirementHorizonYears = Math.max(1, inputs.lifeExpectancyAge - inputs.targetRetirementAge);
 
-  // 1. Accumulation to Retirement Age
-  const realReturnRate = (inputs.assumedRealReturnPercent - inputs.inflationPercent) / 100;
+  // 1. Accumulation to Retirement Age (using real portfolio return directly without double-subtracting inflation)
+  const realReturnRate = inputs.assumedRealReturnPercent / 100;
   let accumulatedPension = inputs.currentPensionPot;
   let accumulatedIsa = inputs.currentIsaPot;
 
@@ -156,9 +177,7 @@ export function runPensionCalculation(inputs: PensionInputs): PensionResults {
     } else {
       // Drawdown Strategy: Draw from Pension first (optimizing 2027 IHT rule), then ISA
       if (pensionBalance > 0) {
-        // Approximate gross pension needed to achieve netIncomeNeeded
-        // Simplified gross-up factoring in basic rate
-        const grossNeeded = netIncomeNeeded > 0 ? Math.round(netIncomeNeeded * 1.22) : 0;
+        const grossNeeded = solveGrossPensionDrawdownForNet(netIncomeNeeded, statePension);
         pensionDrawdown = Math.min(pensionBalance, grossNeeded);
         taxPaid = calculatePensionDrawdownTax(pensionDrawdown, statePension);
         const netPensionReceived = Math.max(0, pensionDrawdown - taxPaid);
@@ -166,9 +185,20 @@ export function runPensionCalculation(inputs: PensionInputs): PensionResults {
         const remainingShortfall = Math.max(0, netIncomeNeeded - netPensionReceived);
         if (remainingShortfall > 0 && isaBalance > 0) {
           isaDrawdown = Math.min(isaBalance, remainingShortfall);
+          if (netPensionReceived + isaDrawdown < netIncomeNeeded && isFullyFunded) {
+            isFullyFunded = false;
+            potLastsUntilAge = currentAge;
+          }
+        } else if (remainingShortfall > 0 && isaBalance <= 0 && isFullyFunded) {
+          isFullyFunded = false;
+          potLastsUntilAge = currentAge;
         }
       } else if (isaBalance > 0) {
         isaDrawdown = Math.min(isaBalance, netIncomeNeeded);
+        if (isaDrawdown < netIncomeNeeded && isFullyFunded) {
+          isFullyFunded = false;
+          potLastsUntilAge = currentAge;
+        }
       }
     }
 
@@ -184,6 +214,11 @@ export function runPensionCalculation(inputs: PensionInputs): PensionResults {
 
     const totalNetWorth = Math.round(pensionBalance + isaBalance);
     const isPotDepleted = totalNetWorth <= 0;
+
+    if (isPotDepleted && isFullyFunded && year < retirementHorizonYears) {
+      isFullyFunded = false;
+      potLastsUntilAge = currentAge;
+    }
 
     projections.push({
       year,

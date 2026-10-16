@@ -1,9 +1,18 @@
 /**
  * UK Electric Vehicle (EV) Financial Comparison Engine
  * Compares Salary Sacrifice vs. PCP vs. Cash Purchase vs. Petrol/Diesel.
- * Models HMRC Benefit-in-Kind (BiK) escalator (2% to 5%), tax relief,
+ * Models HMRC Benefit-in-Kind (BiK) escalator (2% to 5%), progressive tax-band slicing,
  * and home vs. public charging costs.
  */
+
+import {
+  calculateIncomeTax,
+  calculateNationalInsurance,
+  calculateChildBenefit,
+  calculateChildcareValue,
+  calculateStudentLoan,
+  StudentLoanPlanCode,
+} from "./tax-calculator";
 
 export interface EVInputs {
   vehicleP11DValue: number;       // Recommended retail price (£)
@@ -15,12 +24,15 @@ export interface EVInputs {
   currentCarMonthlyFuel: number;  // Current petrol/diesel monthly spend (£)
   currentCarMonthlyInsurance: number;
   currentCarMonthlyMaintenance: number;
+  studentLoanPlan?: StudentLoanPlanCode; // Optional student loan plan for exact sacrifice delta
+  numberOfChildren?: number;      // Optional HICBC child benefit recovery modeling
+  childrenInChildcare?: number;   // Optional 30h childcare cliff recovery modeling
 }
 
 export interface EVOptionComparison {
   optionName: string;
   monthlyVehicleCost: number;     // Lease, PCP, or depreciation
-  monthlyTaxRelief: number;       // Income tax and NI saved
+  monthlyTaxRelief: number;       // Income tax and NI (and student loan) saved via progressive band slicing
   monthlyBikTax: number;          // Benefit-in-kind tax owed
   monthlyFuelCost: number;        // Electricity or petrol
   monthlyInsuranceAndUpkeep: number; // Insurance, servicing, tyres
@@ -40,6 +52,7 @@ export interface EVCalculatorResults {
   effectiveEmployeeTaxRatePercent: number;
   averageBikPercentOver3Years: number;
   fuelSavingsAnnual: number;
+  annualChildcareAndBenefitRestored: number;
 }
 
 export const EV_BENCHMARKS = {
@@ -63,7 +76,7 @@ export const EV_BENCHMARKS = {
 };
 
 /**
- * Computes marginal tax rate for salary sacrifice deductions
+ * Computes marginal tax rate on the next pound of salary
  */
 export function getEmployeeMarginalTaxRate(salary: number): number {
   if (salary > 125140) return 0.45 + 0.02; // 47%
@@ -71,6 +84,88 @@ export function getEmployeeMarginalTaxRate(salary: number): number {
   if (salary > 50270) return 0.40 + 0.02;  // 42%
   if (salary > 12570) return 0.20 + 0.08;  // 28%
   return 0;
+}
+
+/**
+ * Computes exact progressive tax, NI, student loan, HICBC, and childcare delta for an EV salary sacrifice
+ * Handles band-crossing accurately (e.g., sacrificing £9,600/yr from £101,000 slices £1,000 @ 62% and £8,600 @ 42%).
+ */
+export function calculateProgressiveEVTaxDelta(
+  grossAnnualSalary: number,
+  grossAnnualLease: number,
+  vehicleP11DValue: number,
+  options?: {
+    studentLoanPlan?: StudentLoanPlanCode;
+    numberOfChildren?: number;
+    childrenInChildcare?: number;
+  }
+): {
+  annualTaxAndNiRelief: number;
+  annualBikTax: number;
+  monthlyTaxRelief: number;
+  monthlyBikTax: number;
+  effectiveReliefRatePercent: number;
+  annualChildcareAndBenefitRestored: number;
+} {
+  if (grossAnnualLease <= 0 || grossAnnualSalary <= 0) {
+    return {
+      annualTaxAndNiRelief: 0,
+      annualBikTax: 0,
+      monthlyTaxRelief: 0,
+      monthlyBikTax: 0,
+      effectiveReliefRatePercent: 0,
+      annualChildcareAndBenefitRestored: 0,
+    };
+  }
+
+  const postSacrificeCashSalary = Math.max(0, grossAnnualSalary - grossAnnualLease);
+  const annualBikTaxableBenefit = vehicleP11DValue * EV_BENCHMARKS.average3YearBikRate;
+  // Adjusted Net Income for Income Tax / PA taper / Childcare includes taxable BiK benefit
+  const postSacrificeAdjustedNetIncome = postSacrificeCashSalary + annualBikTaxableBenefit;
+
+  // 1. Income Tax before vs after gross lease deduction (before BiK)
+  const baselineIncomeTax = calculateIncomeTax(grossAnnualSalary).tax;
+  const postLeaseIncomeTax = calculateIncomeTax(postSacrificeCashSalary).tax;
+  const incomeTaxSavedOnLease = Math.max(0, baselineIncomeTax - postLeaseIncomeTax);
+
+  // 2. Employee Class 1 NI before vs after gross lease deduction (employees do not pay Class 1 NI on BiK)
+  const baselineNi = calculateNationalInsurance(grossAnnualSalary);
+  const postLeaseNi = calculateNationalInsurance(postSacrificeCashSalary);
+  const niSavedOnLease = Math.max(0, baselineNi - postLeaseNi);
+
+  // 3. Optional Student Loan reduction (calculated on cash gross pay subject to Class 1 NI)
+  const slPlan = options?.studentLoanPlan || "NONE";
+  const baselineSl = calculateStudentLoan(grossAnnualSalary, slPlan === "PLAN_2", false, slPlan);
+  const postLeaseSl = calculateStudentLoan(postSacrificeCashSalary, slPlan === "PLAN_2", false, slPlan);
+  const slSavedOnLease = Math.max(0, baselineSl - postLeaseSl);
+
+  // 4. Exact Income Tax owed on the P11D BiK benefit at the post-sacrifice tax position
+  const incomeTaxWithBik = calculateIncomeTax(postSacrificeAdjustedNetIncome).tax;
+  const annualBikTax = Math.max(0, incomeTaxWithBik - postLeaseIncomeTax);
+
+  // 5. HICBC & 30h Free Childcare restoration (evaluated at post-sacrifice Adjusted Net Income incl. BiK)
+  const childrenCount = options?.numberOfChildren || 0;
+  const childcareCount = options?.childrenInChildcare || 0;
+  const cbBefore = calculateChildBenefit(grossAnnualSalary, childrenCount).netBenefit;
+  const cbAfter = calculateChildBenefit(postSacrificeAdjustedNetIncome, childrenCount).netBenefit;
+  const childcareBefore = calculateChildcareValue(grossAnnualSalary, childcareCount);
+  const childcareAfter = calculateChildcareValue(postSacrificeAdjustedNetIncome, childcareCount);
+  const annualChildcareAndBenefitRestored =
+    Math.max(0, cbAfter - cbBefore) + Math.max(0, childcareAfter - childcareBefore);
+
+  const annualTaxAndNiRelief = incomeTaxSavedOnLease + niSavedOnLease + slSavedOnLease;
+  const monthlyTaxRelief = Math.round(annualTaxAndNiRelief / 12);
+  const monthlyBikTax = Math.round(annualBikTax / 12);
+  const effectiveReliefRatePercent = Math.round((annualTaxAndNiRelief / grossAnnualLease) * 100);
+
+  return {
+    annualTaxAndNiRelief,
+    annualBikTax,
+    monthlyTaxRelief,
+    monthlyBikTax,
+    effectiveReliefRatePercent,
+    annualChildcareAndBenefitRestored,
+  };
 }
 
 /**
@@ -102,27 +197,27 @@ export function calculateMonthlyEVElectricityCost(
  * Full EV Comparative Calculation
  */
 export function runEVCalculation(inputs: EVInputs): EVCalculatorResults {
-  const marginalRate = getEmployeeMarginalTaxRate(inputs.grossAnnualSalary);
   const monthlyEVFuel = calculateMonthlyEVElectricityCost(
     inputs.annualMileage,
     inputs.homeChargingPercent,
     inputs.hasSmartEVTariff
   );
 
-  // 1. Salary Sacrifice Option
-  // Monthly BiK Tax = (P11D * 3.3% / 12) * marginal income tax rate (excluding NI)
-  // Income tax portion only: 20%, 40%, or 45% (or 60% in the trap)
-  let incomeTaxOnlyRate = 0.20;
-  if (inputs.grossAnnualSalary > 125140) incomeTaxOnlyRate = 0.45;
-  else if (inputs.grossAnnualSalary > 100000) incomeTaxOnlyRate = 0.60;
-  else if (inputs.grossAnnualSalary > 50270) incomeTaxOnlyRate = 0.40;
-
-  const monthlyBikTax = Math.round(
-    ((inputs.vehicleP11DValue * EV_BENCHMARKS.average3YearBikRate) / 12) * incomeTaxOnlyRate
+  // 1. Salary Sacrifice Option (using exact progressive tax band slicing)
+  const annualGrossLease = inputs.grossMonthlyLease * 12;
+  const progressiveDelta = calculateProgressiveEVTaxDelta(
+    inputs.grossAnnualSalary,
+    annualGrossLease,
+    inputs.vehicleP11DValue,
+    {
+      studentLoanPlan: inputs.studentLoanPlan,
+      numberOfChildren: inputs.numberOfChildren,
+      childrenInChildcare: inputs.childrenInChildcare,
+    }
   );
 
-  // Tax + NI relief on the gross lease
-  const monthlyTaxRelief = Math.round(inputs.grossMonthlyLease * marginalRate);
+  const { monthlyTaxRelief, monthlyBikTax, effectiveReliefRatePercent, annualChildcareAndBenefitRestored } =
+    progressiveDelta;
 
   // Net cost of lease: Gross - Tax Relief + BiK
   const netSalarySacrificeVehicleCost = Math.max(
@@ -144,7 +239,6 @@ export function runEVCalculation(inputs: EVInputs): EVCalculatorResults {
   };
 
   // 2. Personal Contract Purchase (PCP) on the same EV
-  // A typical PCP on a £45k car with £3k deposit is roughly 1.15x the gross lease without tax relief, plus insurance & servicing
   const estimatedPcpMonthly = Math.round(inputs.grossMonthlyLease * 0.92);
   const estimatedInsuranceMonthly = 85;
   const estimatedServiceTyresMonthly = 35;
@@ -163,7 +257,6 @@ export function runEVCalculation(inputs: EVInputs): EVCalculatorResults {
   };
 
   // 3. Cash Purchase / Bank Loan Option
-  // Depreciation over 3 years: ~52% of P11D value / 36 months + lost interest opportunity cost
   const monthlyDepreciation = Math.round((inputs.vehicleP11DValue * 0.52) / 36);
   const cashTotalMonthly =
     monthlyDepreciation + monthlyEVFuel + estimatedInsuranceMonthly + estimatedServiceTyresMonthly;
@@ -211,8 +304,9 @@ export function runEVCalculation(inputs: EVInputs): EVCalculatorResults {
     monthlySavingsVsPcp,
     monthlySavingsVsPetrol,
     threeYearSavingsVsPetrol,
-    effectiveEmployeeTaxRatePercent: Math.round(marginalRate * 100),
+    effectiveEmployeeTaxRatePercent: effectiveReliefRatePercent,
     averageBikPercentOver3Years: Math.round(EV_BENCHMARKS.average3YearBikRate * 1000) / 10,
     fuelSavingsAnnual,
+    annualChildcareAndBenefitRestored,
   };
 }

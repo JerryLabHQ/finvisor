@@ -21,7 +21,7 @@ import {
   runStudentLoanCalculation,
   StudentLoanInputs,
 } from "@/lib/student-loan-calculator";
-import { SUPPORT_URL } from "@/lib/constants";
+import { useFinancialProfile } from "@/lib/financial-profile-store";
 import "../dashboard.css";
 
 const formatGBP = (v: number) =>
@@ -36,7 +36,7 @@ const STUDENT_LOAN_CITATIONS: CitationItem[] = [
   },
   {
     act: "Higher Education and Research Act 2017",
-    description: "Defines Plan 2 repayment terms (£27,295 statutory threshold, RPI to RPI+3% interest rate scale, and complete debt cancellation after 30 years).",
+    description: "Defines Plan 2 repayment terms (£28,470 statutory threshold, RPI to RPI+3% interest rate scale, and complete debt cancellation after 30 years).",
     govUrl: "https://www.gov.uk/repaying-your-student-loan/which-repayment-plan-you-are-on",
   },
   {
@@ -91,6 +91,7 @@ const STUDENT_LOAN_CHECKLIST: ChecklistItem[] = [
 ];
 
 export default function StudentLoanPage() {
+  const { updateProfile } = useFinancialProfile();
   const [salary, setSalary] = useState(38000);
   const [balance, setBalance] = useState(48000);
   const [plan, setPlan] = useState<"PLAN_2" | "PLAN_5" | "POSTGRAD" | "PLAN_1">("PLAN_2");
@@ -99,9 +100,16 @@ export default function StudentLoanPage() {
   const [yearsElapsed, setYearsElapsed] = useState(3);
   const [overpay, setOverpay] = useState(0);
 
-  const [donationDismissed, setDonationDismissed] = useState(false);
   const [showBrokerModal, setShowBrokerModal] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
+
+  React.useEffect(() => {
+    const mappedPlan = plan === "POSTGRAD" ? "PLAN_2" : plan;
+    updateProfile({
+      grossSalary: salary,
+      studentLoanPlan: mappedPlan,
+    });
+  }, [salary, plan, updateProfile]);
 
   const inputs: StudentLoanInputs = useMemo(
     () => ({
@@ -137,27 +145,6 @@ export default function StudentLoanPage() {
     <div className="dashboard-container">
       {/* Unified Suite Header Navigation */}
       <HeaderNav />
-
-      {/* Dismissible Donation Banner */}
-      {!donationDismissed && SUPPORT_URL && (
-        <div className="donation-banner" role="note">
-          <span className="donation-banner__text">
-            👋 <strong>LadderPass Student Loan is 100% free with no paywalls.</strong> If this mathematical projection gives you clarity on your repayments and mortgage borrowing capacity, consider{" "}
-            <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="donation-banner__link">
-              buying me a coffee
-            </a>{" "}
-            to support independent UK tools!
-          </span>
-          <button
-            type="button"
-            className="donation-banner__dismiss"
-            onClick={() => setDonationDismissed(true)}
-            aria-label="Dismiss donation prompt"
-          >
-            ×
-          </button>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -560,7 +547,7 @@ export default function StudentLoanPage() {
       {/* Statutory Sources & Mathematical Methodology (IFS / FT Style) */}
       <StatutoryMethodology
         moduleTitle="Student Loan Repayment & Mortgage Affordability"
-        formulaDescription="Simulates statutory income-contingent repayments (9% on earnings above Plan 2 £27,295 and Plan 5 £25,000), monthly compounding interest based on prevailing RPI, 30y/40y statutory debt cancellation horizons, and impact on FCA borrowing capacity (approx 4.5x annual repayments)."
+        formulaDescription="Simulates statutory income-contingent repayments (9% on earnings above Plan 2 £28,470, Plan 1 £26,065, and Plan 5 £25,000), monthly compounding interest based on prevailing RPI, 30y/40y statutory debt cancellation horizons, and impact on FCA borrowing capacity (approx 4.5x annual repayments)."
         citations={STUDENT_LOAN_CITATIONS}
         defaultOpen={false}
       />
@@ -621,6 +608,10 @@ export default function StudentLoanPage() {
         }}
         statutoryCitations={STUDENT_LOAN_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
         csvFilename="ladderpass_student_loan_audit"
+        onRequestConsultation={() => {
+          setIsDossierOpen(false);
+          setShowBrokerModal(true);
+        }}
       />
 
       {/* Global Institutional Editorial Footer */}

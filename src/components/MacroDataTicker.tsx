@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { UK_MARKET_DEFAULTS } from "@/lib/constants";
+import { UK_MARKET_DEFAULTS, SDLT_CONFIG } from "@/lib/constants";
 import { Landmark, TrendingUp, AlertTriangle, Home, Percent } from "lucide-react";
 
 export function MacroDataTicker() {
@@ -27,7 +27,7 @@ export function MacroDataTicker() {
 
           <div className="macro-ticker__item">
             <span className="macro-ticker__key">
-              <Percent size={12} className="macro-ticker__icon" /> 2y Fixed Mortgages:
+              <Percent size={12} className="macro-ticker__icon" /> 5y Fixed Mortgages:
             </span>
             <span className="macro-ticker__val">{UK_MARKET_DEFAULTS.defaultMortgageRate}%</span>
             <span className="macro-ticker__sub">75% LTV</span>
@@ -37,9 +37,9 @@ export function MacroDataTicker() {
 
           <div className="macro-ticker__item">
             <span className="macro-ticker__key">
-              <TrendingUp size={12} className="macro-ticker__icon" /> 5y Fixed Mortgages:
+              <TrendingUp size={12} className="macro-ticker__icon" /> 2y Fixed Mortgages:
             </span>
-            <span className="macro-ticker__val">4.10%</span>
+            <span className="macro-ticker__val">4.15%</span>
             <span className="macro-ticker__sub">Market Avg</span>
           </div>
 
@@ -47,7 +47,7 @@ export function MacroDataTicker() {
 
           <div className="macro-ticker__item">
             <span className="macro-ticker__key">CPI Inflation:</span>
-            <span className="macro-ticker__val">2.8%</span>
+            <span className="macro-ticker__val">{UK_MARKET_DEFAULTS.defaultInflationPercent}%</span>
             <span className="macro-ticker__sub">ONS Target 2%</span>
           </div>
 
@@ -66,7 +66,7 @@ export function MacroDataTicker() {
           <div className="macro-ticker__item macro-ticker__item--alert">
             <AlertTriangle size={12} className="macro-ticker__icon text-amber" />
             <span className="macro-ticker__alert-text">
-              <strong>Statutory SDLT Sunset:</strong> FTB nil-rate band drops from £425,000 to £300,000 in April 2026
+              <strong>Post-April 2025 Statutory SDLT Active:</strong> FTB 0% band £{SDLT_CONFIG.firstTimeBuyerZeroRateThreshold.toLocaleString()} (£{SDLT_CONFIG.firstTimeBuyerMaxPrice.toLocaleString()} cap) • Standard 0% band £{SDLT_CONFIG.standardBands[0].upTo.toLocaleString()} • 5% HRAD
             </span>
             <Link href="/" className="macro-ticker__alert-link">
               Audit Impact →

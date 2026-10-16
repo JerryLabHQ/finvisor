@@ -21,7 +21,7 @@ import {
   runEVCalculation,
   EVInputs,
 } from "@/lib/ev-calculator";
-import { SUPPORT_URL } from "@/lib/constants";
+import { useFinancialProfile } from "@/lib/financial-profile-store";
 import "../dashboard.css";
 
 const formatGBP = (v: number) =>
@@ -91,6 +91,7 @@ const EV_CHECKLIST: ChecklistItem[] = [
 ];
 
 export default function EVPage() {
+  const { updateProfile } = useFinancialProfile();
   const [p11d, setP11d] = useState(48000);
   const [grossLease, setGrossLease] = useState(650);
   const [salary, setSalary] = useState(85000);
@@ -101,9 +102,15 @@ export default function EVPage() {
   const petrolInsurance = 65;
   const petrolMaint = 45;
 
-  const [donationDismissed, setDonationDismissed] = useState(false);
   const [showBrokerModal, setShowBrokerModal] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
+
+  React.useEffect(() => {
+    updateProfile({
+      grossSalary: salary,
+      evGrossLeaseMonthly: grossLease,
+    });
+  }, [salary, grossLease, updateProfile]);
 
   const inputs: EVInputs = useMemo(
     () => ({
@@ -131,27 +138,6 @@ export default function EVPage() {
     <div className="dashboard-container">
       {/* Unified Suite Header Navigation */}
       <HeaderNav />
-
-      {/* Dismissible Donation Banner */}
-      {!donationDismissed && SUPPORT_URL && (
-        <div className="donation-banner" role="note">
-          <span className="donation-banner__text">
-            👋 <strong>LadderPass EV is 100% free with no car dealer bias or tracking cookies.</strong> If this comparison helps you save hundreds of pounds each month, consider{" "}
-            <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="donation-banner__link">
-              buying me a coffee
-            </a>{" "}
-            to support independent UK research!
-          </span>
-          <button
-            type="button"
-            className="donation-banner__dismiss"
-            onClick={() => setDonationDismissed(true)}
-            aria-label="Dismiss donation prompt"
-          >
-            ×
-          </button>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -653,6 +639,10 @@ export default function EVPage() {
         }}
         statutoryCitations={EV_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
         csvFilename="ladderpass_ev_salary_sacrifice_audit"
+        onRequestConsultation={() => {
+          setIsDossierOpen(false);
+          setShowBrokerModal(true);
+        }}
       />
 
       {/* Global Institutional Editorial Footer */}

@@ -97,7 +97,7 @@ export const UK_CITIES: CityMarketData[] = [
     highlights: [
       "Average property price: £335,000",
       "Average private rent: £1,450/month",
-      "Typical break-even horizon: 5-6 years",
+      "Subject to Revenue Scotland LBTT (£175k FTB zero-rate)",
       "Low tenement factoring costs relative to London service charges",
     ],
   },
@@ -118,7 +118,7 @@ export const UK_CITIES: CityMarketData[] = [
       "Average property price: £220,000",
       "Average private rent: £1,050/month",
       "Typical break-even horizon: 3-5 years",
-      "Zero Stamp Duty for first-time buyers at average price",
+      "Zero post-April 2025 Stamp Duty for first-time buyers (£300k threshold)",
     ],
   },
   {
@@ -137,7 +137,7 @@ export const UK_CITIES: CityMarketData[] = [
     highlights: [
       "Average property price: £495,000",
       "Average private rent: £1,800/month",
-      "Typical break-even horizon: 7-9 years",
+      "Within £500,000 First-Time Buyer SDLT relief cap",
       "High equity requirements for entry",
     ],
   },
@@ -157,7 +157,7 @@ export const UK_CITIES: CityMarketData[] = [
     highlights: [
       "Average property price: £475,000",
       "Average private rent: £1,750/month",
-      "Typical break-even horizon: 7-8 years",
+      "Qualifies for partial FTB SDLT relief (£300k–£500k band)",
       "Strong demand from research and academic institutions",
     ],
   },
@@ -178,7 +178,7 @@ export const UK_CITIES: CityMarketData[] = [
       "Average property price: £215,000",
       "Average private rent: £975/month",
       "Typical break-even horizon: 3-4 years",
-      "Sub-£250k zero-SDLT bracket for all buyers",
+      "Zero SDLT for First-Time Buyers (£1,800 standard SDLT post-April 2025)",
     ],
   },
   {
@@ -197,7 +197,7 @@ export const UK_CITIES: CityMarketData[] = [
     highlights: [
       "Average property price: £195,000",
       "Average private rent: £1,100/month",
-      "Typical break-even horizon: 2-3 years",
+      "Scottish LBTT: £400 for First-Time Buyers (£1,000 standard)",
       "High gross rental yield (~6.8%)",
     ],
   },
@@ -218,7 +218,7 @@ export const UK_CITIES: CityMarketData[] = [
       "Average property price: £190,000",
       "Average private rent: £950/month",
       "Typical break-even horizon: 3-4 years",
-      "Exceptionally low capital barrier to entry",
+      "Exceptionally low capital barrier to entry (£0 FTB SDLT)",
     ],
   },
   {
@@ -237,8 +237,8 @@ export const UK_CITIES: CityMarketData[] = [
     highlights: [
       "Average property price: £265,000",
       "Average private rent: £1,200/month",
-      "Typical break-even horizon: 4-5 years",
-      "Welsh LTT statutory thresholds apply",
+      "Welsh LTT: 0% up to £225,000 (£2,400 due at £265k)",
+      "Welsh Revenue Authority LTT statutory thresholds apply",
     ],
   },
   {

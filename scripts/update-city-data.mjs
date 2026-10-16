@@ -94,6 +94,41 @@ let updatedBlockText = cityBlock.fullText;
 let currentPrice = Number(cityBlock.fullText.match(/averagePrice:\s*(\d+)/)?.[1] || 0);
 let currentRent = Number(cityBlock.fullText.match(/averageRentMonthly:\s*(\d+)/)?.[1] || 0);
 
+function computeDevolvedFtbTaxText(slug, price) {
+  if (slug === "edinburgh" || slug === "glasgow") {
+    // Scottish LBTT FTB (£175k nil-rate)
+    let lbtt = 0;
+    if (price > 175000) lbtt += Math.min(price - 175000, 75000) * 0.02;
+    if (price > 250000) lbtt += Math.min(price - 250000, 75000) * 0.05;
+    if (price > 325000) lbtt += Math.min(price - 325000, 425000) * 0.1;
+    if (price > 750000) lbtt += (price - 750000) * 0.12;
+    return `Scottish LBTT FTB at £${price.toLocaleString("en-GB")}: £${Math.round(lbtt).toLocaleString("en-GB")} (£175k FTB nil-rate)`;
+  }
+  if (slug === "cardiff") {
+    // Welsh LTT (£225k nil-rate, no separate FTB relief)
+    let ltt = 0;
+    if (price > 225000) ltt += Math.min(price - 225000, 175000) * 0.06;
+    if (price > 400000) ltt += Math.min(price - 400000, 350000) * 0.075;
+    if (price > 750000) ltt += Math.min(price - 750000, 750000) * 0.1;
+    if (price > 1500000) ltt += (price - 1500000) * 0.12;
+    return `Welsh LTT at £${price.toLocaleString("en-GB")}: £${Math.round(ltt).toLocaleString("en-GB")} (£225k nil-rate, no separate FTB relief)`;
+  }
+  // England & NI post-April 2025 SDLT
+  if (price <= 300000) {
+    return "£0 FTB Stamp Duty (post-April 2025 £300k threshold)";
+  }
+  if (price <= 500000) {
+    const sdlt = Math.round((price - 300000) * 0.05);
+    return `FTB Stamp Duty at £${price.toLocaleString("en-GB")}: £${sdlt.toLocaleString("en-GB")} (5% above £300k post-April 2025)`;
+  }
+  let std = 0;
+  if (price > 125000) std += Math.min(price - 125000, 125000) * 0.02;
+  if (price > 250000) std += Math.min(price - 250000, 675000) * 0.05;
+  if (price > 925000) std += Math.min(price - 925000, 575000) * 0.1;
+  if (price > 1500000) std += (price - 1500000) * 0.12;
+  return `Standard SDLT applies (>£500k FTB cap): £${Math.round(std).toLocaleString("en-GB")}`;
+}
+
 if (params.price !== undefined && !isNaN(params.price)) {
   currentPrice = Number(params.price);
   updatedBlockText = updatedBlockText.replace(
@@ -105,6 +140,12 @@ if (params.price !== undefined && !isNaN(params.price)) {
   updatedBlockText = updatedBlockText.replace(
     /(Average (?:2-bed )?property price:\s*)£[0-9,]+/g,
     `$1${formattedPrice}`
+  );
+  // Update tax highlight line
+  const taxHighlight = computeDevolvedFtbTaxText(targetSlug, currentPrice);
+  updatedBlockText = updatedBlockText.replace(
+    /"(?:£0 FTB Stamp Duty|FTB Stamp Duty|Standard SDLT applies|Scottish LBTT|Welsh LTT)[^"]*"/,
+    `"${taxHighlight}"`
   );
   console.log(`[${targetSlug}] Updated averagePrice to £${currentPrice.toLocaleString("en-GB")}`);
 }

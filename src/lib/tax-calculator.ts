@@ -2,16 +2,19 @@
  * UK Income Tax, National Insurance & Salary Sacrifice Optimization Engine
  * Models the 60% marginal tax trap (£100k-£125,140), Childcare cliff edge,
  * and High Income Child Benefit Charge (HICBC).
- * Verified against HMRC statutory rules.
+ * Verified against HMRC 2025/2026 statutory rules.
  */
+
+export type StudentLoanPlanCode = "NONE" | "PLAN_1" | "PLAN_2" | "PLAN_4" | "PLAN_5";
 
 export interface TaxInputs {
   grossSalary: number;            // Annual gross employment income (£)
   salarySacrificePension: number; // Annual salary sacrifice or SIPP contribution (£)
   numberOfChildren: number;       // For Child Benefit calculation
   childrenInChildcare: number;    // Number of children eligible for 30h / Tax-Free childcare
-  hasStudentLoanPlan2: boolean;   // Whether 9% student loan applies above £27,295
+  hasStudentLoanPlan2: boolean;   // Whether 9% student loan applies
   hasStudentLoanPostgrad: boolean;// Whether 6% postgraduate loan applies above £21,000
+  studentLoanPlan?: StudentLoanPlanCode; // Optional specific plan override (PLAN_1, PLAN_2, PLAN_4, PLAN_5)
 }
 
 export interface TaxBreakdown {
@@ -36,6 +39,7 @@ export interface TaxOptimizationResults {
   withSacrifice: TaxBreakdown;  // With salary sacrifice
   taxSaved: number;             // Income tax saved via sacrifice
   niSaved: number;              // National Insurance saved via sacrifice
+  studentLoanSaved: number;     // Student loan saved via sacrifice
   totalTaxAndNiSaved: number;
   childcarePreservedValue: number;
   childBenefitRestored: number;
@@ -60,13 +64,13 @@ export const UK_TAX_CONSTANTS = {
   higherRate: 0.40,
   additionalRate: 0.45,
 
-  // Class 1 Employee NI (post-April 2024)
+  // Class 1 Employee NI (post-April 2024/2025)
   niPrimaryThreshold: 12570,
   niUpperEarningsLimit: 50270,
   niMainRate: 0.08, // 8%
   niUpperRate: 0.02, // 2%
 
-  // Child Benefit (2024-2026 rates)
+  // Child Benefit (statutory rates)
   childBenefitFirstChildWeekly: 25.60,
   childBenefitSubsequentWeekly: 16.95,
   hicbcThresholdStart: 60000, // Raised from £50k to £60k in Spring Budget 2024
@@ -76,8 +80,12 @@ export const UK_TAX_CONSTANTS = {
   freeChildcareHoursAnnualValuePerChild: 6500, // 30 hours funded childcare for 38 weeks
   taxFreeChildcareMaxPerChild: 2000,            // £2k top-up per child
 
-  // Student loan repayment thresholds
-  plan2Threshold: 27295,
+  // Student loan repayment thresholds (2025/2026 statutory)
+  plan1Threshold: 26065,
+  plan2Threshold: 28470,
+  plan4Threshold: 32745,
+  plan5Threshold: 25000,
+  planRate: 0.09,
   plan2Rate: 0.09,
   postgradThreshold: 21000,
   postgradRate: 0.06,
@@ -113,8 +121,7 @@ export function calculateIncomeTax(adjustedNetIncome: number): {
   const basicTaxable = Math.min(taxableIncome, basicRateBandSize);
   tax += basicTaxable * UK_TAX_CONSTANTS.basicRate;
 
-  // Higher rate band: from (£50,270 - standard PA + personalAllowance) up to £125,140
-  // In statutory rules: 40% applies to taxable income between £37,700 and £125,140 - personalAllowance
+  // Higher rate band: taxable income between £37,700 and £125,140 - personalAllowance
   const higherRateLimit = UK_TAX_CONSTANTS.higherRateThreshold - personalAllowance;
   if (taxableIncome > basicRateBandSize) {
     const higherTaxable = Math.min(taxableIncome, higherRateLimit) - basicRateBandSize;
@@ -199,16 +206,37 @@ export function calculateChildcareValue(adjustedNetIncome: number, childrenInChi
 }
 
 /**
+ * Resolves the statutory student loan threshold for a given plan
+ */
+export function getPlanThreshold(plan?: StudentLoanPlanCode, hasPlan2 = false): number | null {
+  const effectivePlan = plan || (hasPlan2 ? "PLAN_2" : "NONE");
+  switch (effectivePlan) {
+    case "PLAN_1":
+      return UK_TAX_CONSTANTS.plan1Threshold;
+    case "PLAN_2":
+      return UK_TAX_CONSTANTS.plan2Threshold;
+    case "PLAN_4":
+      return UK_TAX_CONSTANTS.plan4Threshold;
+    case "PLAN_5":
+      return UK_TAX_CONSTANTS.plan5Threshold;
+    default:
+      return null;
+  }
+}
+
+/**
  * Calculates Student Loan Deductions
  */
 export function calculateStudentLoan(
   salary: number,
   hasPlan2: boolean,
-  hasPostgrad: boolean
+  hasPostgrad: boolean,
+  planOverride?: StudentLoanPlanCode
 ): number {
   let deduction = 0;
-  if (hasPlan2 && salary > UK_TAX_CONSTANTS.plan2Threshold) {
-    deduction += (salary - UK_TAX_CONSTANTS.plan2Threshold) * UK_TAX_CONSTANTS.plan2Rate;
+  const threshold = getPlanThreshold(planOverride, hasPlan2);
+  if (threshold !== null && salary > threshold) {
+    deduction += (salary - threshold) * UK_TAX_CONSTANTS.planRate;
   }
   if (hasPostgrad && salary > UK_TAX_CONSTANTS.postgradThreshold) {
     deduction += (salary - UK_TAX_CONSTANTS.postgradThreshold) * UK_TAX_CONSTANTS.postgradRate;
@@ -219,7 +247,11 @@ export function calculateStudentLoan(
 /**
  * Calculates the exact marginal tax rate on the next pound of income
  */
-export function calculateMarginalTaxRate(income: number, hasStudentLoan = false): number {
+export function calculateMarginalTaxRate(
+  income: number,
+  hasStudentLoan = false,
+  planOverride?: StudentLoanPlanCode
+): number {
   let rate = 0;
   if (income > UK_TAX_CONSTANTS.personalAllowance && income <= UK_TAX_CONSTANTS.basicRateThreshold) {
     rate = 20 + 8; // 20% IT + 8% NI = 28%
@@ -230,7 +262,8 @@ export function calculateMarginalTaxRate(income: number, hasStudentLoan = false)
   } else if (income > UK_TAX_CONSTANTS.higherRateThreshold) {
     rate = 45 + 2; // 45% IT + 2% NI = 47%
   }
-  if (hasStudentLoan && income > UK_TAX_CONSTANTS.plan2Threshold) {
+  const slThreshold = getPlanThreshold(planOverride, hasStudentLoan);
+  if (slThreshold !== null && income > slThreshold) {
     rate += 9;
   }
   return rate;
@@ -250,7 +283,8 @@ export function runSingleTaxScenario(
   const studentLoanDeduction = calculateStudentLoan(
     adjustedNetIncome,
     inputs.hasStudentLoanPlan2,
-    inputs.hasStudentLoanPostgrad
+    inputs.hasStudentLoanPostgrad,
+    inputs.studentLoanPlan
   );
   const { entitlement, clawback, netBenefit } = calculateChildBenefit(
     adjustedNetIncome,
@@ -261,7 +295,11 @@ export function runSingleTaxScenario(
   const totalDeductions = incomeTax + nationalInsurance + studentLoanDeduction + clawback;
   const netTakeHome = adjustedNetIncome - (incomeTax + nationalInsurance + studentLoanDeduction) + netBenefit;
 
-  const marginalRate = calculateMarginalTaxRate(adjustedNetIncome, inputs.hasStudentLoanPlan2);
+  const marginalRate = calculateMarginalTaxRate(
+    adjustedNetIncome,
+    inputs.hasStudentLoanPlan2,
+    inputs.studentLoanPlan
+  );
   const effectiveTotalRate = salary > 0 ? (totalDeductions / salary) * 100 : 0;
 
   return {
@@ -295,6 +333,7 @@ export function runTaxOptimization(inputs: TaxInputs): TaxOptimizationResults {
 
   const taxSaved = Math.max(0, baseline.incomeTax - withSacrifice.incomeTax);
   const niSaved = Math.max(0, baseline.nationalInsurance - withSacrifice.nationalInsurance);
+  const studentLoanSaved = Math.max(0, baseline.studentLoanDeduction - withSacrifice.studentLoanDeduction);
   const totalTaxAndNiSaved = taxSaved + niSaved;
 
   const childcarePreservedValue = Math.max(
@@ -316,7 +355,6 @@ export function runTaxOptimization(inputs: TaxInputs): TaxOptimizationResults {
   const annualContrib = sacrifice > 0 ? sacrifice : 10000;
   const pensionGrowthProjections = [5, 10, 15, 20, 25, 30].map((years) => {
     const totalContributed = annualContrib * years;
-    // Compound formula with annual contributions at end of year: FV = PMT * ((1+r)^n - 1) / r
     const r5 = 0.05;
     const r7 = 0.07;
     const fv5 = Math.round((annualContrib * (Math.pow(1 + r5, years) - 1)) / r5);
@@ -345,6 +383,7 @@ export function runTaxOptimization(inputs: TaxInputs): TaxOptimizationResults {
     withSacrifice,
     taxSaved,
     niSaved,
+    studentLoanSaved,
     totalTaxAndNiSaved,
     childcarePreservedValue,
     childBenefitRestored,

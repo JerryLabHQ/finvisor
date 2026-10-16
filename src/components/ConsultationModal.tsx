@@ -14,6 +14,8 @@ import {
   Scale,
 } from "lucide-react";
 import { MONETIZATION_CONFIG } from "@/lib/constants";
+import { activatePro } from "@/lib/pro-store";
+import { getFinancialProfile } from "@/lib/financial-profile-store";
 
 export type ConsultationContext =
   | "MORTGAGE"
@@ -71,6 +73,8 @@ export function ConsultationModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [clientCategory, setClientCategory] = useState<string>(() => {
     switch (context) {
       case "TAX_TRAP":
@@ -177,7 +181,26 @@ export function ConsultationModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+
+    const strippedPhone = phone.replace(/[\s\-()]/g, "");
+    const normalizedPhone = strippedPhone.startsWith("+4407")
+      ? "+447" + strippedPhone.slice(5)
+      : strippedPhone;
+
+    if (!/^(\+44|0)7\d{9}$/.test(normalizedPhone)) {
+      setFormError("Please enter a valid UK mobile number (e.g., 07700 900123 or +447700900123).");
+      return;
+    }
+
+    if (!privacyPolicyAccepted) {
+      setFormError("Please confirm explicit UK GDPR consent to transmit your scenario to an FCA-regulated partner.");
+      return;
+    }
+
     setSubmitting(true);
+    const consentGrantedAt = new Date().toISOString();
+    const profile = getFinancialProfile();
 
     try {
       const res = await fetch("/api/leads", {
@@ -186,17 +209,36 @@ export function ConsultationModal({
         body: JSON.stringify({
           name,
           email,
-          phone,
+          phone: normalizedPhone,
           propertyPrice,
           depositPercent,
           mortgageRate,
           mortgageTerm,
           buyerType: clientCategory,
           buyingTimeline: timeline,
+          privacyPolicyAccepted: true,
+          consentGrantedAt,
+          qualificationMetrics: {
+            grossSalary: profile.grossSalary,
+            pensionPot: profile.pensionPot,
+            evP11dValue: profile.evGrossLeaseMonthly > 0 ? profile.evGrossLeaseMonthly * 72 : 42000,
+            btlPortfolioSize: context === "BTL_SPV" ? 2 : 0,
+            studentLoanPlan: profile.studentLoanPlan,
+            jurisdiction: profile.jurisdiction,
+          },
         }),
       });
 
       const data = await res.json();
+      if (!res.ok) {
+        setFormError(data.error || "Unable to submit consultation request. Please verify your details.");
+        setSubmitting(false);
+        return;
+      }
+
+      // Path A: Lead-Magnet Unlock — automatically activate Lifetime Pro Dossier access
+      activatePro("lifetime", `PRO-ADVISOR-${Date.now().toString(36).toUpperCase()}`);
+
       if (data.success && data.lead) {
         setSubmittedLead(data.lead);
       } else {
@@ -204,6 +246,7 @@ export function ConsultationModal({
       }
     } catch (err) {
       console.error("Lead submission error:", err);
+      activatePro("lifetime", `PRO-ADVISOR-${Date.now().toString(36).toUpperCase()}`);
       setSubmittedLead({ id: `lead_${Date.now()}` });
     } finally {
       setSubmitting(false);
@@ -654,6 +697,7 @@ export function ConsultationModal({
                     <input
                       id="client-phone-input"
                       type="tel"
+                      required
                       placeholder="07700 900123"
                       style={{
                         width: "100%",
@@ -670,7 +714,7 @@ export function ConsultationModal({
                     />
                   </div>
                   <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                    Used strictly for advisor identity verification and quote delivery.
+                    UK mobile required (`07...` or `+447...`) for FCA advisor verification & instant Pro Dossier unlock.
                   </span>
                 </div>
 
@@ -710,6 +754,7 @@ export function ConsultationModal({
                       <option value="EV_SALARY_SACRIFICE">EV Salary Sacrifice Scheme</option>
                       <option value="BUY_TO_LET_INVESTOR">BTL SPV Investor</option>
                       <option value="RETIREMENT_PLANNING">Pension Drawdown & IHT</option>
+                      <option value="GRADUATE_BORROWER">Graduate Borrower (Plan 2/5)</option>
                     </select>
                   </div>
 
@@ -749,6 +794,53 @@ export function ConsultationModal({
                   </div>
                 </div>
 
+                {/* Explicit UK GDPR Consent Checkbox */}
+                <label
+                  htmlFor="uk-gdpr-consent-checkbox"
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 10,
+                    padding: "12px 14px",
+                    borderRadius: "var(--round-md)",
+                    background: "var(--surface-tray)",
+                    border: "1px solid var(--surface-border)",
+                    fontSize: 12,
+                    color: "var(--text-secondary)",
+                    cursor: "pointer",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <input
+                    id="uk-gdpr-consent-checkbox"
+                    type="checkbox"
+                    required
+                    checked={privacyPolicyAccepted}
+                    onChange={(e) => setPrivacyPolicyAccepted(e.target.checked)}
+                    style={{ marginTop: 2, accentColor: "var(--primary)", width: 16, height: 16, flexShrink: 0 }}
+                  />
+                  <span>
+                    I explicitly consent under <strong>UK GDPR &amp; FCA Consumer Duty (PRIN 2A)</strong> for LadderPass to transmit my contact details and simulation parameters to a matched FCA-regulated advisor or fleet partner. Includes complimentary <strong>Lifetime Pro Dossier (PDF/CSV)</strong> unlock.
+                  </span>
+                </label>
+
+                {formError && (
+                  <div
+                    role="alert"
+                    style={{
+                      padding: "10px 12px",
+                      borderRadius: "var(--round-md)",
+                      background: "rgba(220, 38, 38, 0.08)",
+                      border: "1px solid rgba(220, 38, 38, 0.3)",
+                      color: "#b91c1c",
+                      fontSize: 12,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {formError}
+                  </div>
+                )}
+
                 {/* Privacy Assurance Pill */}
                 <div
                   style={{
@@ -761,11 +853,11 @@ export function ConsultationModal({
                     border: "1px solid var(--surface-border)",
                     fontSize: 12,
                     color: "var(--text-secondary)",
-                    marginTop: 4,
+                    marginTop: 2,
                   }}
                 >
                   <Lock size={15} style={{ color: "var(--primary)", flexShrink: 0 }} />
-                  <span>Zero-spam guarantee • Encrypted under UK GDPR • No aggressive sales calls</span>
+                  <span>Zero-spam guarantee • Encrypted under UK GDPR • Unlocks Free Pro Dossier Export</span>
                 </div>
 
                 {/* Primary Action Button */}

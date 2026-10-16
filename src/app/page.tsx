@@ -25,17 +25,24 @@ import {
   Zap,
   GitCompare,
   Table,
-  Coffee,
   HelpCircle,
   CheckCircle2,
   Scale,
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react";
-import { runBuyVsRentCalculation, calculateSDLT, CalculatorInputs, AnnualData } from "@/lib/calculator";
+import {
+  runBuyVsRentCalculation,
+  calculatePropertyTax,
+  getJurisdictionFromCity,
+  getPropertyTaxLabel,
+  CalculatorInputs,
+  AnnualData,
+} from "@/lib/calculator";
 import { UK_CITIES } from "@/lib/cities";
-import { UK_MARKET_DEFAULTS, SUPPORT_URL, SUPPORT_LABEL } from "@/lib/constants";
-import { ReportModal } from "@/components/ReportModal";
+import { UK_MARKET_DEFAULTS, UKTaxJurisdiction } from "@/lib/constants";
+import { useFinancialProfile } from "@/lib/financial-profile-store";
+import { ExecutiveDossierModal } from "@/components/ExecutiveDossierModal";
 import { BrokerModal } from "@/components/BrokerModal";
 import { StressTestView } from "@/components/StressTestView";
 import { ScenarioCompare } from "@/components/ScenarioCompare";
@@ -58,9 +65,9 @@ const formatGBP = (value: number) => {
 
 const BUY_VS_RENT_CITATIONS: CitationItem[] = [
   {
-    act: "Finance Act 2003 (as amended)",
-    section: "Part 4, Stamp Duty Land Tax",
-    description: "Statutory SDLT bands for England & Northern Ireland, including First-Time Buyer relief up to £425,000 and 5% higher rates for additional dwellings (HRAD).",
+    act: "Finance Act 2003 & Devolved Land Transaction Acts",
+    section: "Part 4 SDLT (England/NI), LBTT (Scotland) & LTT (Wales)",
+    description: "Post-April 2025 statutory bands: England/NI 0% up to £125k (or £300k for First-Time Buyers up to £500k cap), Scottish LBTT (£145k / £175k FTB + 8% ADS), and Welsh LTT (£225k nil-rate).",
     govUrl: "https://www.gov.uk/stamp-duty-land-tax",
   },
   {
@@ -72,7 +79,7 @@ const BUY_VS_RENT_CITATIONS: CitationItem[] = [
   {
     act: "Housing Act 1988 & Tenant Fees Act 2019",
     section: "Section 2 & Schedule 1",
-    description: "Statutory assured shorthold tenancy structures and mandatory 5-week refundable deposit protection cap.",
+    description: "Statutory assured shorthold tenancy structures and mandatory 5-week refundable deposit protection cap held at nominal value.",
     govUrl: "https://www.legislation.gov.uk/ukpga/1988/50/contents",
   },
   {
@@ -88,14 +95,14 @@ const BUY_VS_RENT_CHECKLIST: ChecklistItem[] = [
     id: "dip",
     stepNumber: 1,
     title: "Obtain a Decision in Principle (DIP)",
-    detail: "Approach an FCA-regulated mortgage broker to benchmark your maximum borrowing (typically 4.5x household income) and test affordability at stressed rates.",
+    detail: "Approach an FCA-regulated mortgage broker to benchmark your maximum borrowing (typically 4.5x net-adjusted household income) and test affordability at stressed rates.",
     actionTag: "Crucial First Step",
   },
   {
     id: "sdlt-reserve",
     stepNumber: 2,
-    title: "Verify First-Time Buyer Stamp Duty Relief",
-    detail: "Confirm property purchase price is under £425,000 for 0% SDLT in England/NI, and note the statutory sunset reducing the threshold back to £300,000.",
+    title: "Verify Post-April 2025 Stamp Duty / LBTT / LTT Relief",
+    detail: "Confirm property purchase price is under £300,000 for 0% FTB SDLT in England/NI (5% from £300k–£500k; standard bands above £500k), or £175,000 for Scottish LBTT.",
     actionTag: "Tax Reserve",
   },
   {
@@ -268,12 +275,12 @@ const UK_PERSONAS = [
 ];
 
 export default function Dashboard() {
+  const { profile, updateProfile } = useFinancialProfile();
   const [mounted, setMounted] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isBrokerModalOpen, setIsBrokerModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [donationDismissed, setDonationDismissed] = useState(false);
 
   // Active View Tab
   const [activeTab, setActiveTab] = useState<"chart" | "table" | "stress" | "compare" | "truecost">("chart");
@@ -285,6 +292,7 @@ export default function Dashboard() {
   const [timeHorizon, setTimeHorizon] = useState(10);
   const [selectedCitySlug, setSelectedCitySlug] = useState<string | null>(null);
   const [activePersonaId, setActivePersonaId] = useState<string | null>("london-ftb");
+  const [jurisdiction, setJurisdiction] = useState<UKTaxJurisdiction>("ENGLAND_NI");
 
   // State for advanced inputs
   const [mortgageRate, setMortgageRate] = useState(UK_MARKET_DEFAULTS.defaultMortgageRate);
@@ -311,37 +319,73 @@ export default function Dashboard() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Mount & URL Query Param Sync
+  // Mount & Full URL Query Param Hydration (price, deposit, rent, councilTax, serviceCharge, hpi, ftb, city, horizon, salary)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
 
     if (typeof window !== "undefined") {
-      if (
-        localStorage.getItem("ladderpass_donation_dismissed") === "true"
-      ) {
-        setDonationDismissed(true);
-      }
-
       const searchParams = new URLSearchParams(window.location.search);
+      const urlCity = searchParams.get("city");
       const urlPrice = searchParams.get("price");
       const urlRent = searchParams.get("rent");
       const urlDeposit = searchParams.get("deposit");
       const urlHorizon = searchParams.get("horizon");
+      const urlCouncilTax = searchParams.get("councilTax");
+      const urlServiceCharge = searchParams.get("serviceCharge");
+      const urlHpi = searchParams.get("hpi");
+      const urlFtb = searchParams.get("ftb");
+      const urlSalary = searchParams.get("salary");
+
+      if (urlCity) {
+        const matchedCity = UK_CITIES.find((c) => c.slug === urlCity.toLowerCase());
+        if (matchedCity) {
+          setSelectedCitySlug(matchedCity.slug);
+          setActivePersonaId(null);
+          setPropertyPrice(matchedCity.averagePrice);
+          setInitialRent(matchedCity.averageRentMonthly);
+          setDepositPercent(matchedCity.typicalDepositPct);
+          setCouncilTaxMonthly(matchedCity.typicalCouncilTaxMonthly);
+          setServiceChargeMonthly(matchedCity.typicalServiceChargeMonthly);
+          setHouseAppreciationPercent(matchedCity.historicalHpi5YrAvg);
+          const cityJur = getJurisdictionFromCity(matchedCity.slug);
+          setJurisdiction(cityJur);
+          updateProfile({ jurisdiction: cityJur });
+        }
+      }
 
       if (urlPrice) setPropertyPrice(parseInt(urlPrice, 10));
       if (urlRent) setInitialRent(parseInt(urlRent, 10));
       if (urlDeposit) setDepositPercent(parseFloat(urlDeposit));
       if (urlHorizon) setTimeHorizon(parseInt(urlHorizon, 10));
+      if (urlCouncilTax) setCouncilTaxMonthly(parseInt(urlCouncilTax, 10));
+      if (urlServiceCharge) setServiceChargeMonthly(parseInt(urlServiceCharge, 10));
+      if (urlHpi) setHouseAppreciationPercent(parseFloat(urlHpi));
+      if (urlFtb !== null) setIsFirstTimeBuyer(urlFtb === "true" || urlFtb === "1");
+      if (urlSalary) {
+        const parsedSalary = parseInt(urlSalary, 10);
+        if (!isNaN(parsedSalary) && parsedSalary > 0) {
+          updateProfile({ grossSalary: parsedSalary });
+        }
+      }
     }
-  }, []);
+  }, [updateProfile]);
 
-  const dismissDonation = () => {
-    setDonationDismissed(true);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("ladderpass_donation_dismissed", "true");
+  // Sync jurisdiction from global Twin Bar when changed
+  useEffect(() => {
+    if (profile.jurisdiction && profile.jurisdiction !== jurisdiction) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setJurisdiction(profile.jurisdiction);
     }
-  };
+  }, [profile.jurisdiction, jurisdiction]);
+
+  // Sync propertyPrice & depositPercent to Unified UK Financial Twin Store
+  useEffect(() => {
+    if (!mounted) return;
+    if (profile.targetPropertyPrice !== propertyPrice || profile.depositPercent !== depositPercent) {
+      updateProfile({ targetPropertyPrice: propertyPrice, depositPercent });
+    }
+  }, [propertyPrice, depositPercent, mounted, profile.targetPropertyPrice, profile.depositPercent, updateProfile]);
 
   // Compute inputs object
   const inputs: CalculatorInputs = useMemo(() => {
@@ -354,6 +398,7 @@ export default function Dashboard() {
       svrRate,
       isFirstTimeBuyer,
       stampDutyOverride: null,
+      jurisdiction,
       legalFees,
       surveyFees,
       councilTaxMonthly,
@@ -376,6 +421,7 @@ export default function Dashboard() {
     fixedTermYears,
     svrRate,
     isFirstTimeBuyer,
+    jurisdiction,
     legalFees,
     surveyFees,
     councilTaxMonthly,
@@ -404,6 +450,9 @@ export default function Dashboard() {
     setInitialRent(p.rent);
     setIsFirstTimeBuyer(p.ftb);
     setSelectedCitySlug(p.citySlug);
+    const nextJur = getJurisdictionFromCity(p.citySlug);
+    setJurisdiction(nextJur);
+    updateProfile({ targetPropertyPrice: p.price, depositPercent: p.deposit, jurisdiction: nextJur });
     showToast(`Loaded ${p.name} Scenario`);
   };
 
@@ -411,6 +460,7 @@ export default function Dashboard() {
   const handleCitySelect = (citySlug: string) => {
     const city = UK_CITIES.find((c) => c.slug === citySlug);
     if (!city) return;
+    const nextJur = getJurisdictionFromCity(city.slug);
     setSelectedCitySlug(city.slug);
     setActivePersonaId(null);
     setPropertyPrice(city.averagePrice);
@@ -419,7 +469,13 @@ export default function Dashboard() {
     setCouncilTaxMonthly(city.typicalCouncilTaxMonthly);
     setServiceChargeMonthly(city.typicalServiceChargeMonthly);
     setHouseAppreciationPercent(city.historicalHpi5YrAvg);
-    showToast(`Loaded ${city.name} Market Benchmarks`);
+    setJurisdiction(nextJur);
+    updateProfile({
+      targetPropertyPrice: city.averagePrice,
+      depositPercent: city.typicalDepositPct,
+      jurisdiction: nextJur,
+    });
+    showToast(`Loaded ${city.name} Market Benchmarks (${getPropertyTaxLabel(nextJur)})`);
   };
 
   // Copy Shareable Link
@@ -430,6 +486,8 @@ export default function Dashboard() {
     url.searchParams.set("deposit", String(depositPercent));
     url.searchParams.set("rent", String(initialRent));
     url.searchParams.set("horizon", String(timeHorizon));
+    url.searchParams.set("ftb", String(isFirstTimeBuyer));
+    if (selectedCitySlug) url.searchParams.set("city", selectedCitySlug);
 
     navigator.clipboard.writeText(url.toString()).then(() => {
       showToast("Link copied to clipboard! Ready to share with partner.");
@@ -442,8 +500,9 @@ export default function Dashboard() {
   const isBuyWinner = diff > 0;
   const lastYearData = results.annualBreakdown[results.annualBreakdown.length - 1] || results.annualBreakdown[0];
   const totalCombinedWealth = Math.max(1, (lastYearData?.buyerTotalNetWorth || 0) + (lastYearData?.renterTotalNetWorth || 0));
-  const standardSdltCost = calculateSDLT(propertyPrice, false);
+  const standardSdltCost = calculatePropertyTax(propertyPrice, false, false, jurisdiction);
   const sdltSavings = Math.max(0, standardSdltCost - results.sdltCost);
+  const taxLabel = getPropertyTaxLabel(jurisdiction);
 
   const depositCashNeeded = Math.round(propertyPrice * (depositPercent / 100));
   const ltvRatio = 100 - depositPercent;
@@ -462,27 +521,6 @@ export default function Dashboard() {
       {/* Unified Suite Header Navigation */}
       <HeaderNav currentModule="Property" />
 
-      {/* Dismissible Donation Banner */}
-      {!donationDismissed && SUPPORT_URL && (
-        <div className="donation-banner" role="note">
-          <span className="donation-banner__text">
-            👋 <strong>LadderPass is 100% free with no ads, trackers, or broker sales calls.</strong> If this tool helps you and your partner make a confident property decision, consider{" "}
-            <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="donation-banner__link">
-              buying me a coffee
-            </a>{" "}
-            to support hosting & data maintenance!
-          </span>
-          <button
-            type="button"
-            className="donation-banner__dismiss"
-            onClick={dismissDonation}
-            aria-label="Dismiss donation prompt"
-          >
-            ×
-          </button>
-        </div>
-      )}
-
       {/* Welcoming Hero Section */}
       <section className="hero-section">
         <div className="hero-pill">
@@ -493,12 +531,12 @@ export default function Dashboard() {
           Should you buy a home or keep renting in the UK?
         </h1>
         <p className="hero-subtitle">
-          Compare the real mathematical cost of stepping onto the property ladder vs. renting and investing your deposit into a tax-free Stocks & Shares ISA. Updated with current Bank of England base rates, 2026 Stamp Duty (SDLT) thresholds, and full amortization modeling.
+          Compare the real mathematical cost of stepping onto the property ladder vs. renting and investing your deposit into a tax-free Stocks &amp; Shares ISA. Updated with current Bank of England base rates, post-April 2025 Stamp Duty (SDLT), Scottish LBTT, and Welsh LTT rules.
         </p>
 
         {/* Quick Personas */}
         <div className="persona-chips-wrapper">
-          <span className="persona-chips-label">Quick-Start Scenarios for First-Time Buyers & Renters:</span>
+          <span className="persona-chips-label">Quick-Start Scenarios for First-Time Buyers &amp; Renters:</span>
           <div className="persona-chips">
             {UK_PERSONAS.map((p) => (
               <button
@@ -527,7 +565,7 @@ export default function Dashboard() {
               ) : (
                 <>
                   <PiggyBank size={14} />
-                  <span>Verdict: Renting & ISA Investing Wins by {formatGBP(absDiff)}</span>
+                  <span>Verdict: Renting &amp; ISA Investing Wins by {formatGBP(absDiff)}</span>
                 </>
               )}
             </div>
@@ -540,7 +578,7 @@ export default function Dashboard() {
 
             <p className="verdict-summary">
               {isBuyWinner
-                ? `Even after paying ${formatGBP(results.buyTotalSunkCostsAtHorizon)} in non-recoverable mortgage interest, Stamp Duty (£${results.sdltCost.toLocaleString()}), and repairs, your accumulated ${formatGBP(lastYearData.buyerEquity)} in home equity easily outpaces renting.`
+                ? `Even after paying ${formatGBP(results.buyTotalSunkCostsAtHorizon)} in non-recoverable mortgage interest, ${taxLabel} (£${results.sdltCost.toLocaleString()}), and selling costs, your accumulated ${formatGBP(lastYearData.buyerEquity)} in home equity outpaces renting.`
                 : `Because mortgage debt service (${mortgageRate}% fixed / ${svrRate}% SVR) and buying friction cost more than renting, compounding your ${formatGBP(depositCashNeeded)} deposit at ${investmentReturnPercent}% in a Stocks & Shares ISA builds wealth faster.`}
             </p>
           </div>
@@ -552,7 +590,7 @@ export default function Dashboard() {
               style={{ whiteSpace: "nowrap" }}
             >
               <FileText size={16} />
-              <span>Generate Free PDF Report</span>
+              <span>Export Executive Dossier</span>
             </button>
             <button
               onClick={handleCopyShareLink}
@@ -819,7 +857,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* SDLT Statutory Relief Breakdown Card */}
+      {/* SDLT / LBTT / LTT Statutory Relief Breakdown Card */}
       <div className="glass-panel" style={{ padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 38, height: 38, borderRadius: "var(--round-md)", background: "var(--primary-light)", border: "1px solid var(--primary-border)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary)", flexShrink: 0 }}>
@@ -827,34 +865,66 @@ export default function Dashboard() {
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span>HMRC Stamp Duty (SDLT) Assessment: <strong style={{ color: "var(--primary)" }}>{formatGBP(results.sdltCost)}</strong></span>
-              {isFirstTimeBuyer && propertyPrice <= 625000 && (
+              <span>{taxLabel} Assessment: <strong style={{ color: "var(--primary)" }}>{formatGBP(results.sdltCost)}</strong></span>
+              {isFirstTimeBuyer && sdltSavings > 0 && (
                 <span className="editorial-badge-institution editorial-badge-hmrc">
-                  FTB Statutory Relief Applied
+                  FTB Statutory Relief Applied (-{formatGBP(sdltSavings)})
                 </span>
               )}
             </div>
             <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.4 }}>
-              {isFirstTimeBuyer
-                ? propertyPrice <= 425000
-                  ? `0% nil-rate up to £425,000. Statutory relief saved: ${formatGBP(standardSdltCost)} vs standard residential rates.`
-                  : propertyPrice <= 625000
-                    ? `0% on first £425,000, 5% on £425,001–£${propertyPrice.toLocaleString()}. Statutory relief saved: ${formatGBP(sdltSavings)}.`
-                    : `Property price exceeds £625,000 FTB ceiling. Standard residential rates apply (£${results.sdltCost.toLocaleString()}).`
-                : `Standard residential SDLT: 0% up to £250,000, 5% to £925,000 (£${results.sdltCost.toLocaleString()} due).`}
+              {jurisdiction === "SCOTLAND"
+                ? isFirstTimeBuyer
+                  ? `Revenue Scotland LBTT: 0% up to £175,000 for First-Time Buyers (£${results.sdltCost.toLocaleString()} due; saved ${formatGBP(sdltSavings)}).`
+                  : `Revenue Scotland LBTT: 0% up to £145,000, 2% to £250k, 5% to £325k, 10% to £750k (£${results.sdltCost.toLocaleString()} due).`
+                : jurisdiction === "WALES"
+                  ? `Welsh Revenue Authority LTT: 0% up to £225,000, 6% from £225k–£400k, 7.5% to £750k (£${results.sdltCost.toLocaleString()} due; no separate FTB relief in Wales).`
+                  : isFirstTimeBuyer
+                    ? propertyPrice <= 300000
+                      ? `Post-April 2025 HMRC SDLT: 0% nil-rate up to £300,000. Statutory relief saved: ${formatGBP(sdltSavings)} vs standard residential rates.`
+                      : propertyPrice <= 500000
+                        ? `Post-April 2025 HMRC SDLT: 0% on first £300,000, 5% on £300,001–£${propertyPrice.toLocaleString()}. Statutory relief saved: ${formatGBP(sdltSavings)}.`
+                        : `Property price exceeds £500,000 FTB cap. Standard post-April 2025 SDLT rates apply (£${results.sdltCost.toLocaleString()}).`
+                    : `Post-April 2025 standard SDLT: 0% up to £125,000, 2% to £250,000, 5% to £925,000 (£${results.sdltCost.toLocaleString()} due).`}
             </div>
           </div>
         </div>
 
-        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 600, color: "var(--text-primary)", cursor: "pointer", background: "var(--surface-tray)", padding: "8px 14px", borderRadius: "var(--round-full)", border: "1px solid var(--surface-border)" }}>
-          <input
-            type="checkbox"
-            checked={isFirstTimeBuyer}
-            onChange={(e) => setIsFirstTimeBuyer(e.target.checked)}
-            style={{ cursor: "pointer" }}
-          />
-          <span>First-Time Buyer Relief Eligible</span>
-        </label>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <select
+            aria-label="Select UK Property Tax Jurisdiction"
+            value={jurisdiction}
+            onChange={(e) => {
+              const nextJur = e.target.value as UKTaxJurisdiction;
+              setJurisdiction(nextJur);
+              updateProfile({ jurisdiction: nextJur });
+            }}
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              background: "var(--surface-tray)",
+              padding: "8px 12px",
+              borderRadius: "var(--round-full)",
+              border: "1px solid var(--surface-border)",
+              cursor: "pointer",
+            }}
+          >
+            <option value="ENGLAND_NI">🇬🇧 England &amp; NI (SDLT)</option>
+            <option value="SCOTLAND">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland (LBTT)</option>
+            <option value="WALES">🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales (LTT)</option>
+          </select>
+
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 600, color: "var(--text-primary)", cursor: "pointer", background: "var(--surface-tray)", padding: "8px 14px", borderRadius: "var(--round-full)", border: "1px solid var(--surface-border)" }}>
+            <input
+              type="checkbox"
+              checked={isFirstTimeBuyer}
+              onChange={(e) => setIsFirstTimeBuyer(e.target.checked)}
+              style={{ cursor: "pointer" }}
+            />
+            <span>First-Time Buyer Relief Eligible</span>
+          </label>
+        </div>
       </div>
 
       {/* Quick Actions & Regional City Presets */}
@@ -899,7 +969,7 @@ export default function Dashboard() {
               <div className="chart-title-group">
                 <h2>Wealth Accumulation Trajectory</h2>
                 <span className="chart-subtitle">
-                  Total Net Worth comparison (Home Equity vs. Liquid Stocks & Shares ISA Portfolio)
+                  Total Net Worth comparison (Home Equity vs. Liquid Stocks &amp; Shares ISA Portfolio)
                 </span>
               </div>
 
@@ -986,7 +1056,7 @@ export default function Dashboard() {
                           </div>
                           <div className="legend-item">
                             <span className="legend-color-rent"></span>
-                            <span style={{ color: "#1e3a8a" }}>Renting (Stocks & Shares ISA Pot)</span>
+                            <span style={{ color: "#1e3a8a" }}>Renting (Stocks &amp; Shares ISA Pot)</span>
                           </div>
                         </div>
                       )}
@@ -1069,7 +1139,7 @@ export default function Dashboard() {
               </div>
               <div className="stat-details">
                 <div className="detail-row">
-                  <span>Stocks & Shares ISA Pot:</span>
+                  <span>Stocks &amp; Shares ISA Pot:</span>
                   <span className="detail-value">{formatGBP(lastYearData.renterInvestmentPot)}</span>
                 </div>
                 <div className="detail-row">
@@ -1135,7 +1205,7 @@ export default function Dashboard() {
           {activeTab === "compare" && <ScenarioCompare baseInputs={inputs} />}
         </div>
 
-        {/* Right Side: Advisor, Jargon Busters, Broker, Support */}
+        {/* Right Side: Advisor, Jargon Busters, Broker */}
         <div className="advisor-area">
           {/* Executive Advisor Card */}
           <div className="advisor-card glass-panel">
@@ -1151,13 +1221,13 @@ export default function Dashboard() {
             <div className="advisor-details">
               <strong>Key takeaway:</strong>{" "}
               {results.breakEvenYear
-                ? `If you plan to stay in the home for more than ${results.breakEvenYear} years, buying is mathematically advantageous. If you move sooner, renting avoids heavy Stamp Duty and selling friction.`
+                ? `If you plan to stay in the home for more than ${results.breakEvenYear} years, buying is mathematically advantageous. If you move sooner, renting avoids heavy ${taxLabel} and selling friction.`
                 : `Under current interest rates and rent yields, maintaining flexibility and investing the deposit delta builds a larger total wealth pot.`}
             </div>
 
             <button onClick={() => setIsReportModalOpen(true)} className="pdf-trigger-btn" style={{ width: "100%", justifyContent: "center" }}>
               <FileText size={15} />
-              <span>Download Printable PDF Report</span>
+              <span>Export Printable Executive Dossier</span>
             </button>
           </div>
 
@@ -1171,17 +1241,22 @@ export default function Dashboard() {
             <div className="jargon-item">
               <div className="jargon-term">
                 <CheckCircle2 size={13} style={{ color: "var(--primary)" }} />
-                <span>Stamp Duty (SDLT)</span>
+                <span>{taxLabel}</span>
               </div>
               <p className="jargon-definition">
-                Tax paid to HMRC when buying property. First-time buyers pay £0 up to £425,000 (relief up to £625k). Current calculated SDLT: <strong>{formatGBP(results.sdltCost)}</strong>.
+                {jurisdiction === "SCOTLAND"
+                  ? `Scottish Land & Buildings Transaction Tax (LBTT). First-time buyers pay £0 up to £175,000. Current calculated LBTT: `
+                  : jurisdiction === "WALES"
+                    ? `Welsh Land Transaction Tax (LTT). Standard residential buyers pay £0 up to £225,000. Current calculated LTT: `
+                    : `Post-April 2025 HMRC Stamp Duty (SDLT). First-time buyers pay £0 up to £300,000 (relief up to £500k). Current calculated SDLT: `}
+                <strong>{formatGBP(results.sdltCost)}</strong>.
               </p>
             </div>
 
             <div className="jargon-item">
               <div className="jargon-term">
                 <CheckCircle2 size={13} style={{ color: "var(--secondary)" }} />
-                <span>Stocks & Shares ISA</span>
+                <span>Stocks &amp; Shares ISA</span>
               </div>
               <p className="jargon-definition">
                 If you rent, your deposit remains invested in global index funds (typically 6-8% historical average), compounding 100% free of UK capital gains or income tax.
@@ -1204,47 +1279,15 @@ export default function Dashboard() {
             <Briefcase size={22} style={{ color: "var(--primary)", margin: "0 auto 4px" }} />
             <h3 className="cta-title">UK Whole-of-Market Broker Check</h3>
             <p className="cta-desc">
-              Get an FCA-regulated mortgage illustration. Lock current fixed rates, calculate maximum borrowing (up to 4.5x salary), and confirm first-time buyer tax relief.
+              Get an FCA-regulated mortgage illustration. Lock current fixed rates, calculate maximum borrowing (up to 4.5x net-adjusted salary), and unlock your Free Pro Dossier.
             </p>
             <button className="cta-button" onClick={() => setIsBrokerModalOpen(true)}>
               Get Free Broker Illustration
             </button>
             <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginTop: 4 }}>
-              Independent FCA Brokers • Zero Broker Fee Option • No Spam
+              Independent FCA Brokers • Unlocks Free Pro Dossier • UK GDPR Protected
             </div>
           </div>
-
-          {/* Support LadderPass / Buy Me a Coffee Box (fitpass style) */}
-          {SUPPORT_URL && (
-            <div
-              className="glass-panel"
-              style={{
-                padding: 20,
-                borderRadius: 14,
-                background: "var(--surface)",
-                border: "1px solid var(--surface-border)",
-                boxShadow: "var(--shadow-card)",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <Coffee size={16} style={{ color: "var(--accent-amber)" }} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>Support LadderPass</span>
-              </div>
-              <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: 14 }}>
-                LadderPass is 100% free with no paywalls or intrusive ads. If this calculator helped you make a confident property decision, consider buying me a coffee to support hosting & data maintenance!
-              </p>
-              <a
-                href={SUPPORT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="layout__header-donate"
-                style={{ width: "100%", justifyContent: "center" }}
-              >
-                <Coffee size={14} />
-                <span>{SUPPORT_LABEL}</span>
-              </a>
-            </div>
-          )}
         </div>
       </div>
 
@@ -1278,7 +1321,7 @@ export default function Dashboard() {
         <div className="drawer-content">
           {/* Mortgage settings */}
           <div className="drawer-section">
-            <h3 className="section-title">Buying & Mortgage Structure</h3>
+            <h3 className="section-title">Buying &amp; Mortgage Structure</h3>
 
             <div className="checkbox-row" onClick={() => setIsFirstTimeBuyer(!isFirstTimeBuyer)}>
               <input
@@ -1287,9 +1330,9 @@ export default function Dashboard() {
                 checked={isFirstTimeBuyer}
                 onChange={() => {}}
               />
-              <span className="checkbox-label">First-Time Buyer SDLT Relief</span>
+              <span className="checkbox-label">First-Time Buyer Tax Relief</span>
             </div>
-            <p className="help-text">Exempts Stamp Duty on purchases up to £425k in England/NI (relief up to £625k).</p>
+            <p className="help-text">Exempts Stamp Duty on purchases up to £300k in England/NI (relief up to £500k) or £175k LBTT in Scotland.</p>
 
             <div className="form-grid">
               <div className="slider-group">
@@ -1378,7 +1421,7 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Service Charge & Ground Rent (Monthly)</span>
+                  <span>Service Charge &amp; Ground Rent (Monthly)</span>
                   <span style={{ fontWeight: 700 }}>£{serviceChargeMonthly}</span>
                 </div>
                 <input
@@ -1426,7 +1469,7 @@ export default function Dashboard() {
 
               <div className="slider-group">
                 <div className="slider-labels">
-                  <span>Solicitor & Legal Fees</span>
+                  <span>Solicitor &amp; Legal Fees</span>
                   <span style={{ fontWeight: 700 }}>£{legalFees}</span>
                 </div>
                 <input
@@ -1552,11 +1595,73 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Report Modal */}
-      <ReportModal
+      {/* Institutional Executive Dossier Modal (Unified across all 6 engines) */}
+      <ExecutiveDossierModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
-        results={results}
+        title="UK Residential Acquisition & Buy vs. Rent Dossier"
+        subtitle={`Target Property: ${formatGBP(propertyPrice)} (${depositPercent}% Deposit / ${ltvRatio}% LTV) • ${timeHorizon}-Year Horizon • ${taxLabel}`}
+        badge={`Ref: #LP-PROP-${propertyPrice}`}
+        metrics={[
+          {
+            label: `${timeHorizon}-Year Net Worth Verdict`,
+            value: isBuyWinner ? `Buying +${formatGBP(absDiff)}` : `Renting +${formatGBP(absDiff)}`,
+            sub: results.breakEvenYear ? `Break-Even at Year ${results.breakEvenYear}` : "Renting compounds faster",
+          },
+          {
+            label: "Buyer Net Worth at Horizon",
+            value: formatGBP(lastYearData.buyerTotalNetWorth),
+            sub: `Home Equity: ${formatGBP(lastYearData.buyerEquity)}`,
+          },
+          {
+            label: "Renter ISA Net Worth at Horizon",
+            value: formatGBP(lastYearData.renterTotalNetWorth),
+            sub: `S&S ISA Pot: ${formatGBP(lastYearData.renterInvestmentPot)}`,
+          },
+          {
+            label: `Upfront Cash & ${taxLabel}`,
+            value: formatGBP(results.buyUpfrontCosts),
+            sub: `${taxLabel}: ${formatGBP(results.sdltCost)} (Deposit: ${formatGBP(depositCashNeeded)})`,
+          },
+        ]}
+        summaryParagraph={
+          isBuyWinner
+            ? `Over a ${timeHorizon}-year horizon at ${mortgageRate}% initial fixed interest (${svrRate}% SVR thereafter) and ${houseAppreciationPercent}% annual HPI, purchasing a ${formatGBP(propertyPrice)} property builds ${formatGBP(absDiff)} more net wealth than renting at £${initialRent.toLocaleString()}/month, reaching net-worth break-even after selling friction in Year ${results.breakEvenYear || 1}.`
+            : `Over a ${timeHorizon}-year horizon, renting at £${initialRent.toLocaleString()}/month and compounding the ${formatGBP(depositCashNeeded)} deposit plus monthly cashflow savings at ${investmentReturnPercent}% inside a tax-free Stocks & Shares ISA generates ${formatGBP(absDiff)} more net wealth than purchasing.`
+        }
+        breakdownTable={{
+          headers: [
+            "Year",
+            "Property Value",
+            "Mortgage Balance",
+            "Buyer Home Equity",
+            "Buyer Total Net Worth",
+            "Renter ISA Pot",
+            "Renter Total Net Worth",
+            "Cumulative Buyer Sunk",
+            "Cumulative Renter Sunk",
+          ],
+          rows: results.annualBreakdown.map((r) => [
+            `Year ${r.year}`,
+            formatGBP(r.homeValue),
+            formatGBP(r.mortgageBalance),
+            formatGBP(r.buyerEquity),
+            formatGBP(r.buyerTotalNetWorth),
+            formatGBP(r.renterInvestmentPot),
+            formatGBP(r.renterTotalNetWorth),
+            formatGBP(r.buyerSunkCostsCumulative),
+            formatGBP(r.renterSunkCostsCumulative),
+          ]),
+        }}
+        statutoryCitations={BUY_VS_RENT_CITATIONS.map((c) => ({
+          act: `${c.act} (${c.section})`,
+          description: c.description,
+        }))}
+        csvFilename="ladderpass_buy_vs_rent_dossier"
+        onRequestConsultation={() => {
+          setIsReportModalOpen(false);
+          setIsBrokerModalOpen(true);
+        }}
       />
 
       {/* Broker Consultation Modal */}

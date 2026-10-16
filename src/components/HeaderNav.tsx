@@ -10,15 +10,15 @@ import {
   GraduationCap,
   Building,
   Coins,
-  Coffee,
   Share2,
   Menu,
   X,
   Check,
   ChevronDown,
+  ShieldCheck,
 } from "lucide-react";
-import { UK_MARKET_DEFAULTS, SUPPORT_URL, SUPPORT_LABEL } from "@/lib/constants";
 import { MacroDataTicker } from "@/components/MacroDataTicker";
+import { UnifiedTwinBar } from "@/components/UnifiedTwinBar";
 
 export const FINANCIAL_MODELS = [
   {
@@ -42,7 +42,7 @@ export const FINANCIAL_MODELS = [
   {
     href: "/property/spv",
     label: "BTL Limited Company SPV",
-    subtitle: "Section 24 mortgage relief & 19% Corp Tax",
+    subtitle: "Section 24 mortgage relief & 19%-25% Corp Tax",
     icon: Building,
   },
   {
@@ -112,6 +112,7 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
 
   const isPropertyActive = pathname === "/" || (pathname?.startsWith("/?") ?? false);
   const isCitiesActive = pathname?.startsWith("/city");
+  const isPartnersActive = pathname?.startsWith("/partners");
   const activeModel = FINANCIAL_MODELS.find(
     (m) => pathname === m.href || pathname?.startsWith(m.href)
   );
@@ -136,7 +137,7 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
           </Link>
         </div>
 
-        {/* Desktop Executive Links & Dropdown (No Calculator Farm Tabs) */}
+        {/* Desktop Executive Links & Dropdown */}
         <div className="ladder-nav__center">
           <div className="executive-nav" role="navigation">
             <Link
@@ -151,7 +152,7 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
             <Link
               href="/city/london"
               className={`executive-nav-link ${isCitiesActive ? "active" : ""}`}
-              title="Regional UK City Benchmarks (10 Major Hubs)"
+              title="Regional UK City Benchmarks (19 Major Hubs)"
             >
               <Building size={14} className="executive-nav-link__icon" />
               <span>UK Cities</span>
@@ -205,134 +206,121 @@ export function HeaderNav({ currentModule }: HeaderNavProps = {}) {
                 </div>
               )}
             </div>
+
+            <Link
+              href="/partners"
+              className={`executive-nav-link ${isPartnersActive ? "active" : ""}`}
+              title="B2B Broker & Estate Agency White-Label Widgets"
+            >
+              <ShieldCheck size={14} className="executive-nav-link__icon" />
+              <span>B2B Partners</span>
+            </Link>
           </div>
         </div>
 
-        {/* Right Action Utilities */}
+        {/* Right Utility Actions */}
         <div className="ladder-nav__right">
-          <a
-            href="https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate"
-            target="_blank"
-            rel="noreferrer"
-            className="boe-pill"
-            title="Current Bank of England Official Bank Rate • MPC Indexed"
-          >
-            <span className="pulse-dot"></span>
-            <span>BoE Base: {UK_MARKET_DEFAULTS.boeBaseRate}%</span>
-          </a>
-
-          {/* Preserved Buy Me A Coffee pill button */}
-          {SUPPORT_URL && (
-            <a
-              href={SUPPORT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="layout__header-donate"
-              title="Support this free independent UK project"
-            >
-              <Coffee size={14} />
-              <span>{SUPPORT_LABEL}</span>
-            </a>
-          )}
-
           <button
+            type="button"
             onClick={handleCopyShareLink}
             className="share-nav-btn"
-            title="Share with partner or colleague"
-            type="button"
+            title="Copy scenario link to clipboard"
           >
-            {copied ? <Check size={13} style={{ color: "var(--accent-green)" }} /> : <Share2 size={13} />}
+            {copied ? <Check size={14} /> : <Share2 size={14} />}
             <span>{copied ? "Copied" : "Share"}</span>
           </button>
 
-          {/* Mobile Menu Toggle Button */}
+          <Link
+            href="/partners"
+            className="layout__header-donate"
+            title="Embed White-Label Widgets & FCA Broker Network"
+          >
+            <ShieldCheck size={13} />
+            <span>Partner Network</span>
+          </Link>
+
           <button
             type="button"
-            className="ladder-nav__mobile-toggle"
+            className="mobile-menu-toggle"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation menu"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>
 
-      {/* Institutional FT-style Live Macro Data Ticker */}
+      {/* Live Macroeconomic Benchmark Ticker */}
       <MacroDataTicker />
+
+      {/* Live UK Financial Twin Payslip & Borrowing Capacity Bar */}
+      <UnifiedTwinBar />
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="ladder-nav__mobile-drawer">
-          <div className="mobile-drawer__section-title">Core Property Intelligence</div>
-          <div className="mobile-drawer__list">
+        <div className="mobile-nav-drawer" role="dialog" aria-label="Mobile Navigation">
+          <div className="mobile-nav-section">
+            <div className="mobile-nav-heading">Core Property Suite</div>
             <Link
               href="/"
-              className={`mobile-drawer__item ${isPropertyActive ? "mobile-drawer__item--active" : ""}`}
+              className={`mobile-nav-item ${isPropertyActive ? "active" : ""}`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              <div className="mobile-drawer__item-icon">
-                <Scale size={16} />
-              </div>
-              <div className="mobile-drawer__item-info">
-                <div className="mobile-drawer__item-title">Buy vs Rent</div>
-                <div className="mobile-drawer__item-desc">40-year mortgage amortization & SDLT relief</div>
+              <Scale size={16} />
+              <div>
+                <div className="mobile-nav-title">Buy vs Rent & Mortgages</div>
+                <div className="mobile-nav-sub">SDLT/LBTT/LTT, 40y amortization & ISA opportunity cost</div>
               </div>
             </Link>
-
             <Link
               href="/city/london"
-              className={`mobile-drawer__item ${isCitiesActive ? "mobile-drawer__item--active" : ""}`}
+              className={`mobile-nav-item ${isCitiesActive ? "active" : ""}`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              <div className="mobile-drawer__item-icon">
-                <Building size={16} />
-              </div>
-              <div className="mobile-drawer__item-info">
-                <div className="mobile-drawer__item-title">UK Regional Cities</div>
-                <div className="mobile-drawer__item-desc">Price-to-rent ratios across 10 major hubs</div>
+              <Building size={16} />
+              <div>
+                <div className="mobile-nav-title">UK Regional City Hubs</div>
+                <div className="mobile-nav-sub">19 metropolitan benchmarks & price-to-rent ratios</div>
               </div>
             </Link>
           </div>
 
-          <div className="mobile-drawer__section-title" style={{ marginTop: 8 }}>
-            Specialist Financial Models
-          </div>
-          <div className="mobile-drawer__list">
+          <div className="mobile-nav-section">
+            <div className="mobile-nav-heading">Specialist Financial Models</div>
             {FINANCIAL_MODELS.map((item) => {
-              const active = pathname === item.href;
               const Icon = item.icon;
+              const active = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`mobile-drawer__item ${active ? "mobile-drawer__item--active" : ""}`}
+                  className={`mobile-nav-item ${active ? "active" : ""}`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <div className="mobile-drawer__item-icon">
-                    <Icon size={16} />
-                  </div>
-                  <div className="mobile-drawer__item-info">
-                    <div className="mobile-drawer__item-title">{item.label}</div>
-                    <div className="mobile-drawer__item-desc">{item.subtitle}</div>
+                  <Icon size={16} />
+                  <div>
+                    <div className="mobile-nav-title">{item.label}</div>
+                    <div className="mobile-nav-sub">{item.subtitle}</div>
                   </div>
                 </Link>
               );
             })}
           </div>
 
-          <div className="mobile-drawer__footer">
-            {SUPPORT_URL && (
-              <a
-                href={SUPPORT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="layout__header-donate"
-                style={{ justifyContent: "center" }}
-              >
-                <Coffee size={14} />
-                <span>{SUPPORT_LABEL}</span>
-              </a>
-            )}
+          <div className="mobile-nav-section">
+            <div className="mobile-nav-heading">Institutional B2B</div>
+            <Link
+              href="/partners"
+              className={`mobile-nav-item ${isPartnersActive ? "active" : ""}`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <ShieldCheck size={16} />
+              <div>
+                <div className="mobile-nav-title">B2B Partner Portal & White-Label Widgets</div>
+                <div className="mobile-nav-sub">Embed calculators & FCA Consumer Duty lead routing</div>
+              </div>
+            </Link>
           </div>
         </div>
       )}

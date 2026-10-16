@@ -4,6 +4,8 @@
  * Last updated: October 2026
  */
 
+export type UKTaxJurisdiction = "ENGLAND_NI" | "SCOTLAND" | "WALES";
+
 export const UK_MARKET_DEFAULTS = {
   // Current Bank of England Base Rate and retail lending benchmarks
   boeBaseRate: 3.75,
@@ -29,40 +31,64 @@ export const UK_MARKET_DEFAULTS = {
 };
 
 /**
- * England & Northern Ireland Stamp Duty Land Tax (SDLT) Brackets
+ * England & Northern Ireland Stamp Duty Land Tax (SDLT) Brackets (Post-April 2025 Statutory Rules)
  * Verified against Gov.uk HMRC guidelines.
  */
 export const SDLT_CONFIG = {
-  // First-time buyer relief limits
-  firstTimeBuyerMaxPrice: 625000,
-  firstTimeBuyerZeroRateThreshold: 425000,
+  // First-time buyer relief limits (post-April 2025: 0% up to £300k, 5% from £300k to £500k; >£500k standard rates)
+  firstTimeBuyerMaxPrice: 500000,
+  firstTimeBuyerZeroRateThreshold: 300000,
   firstTimeBuyerReliefRate: 0.05,
 
-  // Standard residential bands
+  // Standard residential bands (post-April 2025)
   standardBands: [
-    { upTo: 250000, rate: 0.00 },
+    { upTo: 125000, rate: 0.00 },
+    { upTo: 250000, rate: 0.02 },
     { upTo: 925000, rate: 0.05 },
     { upTo: 1500000, rate: 0.10 },
     { upTo: Infinity, rate: 0.12 },
   ],
 
-  // Surcharge for additional properties (buy-to-let / second home)
-  additionalPropertySurchargeRate: 0.05, // 5% surcharge introduced in Autumn Budget
+  // Surcharge for additional properties (buy-to-let / second home HRAD)
+  additionalPropertySurchargeRate: 0.05,
 };
 
 /**
- * Support & Donation Configuration (reusing Buy Me a Coffee setup)
+ * Scotland Land and Buildings Transaction Tax (LBTT) Brackets
+ * Verified against Revenue Scotland statutory guidelines.
  */
-export const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_URL || "https://buymeacoffee.com/jerrylabhq";
-export const SUPPORT_LABEL = "☕ Buy me a coffee";
+export const LBTT_CONFIG = {
+  firstTimeBuyerZeroRateThreshold: 175000, // FTB relief raises nil-rate band from £145k to £175k
+  standardBands: [
+    { upTo: 145000, rate: 0.00 },
+    { upTo: 250000, rate: 0.02 },
+    { upTo: 325000, rate: 0.05 },
+    { upTo: 750000, rate: 0.10 },
+    { upTo: Infinity, rate: 0.12 },
+  ],
+  additionalDwellingSupplementRate: 0.08, // 8% ADS on additional residential properties
+};
+
+/**
+ * Wales Land Transaction Tax (LTT) Brackets
+ * Verified against Welsh Revenue Authority (WRA) statutory guidelines.
+ */
+export const LTT_CONFIG = {
+  standardBands: [
+    { upTo: 225000, rate: 0.00 },
+    { upTo: 400000, rate: 0.06 },
+    { upTo: 750000, rate: 0.075 },
+    { upTo: 1500000, rate: 0.10 },
+    { upTo: Infinity, rate: 0.12 },
+  ],
+  additionalPropertySurchargeRate: 0.05, // 5% higher residential rates surcharge across bands
+};
 
 /**
  * Product & Monetization Configuration
  */
 export const MONETIZATION_CONFIG = {
   appName: "LadderPass",
-  supportUrl: SUPPORT_URL,
-  supportLabel: SUPPORT_LABEL,
   proPricing: {
     lifetimePassGbp: 19,
     monthlySubscriptionGbp: 9,
@@ -71,7 +97,7 @@ export const MONETIZATION_CONFIG = {
     partnerName: "LadderPass FCA Broker Network",
     averageBrokerCommissionPerLeadGbp: 175,
     complianceNotice:
-      "LadderPass is an independent financial modeling platform. When you request a consultation, we introduce you to FCA-regulated independent mortgage brokers at no cost to you.",
+      "LadderPass is an independent financial modeling platform. When you request a consultation, we introduce you to FCA-regulated independent mortgage brokers or Chartered IFAs at no upfront cost to you.",
   },
 };
 
@@ -83,4 +109,3 @@ export const SITE_URL =
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : "https://ladderpass.vercel.app");
-

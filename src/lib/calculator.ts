@@ -1,4 +1,6 @@
-import { SDLT_CONFIG } from "./constants";
+import { SDLT_CONFIG, LBTT_CONFIG, LTT_CONFIG, UKTaxJurisdiction } from "./constants";
+
+export type { UKTaxJurisdiction };
 
 export interface CalculatorInputs {
   propertyPrice: number;
@@ -25,6 +27,7 @@ export interface CalculatorInputs {
   houseAppreciationPercent: number; // HPI (e.g. 3.5)
   timeHorizonYears: number;
   sellingCostPercent?: number; // Optional selling agent/legal fee at exit (default: 1.5%)
+  jurisdiction?: UKTaxJurisdiction; // ENGLAND_NI (SDLT), SCOTLAND (LBTT), WALES (LTT)
 }
 
 export interface AnnualData {
@@ -76,46 +79,132 @@ export interface CalculatorResults {
   initialMonthlyMortgage: number;
   initialMonthlyRent: number;
   initialMonthlyBuyerOutgoings: number;
-  netWorthDifferenceAtHorizon: number; // Positive if Buy is better, negative if Rent
+  netWorthDifferenceAtHorizon: number; // Positive if Buy is better (after selling fees), negative if Rent
   buyTotalSunkCostsAtHorizon: number;
   rentTotalSunkCostsAtHorizon: number;
   sdltCost: number;
   sunkCostBreakdown: SunkCostBreakdown;
   sellingFeesAtHorizon: number;
   netBuyerWorthAfterSelling: number;
+  jurisdiction: UKTaxJurisdiction;
+  taxName: "SDLT" | "LBTT" | "LTT";
+}
+
+/**
+ * Resolves the statutory UK property tax jurisdiction from a city slug or region string
+ */
+export function getJurisdictionFromCity(citySlugOrRegion?: string | null): UKTaxJurisdiction {
+  if (!citySlugOrRegion) return "ENGLAND_NI";
+  const norm = citySlugOrRegion.toLowerCase().trim();
+  if (norm === "edinburgh" || norm === "glasgow" || norm === "scotland") {
+    return "SCOTLAND";
+  }
+  if (norm === "cardiff" || norm === "swansea" || norm === "wales") {
+    return "WALES";
+  }
+  return "ENGLAND_NI";
+}
+
+/**
+ * Returns the short statutory name for the property transaction tax in a jurisdiction
+ */
+export function getPropertyTaxLabel(jurisdiction: UKTaxJurisdiction = "ENGLAND_NI"): "SDLT" | "LBTT" | "LTT" {
+  if (jurisdiction === "SCOTLAND") return "LBTT";
+  if (jurisdiction === "WALES") return "LTT";
+  return "SDLT";
+}
+
+/**
+ * Calculates UK Property Transaction Tax across devolved jurisdictions:
+ * - ENGLAND_NI: Stamp Duty Land Tax (SDLT) (Post-April 2025 HMRC rules)
+ * - SCOTLAND: Land and Buildings Transaction Tax (LBTT) (+ 8% ADS for additional dwellings)
+ * - WALES: Land Transaction Tax (LTT) (+ 5% higher residential rates for additional dwellings)
+ */
+export function calculatePropertyTax(
+  price: number,
+  isFirstTimeBuyer: boolean,
+  isAdditionalProperty = false,
+  jurisdiction: UKTaxJurisdiction = "ENGLAND_NI"
+): number {
+  if (price <= 0) return 0;
+
+  if (jurisdiction === "SCOTLAND") {
+    let lbtt = 0;
+    let previousThreshold = 0;
+
+    for (let i = 0; i < LBTT_CONFIG.standardBands.length; i++) {
+      const band = LBTT_CONFIG.standardBands[i];
+      // For Scottish FTBs (non-additional property), the 0% band extends to £175,000
+      const effectiveUpTo =
+        i === 0 && isFirstTimeBuyer && !isAdditionalProperty
+          ? LBTT_CONFIG.firstTimeBuyerZeroRateThreshold
+          : band.upTo;
+
+      if (price > previousThreshold) {
+        const taxableInBand = Math.max(0, Math.min(price, effectiveUpTo) - previousThreshold);
+        lbtt += taxableInBand * band.rate;
+        previousThreshold = effectiveUpTo;
+      }
+    }
+
+    if (isAdditionalProperty && price >= 40000) {
+      lbtt += price * LBTT_CONFIG.additionalDwellingSupplementRate;
+    }
+
+    return Math.round(lbtt);
+  }
+
+  if (jurisdiction === "WALES") {
+    let ltt = 0;
+    let previousThreshold = 0;
+    const surcharge = isAdditionalProperty ? LTT_CONFIG.additionalPropertySurchargeRate : 0;
+
+    for (const band of LTT_CONFIG.standardBands) {
+      if (price > previousThreshold) {
+        const taxableInBand = Math.min(price, band.upTo) - previousThreshold;
+        ltt += taxableInBand * (band.rate + surcharge);
+        previousThreshold = band.upTo;
+      }
+    }
+
+    return Math.round(ltt);
+  }
+
+  // Default: ENGLAND_NI (SDLT driven 100% dynamically from SDLT_CONFIG)
+  if (isFirstTimeBuyer && !isAdditionalProperty && price <= SDLT_CONFIG.firstTimeBuyerMaxPrice) {
+    if (price <= SDLT_CONFIG.firstTimeBuyerZeroRateThreshold) {
+      return 0;
+    }
+    return Math.round(
+      (price - SDLT_CONFIG.firstTimeBuyerZeroRateThreshold) * SDLT_CONFIG.firstTimeBuyerReliefRate
+    );
+  }
+
+  let sdlt = 0;
+  let previousThreshold = 0;
+  const surcharge = isAdditionalProperty ? SDLT_CONFIG.additionalPropertySurchargeRate : 0;
+
+  for (const band of SDLT_CONFIG.standardBands) {
+    if (price > previousThreshold) {
+      const taxableInBand = Math.min(price, band.upTo) - previousThreshold;
+      sdlt += taxableInBand * (band.rate + surcharge);
+      previousThreshold = band.upTo;
+    }
+  }
+
+  return Math.round(sdlt);
 }
 
 /**
  * Calculates Stamp Duty Land Tax (SDLT) for England & Northern Ireland
+ * (Also supports optional jurisdiction parameter for convenience)
  */
-export function calculateSDLT(price: number, isFirstTimeBuyer: boolean): number {
-  if (price <= 0) return 0;
-
-  if (isFirstTimeBuyer) {
-    // First-time buyer relief applies to purchases up to £625,000
-    if (price <= SDLT_CONFIG.firstTimeBuyerMaxPrice) {
-      if (price <= SDLT_CONFIG.firstTimeBuyerZeroRateThreshold) {
-        return 0;
-      } else {
-        return (price - SDLT_CONFIG.firstTimeBuyerZeroRateThreshold) * SDLT_CONFIG.firstTimeBuyerReliefRate;
-      }
-    }
-    // If price is over £625k, no first-time buyer relief applies; standard rates are used
-  }
-
-  // Standard Rates (marginal bands)
-  let sdlt = 0;
-  if (price > 1500000) {
-    sdlt += (price - 1500000) * 0.12;
-    sdlt += (1500000 - 925000) * 0.10;
-    sdlt += (925000 - 250000) * 0.05;
-  } else if (price > 925000) {
-    sdlt += (price - 925000) * 0.10;
-    sdlt += (925000 - 250000) * 0.05;
-  } else if (price > 250000) {
-    sdlt += (price - 250000) * 0.05;
-  }
-  return sdlt;
+export function calculateSDLT(
+  price: number,
+  isFirstTimeBuyer: boolean,
+  jurisdiction: UKTaxJurisdiction = "ENGLAND_NI"
+): number {
+  return calculatePropertyTax(price, isFirstTimeBuyer, false, jurisdiction);
 }
 
 /**
@@ -158,16 +247,20 @@ export function runBuyVsRentCalculation(inputs: CalculatorInputs): CalculatorRes
     houseAppreciationPercent,
     timeHorizonYears,
     sellingCostPercent = 1.5,
+    jurisdiction = "ENGLAND_NI",
   } = inputs;
 
   const deposit = propertyPrice * (depositPercent / 100);
   const loanAmount = Math.max(0, propertyPrice - deposit);
   
-  // Upfront Costs
-  const sdltCost = stampDutyOverride !== null ? stampDutyOverride : calculateSDLT(propertyPrice, isFirstTimeBuyer);
+  // Upfront Costs (using devolved jurisdiction if not overridden)
+  const sdltCost =
+    stampDutyOverride !== null
+      ? stampDutyOverride
+      : calculatePropertyTax(propertyPrice, isFirstTimeBuyer, false, jurisdiction);
   const buyUpfrontCosts = deposit + sdltCost + legalFees + surveyFees;
   
-  // Rent deposit is capped at 5 weeks rent in the UK
+  // Rent deposit is capped at 5 weeks rent in the UK (Tenant Fees Act 2019)
   const rentDeposit = (initialRent * 12 / 52) * 5;
   const rentUpfrontCosts = rentDeposit;
   
@@ -311,6 +404,8 @@ export function runBuyVsRentCalculation(inputs: CalculatorInputs): CalculatorRes
     // Store annual summary
     if (month % 12 === 0 || month === totalMonths) {
       const year = Math.ceil(month / 12);
+      const nominalDeposit = Math.round(rentDeposit);
+      const roundedRenterInvestments = Math.round(renterInvestments);
       annualBreakdown.push({
         year,
         homeValue: Math.round(currentHomeValue),
@@ -326,9 +421,9 @@ export function runBuyVsRentCalculation(inputs: CalculatorInputs): CalculatorRes
         serviceChargePaidThisYear: Math.round(serviceChargePaidThisYear),
         
         rentPaidThisYear: Math.round(rentPaidThisYear),
-        renterInvestmentPot: Math.round(renterInvestments),
-        renterDepositRefundable: Math.round(rentDeposit * Math.pow(1 + inflationPercent / 100, year)),
-        renterTotalNetWorth: Math.round(renterInvestments + rentDeposit),
+        renterInvestmentPot: roundedRenterInvestments,
+        renterDepositRefundable: nominalDeposit,
+        renterTotalNetWorth: roundedRenterInvestments + nominalDeposit,
         renterSunkCostsCumulative: Math.round(renterSunkCostsCumulative),
         renterPaymentsThisYear: Math.round(renterPaymentsThisYear),
       });
@@ -343,19 +438,21 @@ export function runBuyVsRentCalculation(inputs: CalculatorInputs): CalculatorRes
     }
   }
 
-  // Find break-even year
+  // Find break-even year (after deducting estate agent / legal selling fees at exit)
   let breakEvenYear: number | null = null;
   for (const yearData of annualBreakdown) {
-    if (yearData.buyerTotalNetWorth > yearData.renterTotalNetWorth) {
+    const exitSellingFee = Math.round(yearData.homeValue * (sellingCostPercent / 100));
+    const realizableBuyerWorth = yearData.buyerTotalNetWorth - exitSellingFee;
+    if (realizableBuyerWorth > yearData.renterTotalNetWorth) {
       breakEvenYear = yearData.year;
       break;
     }
   }
 
   const finalYearData = annualBreakdown[annualBreakdown.length - 1];
-  const netWorthDifferenceAtHorizon = finalYearData.buyerTotalNetWorth - finalYearData.renterTotalNetWorth;
   const sellingFeesAtHorizon = Math.round(finalYearData.homeValue * (sellingCostPercent / 100));
   const netBuyerWorthAfterSelling = finalYearData.buyerTotalNetWorth - sellingFeesAtHorizon;
+  const netWorthDifferenceAtHorizon = netBuyerWorthAfterSelling - finalYearData.renterTotalNetWorth;
 
   const sunkCostBreakdown: SunkCostBreakdown = {
     buySdlt: Math.round(sdltCost),
@@ -389,6 +486,8 @@ export function runBuyVsRentCalculation(inputs: CalculatorInputs): CalculatorRes
     sunkCostBreakdown,
     sellingFeesAtHorizon,
     netBuyerWorthAfterSelling: Math.round(netBuyerWorthAfterSelling),
+    jurisdiction,
+    taxName: getPropertyTaxLabel(jurisdiction),
   };
 }
 

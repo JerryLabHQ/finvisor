@@ -22,7 +22,7 @@ import {
   runTaxOptimization,
   TaxInputs,
 } from "@/lib/tax-calculator";
-import { SUPPORT_URL } from "@/lib/constants";
+import { useFinancialProfile } from "@/lib/financial-profile-store";
 import "../dashboard.css";
 
 const formatGBP = (v: number) =>
@@ -92,15 +92,25 @@ const TAX_CHECKLIST: ChecklistItem[] = [
 ];
 
 export default function TaxPage() {
+  const { updateProfile } = useFinancialProfile();
   const [grossSalary, setGrossSalary] = useState(115000);
   const [salarySacrifice, setSalarySacrifice] = useState(15000);
   const [numberOfChildren, setNumberOfChildren] = useState(1);
   const [childrenInChildcare, setChildrenInChildcare] = useState(1);
   const [hasPlan2, setHasPlan2] = useState(false);
   const [hasPostgrad, setHasPostgrad] = useState(false);
-  const [donationDismissed, setDonationDismissed] = useState(false);
   const [showIfaModal, setShowIfaModal] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
+
+  React.useEffect(() => {
+    const pensionPct = grossSalary > 0 ? Math.min(60, Math.round((salarySacrifice / grossSalary) * 100)) : 5;
+    updateProfile({
+      grossSalary,
+      pensionSacrificePercent: pensionPct,
+      childrenCount: numberOfChildren,
+      childcareCount: childrenInChildcare,
+    });
+  }, [grossSalary, salarySacrifice, numberOfChildren, childrenInChildcare, updateProfile]);
 
   const inputs: TaxInputs = useMemo(
     () => ({
@@ -135,27 +145,6 @@ export default function TaxPage() {
     <div className="dashboard-container">
       {/* Unified Suite Header Navigation */}
       <HeaderNav />
-
-      {/* Dismissible Donation Banner (Preserved) */}
-      {!donationDismissed && SUPPORT_URL && (
-        <div className="donation-banner" role="note">
-          <span className="donation-banner__text">
-            👋 <strong>LadderPass Tax is 100% free with no paywalls or sales spam.</strong> If this tax modeler helps you keep your hard-earned money and preserve your childcare benefits, consider{" "}
-            <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="donation-banner__link">
-              buying me a coffee
-            </a>{" "}
-            to support independent UK research!
-          </span>
-          <button
-            type="button"
-            className="donation-banner__dismiss"
-            onClick={() => setDonationDismissed(true)}
-            aria-label="Dismiss donation prompt"
-          >
-            ×
-          </button>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -702,6 +691,10 @@ export default function TaxPage() {
         }}
         statutoryCitations={TAX_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
         csvFilename="ladderpass_60_tax_trap_audit"
+        onRequestConsultation={() => {
+          setIsDossierOpen(false);
+          setShowIfaModal(true);
+        }}
       />
 
       {/* Global Institutional Editorial Footer */}

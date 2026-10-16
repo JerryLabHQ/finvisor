@@ -21,7 +21,7 @@ import {
   runPensionCalculation,
   PensionInputs,
 } from "@/lib/pension-calculator";
-import { SUPPORT_URL } from "@/lib/constants";
+import { useFinancialProfile } from "@/lib/financial-profile-store";
 import "../dashboard.css";
 
 const formatGBP = (v: number) =>
@@ -43,7 +43,7 @@ const RETIREMENT_CITATIONS: CitationItem[] = [
   {
     act: "Pensions Act 2014",
     section: "Part 1 (State Pension)",
-    description: "Statutory single-tier State Pension requiring 35 qualifying National Insurance years for full payout, indexed via the statutory triple lock formula.",
+    description: "Statutory single-tier State Pension (£11,973/yr full New State Pension) requiring 35 qualifying National Insurance years, indexed via the statutory triple lock formula.",
     govUrl: "https://www.gov.uk/new-state-pension",
   },
   {
@@ -93,6 +93,7 @@ const RETIREMENT_CHECKLIST: ChecklistItem[] = [
 ];
 
 export default function RetirementPage() {
+  const { updateProfile } = useFinancialProfile();
   const [pensionPot, setPensionPot] = useState(550000);
   const [isaPot, setIsaPot] = useState(80000);
   const [currentAge, setCurrentAge] = useState(55);
@@ -104,9 +105,14 @@ export default function RetirementPage() {
   const [inflationPct] = useState(2.5);
   const [hasStatePension, setHasStatePension] = useState(true);
 
-  const [donationDismissed, setDonationDismissed] = useState(false);
   const [showIfaModal, setShowIfaModal] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
+
+  React.useEffect(() => {
+    updateProfile({
+      pensionPot,
+    });
+  }, [pensionPot, updateProfile]);
 
   const inputs: PensionInputs = useMemo(
     () => ({
@@ -148,27 +154,6 @@ export default function RetirementPage() {
     <div className="dashboard-container">
       {/* Unified Suite Header Navigation */}
       <HeaderNav />
-
-      {/* Dismissible Donation Banner */}
-      {!donationDismissed && SUPPORT_URL && (
-        <div className="donation-banner" role="note">
-          <span className="donation-banner__text">
-            👋 <strong>LadderPass Retirement is 100% free with no sales calls or commission bias.</strong> If this drawdown and 2027 IHT simulation helps you plan your financial independence, consider{" "}
-            <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="donation-banner__link">
-              buying me a coffee
-            </a>{" "}
-            to support independent UK research!
-          </span>
-          <button
-            type="button"
-            className="donation-banner__dismiss"
-            onClick={() => setDonationDismissed(true)}
-            aria-label="Dismiss donation prompt"
-          >
-            ×
-          </button>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -674,6 +659,10 @@ export default function RetirementPage() {
         }}
         statutoryCitations={RETIREMENT_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
         csvFilename="ladderpass_retirement_drawdown_audit"
+        onRequestConsultation={() => {
+          setIsDossierOpen(false);
+          setShowIfaModal(true);
+        }}
       />
 
       {/* Global Institutional Editorial Footer */}

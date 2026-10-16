@@ -1,14 +1,16 @@
 /**
  * UK Student Loan Repayment & "Graduate Tax" Simulation Engine
- * Compares Plan 1, Plan 2, Plan 5, and Postgraduate loans.
- * Models 30-year / 40-year statutory write-off cliffs, career wage curves,
+ * Compares Plan 1, Plan 2, Plan 4 (Scotland), Plan 5, and Postgraduate loans.
+ * Models 25/30/40-year statutory write-off cliffs, career wage curves,
  * and impact on mortgage affordability.
  */
+
+export type StudentLoanPlan = "PLAN_2" | "PLAN_5" | "POSTGRAD" | "PLAN_1" | "PLAN_4";
 
 export interface StudentLoanInputs {
   currentSalary: number;            // Current annual gross salary (£)
   currentLoanBalance: number;       // Current outstanding balance (£)
-  loanPlan: "PLAN_2" | "PLAN_5" | "POSTGRAD" | "PLAN_1";
+  loanPlan: StudentLoanPlan;
   annualSalaryGrowthPercent: number;// Expected annual wage growth (e.g. 4.5%)
   assumedRpiPercent: number;        // Expected RPI inflation (e.g. 3.0%)
   yearsSinceGraduation: number;     // Elapsed years of the 30/40-year clock
@@ -55,13 +57,23 @@ export interface StudentLoanResults {
   estimatedMortgageBorrowingReductionGbp: number;
 }
 
-export const STUDENT_LOAN_CONSTANTS = {
+export const STUDENT_LOAN_CONSTANTS: Record<
+  StudentLoanPlan,
+  {
+    threshold: number;
+    rate: number;
+    writeOffYears: number;
+    minInterestSpread: number;
+    maxInterestSpread: number;
+    maxInterestThreshold: number;
+  }
+> = {
   PLAN_2: {
-    threshold: 27295,
+    threshold: 28470, // Statutory 2025/26 Plan 2 threshold
     rate: 0.09,
     writeOffYears: 30,
     minInterestSpread: 0, // RPI + 0% at threshold
-    maxInterestSpread: 0.03, // RPI + 3% above £49,130
+    maxInterestSpread: 0.03, // RPI + 3% above upper threshold
     maxInterestThreshold: 49130,
   },
   PLAN_5: {
@@ -81,12 +93,20 @@ export const STUDENT_LOAN_CONSTANTS = {
     maxInterestThreshold: 21000,
   },
   PLAN_1: {
-    threshold: 24990,
+    threshold: 26065, // Statutory 2025/26 Plan 1 threshold
     rate: 0.09,
     writeOffYears: 25,
     minInterestSpread: 0,
     maxInterestSpread: 0,
-    maxInterestThreshold: 24990,
+    maxInterestThreshold: 26065,
+  },
+  PLAN_4: {
+    threshold: 32745, // Statutory 2025/26 Plan 4 (Scotland) threshold
+    rate: 0.09,
+    writeOffYears: 30,
+    minInterestSpread: 0,
+    maxInterestSpread: 0,
+    maxInterestThreshold: 32745,
   },
 };
 
@@ -97,12 +117,12 @@ const formatGBP = (v: number) =>
  * Calculates current interest rate based on plan rules and salary
  */
 export function getStudentLoanInterestRate(
-  plan: "PLAN_2" | "PLAN_5" | "POSTGRAD" | "PLAN_1",
+  plan: StudentLoanPlan,
   salary: number,
   rpi: number
 ): number {
   const config = STUDENT_LOAN_CONSTANTS[plan];
-  if (plan === "PLAN_5" || plan === "PLAN_1") {
+  if (plan === "PLAN_5" || plan === "PLAN_1" || plan === "PLAN_4") {
     return rpi;
   }
   if (plan === "POSTGRAD") {
@@ -124,7 +144,7 @@ export function getStudentLoanInterestRate(
  * Calculates mandatory annual repayment based on plan threshold and rate
  */
 export function calculateMandatoryRepayment(
-  plan: "PLAN_2" | "PLAN_5" | "POSTGRAD" | "PLAN_1",
+  plan: StudentLoanPlan,
   salary: number
 ): number {
   const config = STUDENT_LOAN_CONSTANTS[plan];
@@ -240,8 +260,7 @@ export function runStudentLoanCalculation(inputs: StudentLoanInputs): StudentLoa
   const currentMandatoryAnnual = calculateMandatoryRepayment(inputs.loanPlan, inputs.currentSalary);
   const currentMonthlyRepayment = Math.round(currentMandatoryAnnual / 12);
 
-  // UK Lenders typically reduce mortgage borrowing by 4.5x - 5.0x annual loan deductions
-  // or deduct monthly repayments from net cashflow stress testing (~12x-14x annual deduction)
+  // UK Lenders typically reduce mortgage borrowing by 4.5x annual loan deductions
   const estimatedMortgageBorrowingReductionGbp = Math.round(currentMandatoryAnnual * 4.5);
 
   let verdict: "DO_NOT_OVERPAY" | "CONSIDER_OVERPAYING" | "BORDERLINE" = "DO_NOT_OVERPAY";

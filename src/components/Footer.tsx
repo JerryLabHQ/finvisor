@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { Coffee, ShieldCheck, Database, Landmark, ExternalLink } from "lucide-react";
-import { UK_MARKET_DEFAULTS, SUPPORT_URL, SUPPORT_LABEL } from "@/lib/constants";
+import { ShieldCheck, Database, Landmark, ExternalLink } from "lucide-react";
+import { UK_MARKET_DEFAULTS } from "@/lib/constants";
 import { UK_CITIES } from "@/lib/cities";
 
 export function Footer() {
@@ -25,7 +25,7 @@ export function Footer() {
             </Link>
 
             <p className="ladder-footer__mission">
-              Independent financial algorithms engineered to decode UK fiscal policy, residential property economics, and tax-efficient wealth compounding. 100% self-serve, ad-free, and private.
+              Independent financial algorithms engineered to decode UK fiscal policy, residential property economics, and tax-efficient wealth compounding across England, Scotland, Wales, and Northern Ireland.
             </p>
 
             <div className="ladder-footer__status-badge">
@@ -33,21 +33,17 @@ export function Footer() {
               <span>BoE Official Bank Rate: {UK_MARKET_DEFAULTS.boeBaseRate}% • MPC Indexed</span>
             </div>
 
-            {SUPPORT_URL && (
-              <div style={{ marginTop: 8 }}>
-                <a
-                  href={SUPPORT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="layout__header-donate"
-                  style={{ display: "inline-flex" }}
-                  title="Support this free independent UK project"
-                >
-                  <Coffee size={14} />
-                  <span>{SUPPORT_LABEL}</span>
-                </a>
-              </div>
-            )}
+            <div style={{ marginTop: 8 }}>
+              <Link
+                href="/partners"
+                className="layout__header-donate"
+                style={{ display: "inline-flex" }}
+                title="B2B White-Label Widgets & FCA Introducer Network"
+              >
+                <ShieldCheck size={14} />
+                <span>FCA Partner Network & B2B Widgets</span>
+              </Link>
+            </div>
           </div>
 
           {/* Column 2: Financial Engines Directory */}
@@ -56,12 +52,12 @@ export function Footer() {
             <ul className="ladder-footer__list">
               <li>
                 <Link href="/" className="ladder-footer__link">
-                  Buy vs Rent
+                  Buy vs Rent (SDLT / LBTT / LTT)
                 </Link>
               </li>
               <li>
                 <Link href="/tax" className="ladder-footer__link">
-                  60% Marginal Tax Trap
+                  60% Marginal Tax Trap & SIPP
                 </Link>
               </li>
               <li>
@@ -71,7 +67,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/student-loan" className="ladder-footer__link">
-                  Student Loan Payoff Guide
+                  Student Loan Payoff (Plan 1/2/4/5)
                 </Link>
               </li>
               <li>
@@ -81,7 +77,12 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/retirement" className="ladder-footer__link">
-                  Pension Drawdown & FIRE
+                  Pension Drawdown & 2027 IHT
+                </Link>
+              </li>
+              <li>
+                <Link href="/partners" className="ladder-footer__link">
+                  B2B Broker Widgets & API
                 </Link>
               </li>
             </ul>
@@ -113,7 +114,19 @@ export function Footer() {
                   className="ladder-footer__link"
                   style={{ display: "inline-flex", alignItems: "center", gap: 5 }}
                 >
-                  <span>HMRC Stamp Duty (SDLT)</span>
+                  <span>HMRC Stamp Duty (Post-April 2025)</span>
+                  <ExternalLink size={12} />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.revenue.scot/taxes/land-buildings-transaction-tax"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ladder-footer__link"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 5 }}
+                >
+                  <span>Revenue Scotland (LBTT & ADS)</span>
                   <ExternalLink size={12} />
                 </a>
               </li>
@@ -125,7 +138,7 @@ export function Footer() {
                   className="ladder-footer__link"
                   style={{ display: "inline-flex", alignItems: "center", gap: 5 }}
                 >
-                  <span>HMRC 2024/25 Tax Bands</span>
+                  <span>HMRC 2025/26 Tax & NI Bands</span>
                   <ExternalLink size={12} />
                 </a>
               </li>
@@ -153,18 +166,6 @@ export function Footer() {
                   <ExternalLink size={12} />
                 </a>
               </li>
-              <li>
-                <a
-                  href="https://www.ons.gov.uk/economy/inflationandpriceindices/bulletins/privaterentandhousepricesuk"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ladder-footer__link"
-                  style={{ display: "inline-flex", alignItems: "center", gap: 5 }}
-                >
-                  <span>ONS Private Rental Index</span>
-                  <ExternalLink size={12} />
-                </a>
-              </li>
             </ul>
           </div>
         </div>
@@ -172,7 +173,7 @@ export function Footer() {
         {/* Bottom Statutory Legal Bar */}
         <div className="ladder-footer__bottom">
           <p className="ladder-footer__disclaimer">
-            © {currentYear} LadderPass. Quantitative financial simulations provided strictly for educational and informational purposes under English law. This application is not regulated by the Financial Conduct Authority (FCA) and does not provide financial, legal, or mortgage advice pursuant to the Financial Services and Markets Act 2000 (FSMA). Consult an FCA-authorised Independent Financial Adviser (IFA) or qualified mortgage broker for bespoke planning.
+            © {currentYear} LadderPass. Quantitative financial simulations provided strictly for educational and informational purposes under UK law (FSMA 2000 & RAO Article 33A Introducer Exclusion). This platform does not provide FCA-regulated financial advice. When you request a consultation, we introduce you to an FCA-authorised Independent Financial Adviser (IFA) or whole-of-market mortgage intermediary.
           </p>
 
           <div className="ladder-footer__trust-badges">
@@ -183,12 +184,12 @@ export function Footer() {
             <span aria-hidden="true">•</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
               <Database size={13} style={{ color: "var(--primary)" }} />
-              <span>HMRC 2024/25 Audited</span>
+              <span>HMRC 2025/26 Audited</span>
             </span>
             <span aria-hidden="true">•</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
               <ShieldCheck size={13} style={{ color: "var(--primary)" }} />
-              <span>Zero-Tracking Privacy</span>
+              <span>FCA Consumer Duty Native</span>
             </span>
           </div>
         </div>

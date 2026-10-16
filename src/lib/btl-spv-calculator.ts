@@ -1,9 +1,13 @@
 /**
  * UK Buy-to-Let (BTL) Ownership Modeler: Personal Name vs. Limited Company (SPV)
  * Implements Section 24 mortgage interest relief restrictions,
- * 19%-25% Corporation Tax, dividend extraction tax, and 5% HRAD Stamp Duty.
+ * 19%-25% Corporation Tax with 26.5% marginal relief, dividend extraction tax,
+ * and 5% HRAD Stamp Duty (plus Scottish LBTT 8% ADS & Welsh LTT).
  * Verified against HMRC statutory rules.
  */
+
+import { SDLT_CONFIG, UKTaxJurisdiction } from "./constants";
+import { calculatePropertyTax } from "./calculator";
 
 export interface BTLInputs {
   propertyPrice: number;            // Purchase price (£)
@@ -20,6 +24,7 @@ export interface BTLInputs {
   annualAccountancySpv: number;     // e.g. £1,200 for accounts and filings
   dividendStrategy: "REINVEST_IN_SPV" | "EXTRACT_ALL_DIVIDENDS";
   assumedHpiAppreciationPercent: number; // e.g. 3.5%
+  jurisdiction?: UKTaxJurisdiction; // Optional devolved jurisdiction
 }
 
 export interface BTLScenarioBreakdown {
@@ -41,7 +46,7 @@ export interface BTLResults {
   spv: BTLScenarioBreakdown;
   loanAmount: number;
   depositAmount: number;
-  sdltCost: number;                  // Stamp duty with 5% surcharge
+  sdltCost: number;                  // Stamp duty with 5% HRAD surcharge (or LBTT/LTT)
   initialCapitalRequired: number;    // Deposit + SDLT + Legal
   section24TaxDragAnnual: number;    // Extra tax paid personally due to Sec 24
   annualCashflowDifference: number;  // SPV cashflow minus Personal cashflow
@@ -51,17 +56,15 @@ export interface BTLResults {
 }
 
 export const BTL_CONSTANTS = {
-  // Surcharge for additional residential properties
-  hradSurchargePercent: 0.05, // 5% surcharge
-  standardBands: [
-    { upTo: 250000, rate: 0.00 },
-    { upTo: 925000, rate: 0.05 },
-    { upTo: 1500000, rate: 0.10 },
-    { upTo: Infinity, rate: 0.12 },
-  ],
-  // Corporation Tax rates
+  // Surcharge for additional residential properties (driven from SDLT_CONFIG)
+  hradSurchargePercent: SDLT_CONFIG.additionalPropertySurchargeRate,
+  standardBands: SDLT_CONFIG.standardBands,
+  // Corporation Tax rates & thresholds (Finance Act 2021 / April 2023+ statutory rules)
+  corpTaxSmallProfitsThreshold: 50000,
+  corpTaxMainRateThreshold: 250000,
   corpTaxSmallProfitsRate: 0.19, // Up to £50,000 profits
   corpTaxMainRate: 0.25,         // Over £250,000 profits
+  corpTaxMarginalReliefFraction: 3 / 200, // 0.015 standard marginal relief fraction (26.5% marginal rate)
   // Dividend Tax rates (2024-2026)
   dividendAllowance: 500,        // £500 tax-free dividend allowance
   dividendBasicRate: 0.0875,     // 8.75%
@@ -73,22 +76,33 @@ export const BTL_CONSTANTS = {
 };
 
 /**
- * Calculates Stamp Duty for BTL / SPV (including 5% HRAD surcharge)
+ * Calculates Stamp Duty for BTL / SPV (including 5% HRAD surcharge or devolved ADS/LTT)
  */
-export function calculateBtlSDLT(propertyPrice: number): number {
-  let tax = 0;
-  let previousThreshold = 0;
+export function calculateBtlSDLT(
+  propertyPrice: number,
+  jurisdiction: UKTaxJurisdiction = "ENGLAND_NI"
+): number {
+  return calculatePropertyTax(propertyPrice, false, true, jurisdiction);
+}
 
-  for (const band of BTL_CONSTANTS.standardBands) {
-    if (propertyPrice > previousThreshold) {
-      const taxableInBand = Math.min(propertyPrice, band.upTo) - previousThreshold;
-      const combinedRate = band.rate + BTL_CONSTANTS.hradSurchargePercent;
-      tax += taxableInBand * combinedRate;
-      previousThreshold = band.upTo;
-    }
+/**
+ * Calculates UK Corporation Tax with statutory marginal relief between £50,000 and £250,000
+ * - £0 to £50,000: 19% Small Profits Rate
+ * - £50,001 to £250,000: 25% * P - (250,000 - P) * (3/200) (equivalent to 19% on first £50k + 26.5% on excess)
+ * - Above £250,000: 25% Main Rate
+ */
+export function calculateUkCorporationTax(profit: number): number {
+  if (profit <= 0) return 0;
+  if (profit <= BTL_CONSTANTS.corpTaxSmallProfitsThreshold) {
+    return Math.round(profit * BTL_CONSTANTS.corpTaxSmallProfitsRate);
   }
-
-  return Math.round(tax);
+  if (profit >= BTL_CONSTANTS.corpTaxMainRateThreshold) {
+    return Math.round(profit * BTL_CONSTANTS.corpTaxMainRate);
+  }
+  const mainTax = profit * BTL_CONSTANTS.corpTaxMainRate;
+  const marginalRelief =
+    (BTL_CONSTANTS.corpTaxMainRateThreshold - profit) * BTL_CONSTANTS.corpTaxMarginalReliefFraction;
+  return Math.round(mainTax - marginalRelief);
 }
 
 /**
@@ -97,9 +111,10 @@ export function calculateBtlSDLT(propertyPrice: number): number {
 export function runBTLCalculation(inputs: BTLInputs): BTLResults {
   const depositAmount = Math.round(inputs.propertyPrice * (inputs.depositPercent / 100));
   const loanAmount = inputs.propertyPrice - depositAmount;
+  const jurisdiction = inputs.jurisdiction || "ENGLAND_NI";
 
   // Stamp duty and initial capital
-  const sdltCost = calculateBtlSDLT(inputs.propertyPrice);
+  const sdltCost = calculateBtlSDLT(inputs.propertyPrice, jurisdiction);
   const initialCapitalRequired = depositAmount + sdltCost + BTL_CONSTANTS.legalFees + BTL_CONSTANTS.surveyFees;
 
   const grossAnnualRent = inputs.monthlyRent * 12;
@@ -165,8 +180,8 @@ export function runBTLCalculation(inputs: BTLInputs): BTLResults {
     annualOperatingExpenses + spvAnnualMortgage + inputs.annualAccountancySpv;
   const spvNetProfitBeforeTax = Math.max(0, grossAnnualRent - spvAllowableDeductions);
 
-  // Corporation Tax (19% small profits rate up to £50k)
-  const spvCorpTax = Math.round(spvNetProfitBeforeTax * BTL_CONSTANTS.corpTaxSmallProfitsRate);
+  // Corporation Tax (19% small profits rate up to £50k, 26.5% marginal relief £50k-£250k, 25% >£250k)
+  const spvCorpTax = calculateUkCorporationTax(spvNetProfitBeforeTax);
   const spvRetainedProfit = Math.max(0, spvNetProfitBeforeTax - spvCorpTax);
 
   let spvDividendTaxPaid = 0;
@@ -191,7 +206,7 @@ export function runBTLCalculation(inputs: BTLInputs): BTLResults {
   if (inputs.investorTaxBracket === "BASIC_20") {
     if (personalNetAnnualCashflow > spvFinalNetAnnualCashflow) {
       verdict = "PERSONAL_WINS";
-      verdictReasoning = `As a basic-rate (20%) taxpayer, you receive a full 20% Section 24 tax credit that matches your tax rate. Personal ownership avoids the higher SPV commercial mortgage rate and £${inputs.annualAccountancySpv.toLocaleString()}/yr accountancy fees, putting ${Math.abs(annualCashflowDifference).toLocaleString()}/year more cash in your pocket.`;
+      verdictReasoning = `As a basic-rate (20%) taxpayer, you receive a full 20% Section 24 tax credit that matches your tax rate. Personal ownership avoids the higher SPV commercial mortgage rate and £${inputs.annualAccountancySpv.toLocaleString()}/yr accountancy fees, putting £${Math.abs(annualCashflowDifference).toLocaleString()}/year more cash in your pocket.`;
     } else {
       verdict = "CLOSE_CALL";
       verdictReasoning = `For basic-rate taxpayers, personal and SPV returns are very close. An SPV is primarily advantageous if you plan to build a multi-property portfolio or anticipate moving into the higher-rate tax bracket.`;

@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useRef } from "react";
-import { X, Printer, Download, Sparkles, Scale, ShieldCheck } from "lucide-react";
-import { SUPPORT_URL, SUPPORT_LABEL } from "@/lib/constants";
+import React, { useRef, useState, useEffect } from "react";
+import { X, Printer, Download, Sparkles, Scale, ShieldCheck, Lock, CheckCircle } from "lucide-react";
+import { getProStatus, activatePro } from "@/lib/pro-store";
+import { MONETIZATION_CONFIG } from "@/lib/constants";
+import { ProStatus } from "@/lib/types";
 
 export interface MetricItem {
   label: string;
@@ -24,6 +26,7 @@ export interface ExecutiveDossierModalProps {
   };
   statutoryCitations: { act: string; description: string }[];
   csvFilename?: string;
+  onRequestConsultation?: () => void;
 }
 
 export function ExecutiveDossierModal({
@@ -37,10 +40,44 @@ export function ExecutiveDossierModal({
   breakdownTable,
   statutoryCitations,
   csvFilename = "ladderpass_executive_dossier",
+  onRequestConsultation,
 }: ExecutiveDossierModalProps) {
   const reportRef = useRef<HTMLDivElement>(null);
+  const [proStatus, setProStatus] = useState<ProStatus>({ isPro: false });
+  const [unlockingPro, setUnlockingPro] = useState(false);
+
+  useEffect(() => {
+    const syncPro = () => setProStatus(getProStatus());
+    syncPro();
+    window.addEventListener("ladderpass-pro-change", syncPro);
+    return () => window.removeEventListener("ladderpass-pro-change", syncPro);
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleDirectProUnlock = async () => {
+    setUnlockingPro(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: "lifetime", returnUrl: window.location.pathname }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      if (data.success && data.licenseKey) {
+        const updated = activatePro("lifetime", data.licenseKey);
+        setProStatus(updated);
+      }
+    } catch (err) {
+      console.error("Failed to unlock Pro dossier:", err);
+    } finally {
+      setUnlockingPro(false);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -109,20 +146,28 @@ export function ExecutiveDossierModal({
             >
               {title}
             </h3>
+            {proStatus.isPro && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  background: "var(--primary-light)",
+                  color: "var(--primary)",
+                  border: "1px solid var(--primary-border)",
+                }}
+              >
+                <CheckCircle size={11} />
+                <span>PRO VERIFIED ({proStatus.licenseKey || "ACTIVE"})</span>
+              </span>
+            )}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {SUPPORT_URL && (
-              <a
-                href={SUPPORT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="layout__header-donate"
-              >
-                {SUPPORT_LABEL}
-              </a>
-            )}
-
             {breakdownTable && (
               <button
                 type="button"
@@ -184,6 +229,69 @@ export function ExecutiveDossierModal({
           </div>
         </div>
 
+        {/* Dual-Path Institutional Unlock Banner (when not yet Pro/Verified) */}
+        {!proStatus.isPro && (
+          <div
+            style={{
+              padding: "12px 24px",
+              background: "var(--primary-light)",
+              borderBottom: "1px solid var(--primary-border)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-primary)" }}>
+              <Lock size={14} style={{ color: "var(--primary)", flexShrink: 0 }} />
+              <span>
+                <strong>Lender-Ready Dossier License:</strong> Unlock certified broker-stamped exports free via an FCA consultation request, or activate an anonymous Lifetime Pro Pass (£{MONETIZATION_CONFIG.proPricing.lifetimePassGbp}).
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {onRequestConsultation && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onRequestConsultation();
+                  }}
+                  style={{
+                    padding: "6px 12px",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    borderRadius: 4,
+                    border: "1px solid var(--primary)",
+                    background: "#ffffff",
+                    color: "var(--primary)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Free Unlock via FCA Advisor Match
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={unlockingPro}
+                onClick={handleDirectProUnlock}
+                style={{
+                  padding: "6px 12px",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  borderRadius: 4,
+                  border: "none",
+                  background: "var(--primary)",
+                  color: "#ffffff",
+                  cursor: "pointer",
+                }}
+              >
+                {unlockingPro ? "Activating..." : `Instant Pro Pass (£${MONETIZATION_CONFIG.proPricing.lifetimePassGbp})`}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Printable Content Body */}
         <div
           ref={reportRef}
@@ -199,12 +307,14 @@ export function ExecutiveDossierModal({
           {/* Header Masthead */}
           <div
             style={{
-              borderBottom: "2px solid var(--primary)",
-              paddingBottom: 16,
-              marginBottom: 24,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "flex-start",
+              borderBottom: "2px solid var(--text-primary)",
+              paddingBottom: 16,
+              marginBottom: 24,
+              flexWrap: "wrap",
+              gap: 12,
             }}
           >
             <div>
@@ -213,16 +323,20 @@ export function ExecutiveDossierModal({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
                   color: "var(--primary)",
-                  marginBottom: 6,
+                  background: "var(--primary-light)",
+                  border: "1px solid var(--primary-border)",
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  marginBottom: 8,
                 }}
               >
-                <Scale size={13} />
-                <span>LadderPass UK Financial Advisory Memorandum</span>
+                <Scale size={12} />
+                <span>{badge}</span>
               </div>
               <h1
                 style={{
@@ -235,49 +349,62 @@ export function ExecutiveDossierModal({
               >
                 {title}
               </h1>
-              <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
-                {subtitle}
-              </p>
+              <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>{subtitle}</p>
             </div>
 
-            <div style={{ textAlign: "right" }}>
-              <span
-                style={{
-                  display: "inline-block",
-                  padding: "4px 10px",
-                  borderRadius: 4,
-                  backgroundColor: "var(--primary-light)",
-                  color: "var(--primary)",
-                  border: "1px solid var(--primary-border)",
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}
-              >
-                {badge}
-              </span>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
-                Generated: {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            <div style={{ textAlign: "right", fontSize: 11, color: "var(--text-muted)" }}>
+              <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: 13 }}>
+                🇬🇧 LadderPass Institutional Ledger
               </div>
+              <div>Date: {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</div>
+              <div>Jurisdiction: United Kingdom (HMRC / BoE)</div>
             </div>
           </div>
 
-          {/* Executive KPI Summary Matrix */}
+          {/* Executive Summary Callout */}
+          <div
+            style={{
+              padding: "16px 20px",
+              background: "var(--surface-tray)",
+              borderLeft: "4px solid var(--primary)",
+              borderRadius: "0 8px 8px 0",
+              marginBottom: 24,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: "var(--primary)",
+                marginBottom: 4,
+              }}
+            >
+              Executive Quantitative Verdict
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0, color: "var(--text-primary)" }}>
+              {summaryParagraph}
+            </p>
+          </div>
+
+          {/* 4-Metric Grid */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(175px, 1fr))",
               gap: 12,
-              marginBottom: 24,
+              marginBottom: 28,
             }}
           >
             {metrics.map((m, idx) => (
               <div
                 key={idx}
                 style={{
-                  padding: "14px 16px",
-                  background: "var(--surface-tray)",
+                  padding: 14,
+                  borderRadius: 8,
                   border: "1px solid var(--surface-border)",
-                  borderRadius: 6,
+                  background: "#ffffff",
                 }}
               >
                 <div
@@ -296,8 +423,8 @@ export function ExecutiveDossierModal({
                   style={{
                     fontFamily: "var(--font-serif)",
                     fontSize: 20,
-                    fontWeight: 700,
-                    color: "var(--primary)",
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
@@ -312,75 +439,32 @@ export function ExecutiveDossierModal({
             ))}
           </div>
 
-          {/* Strategic Narrative / Verdict */}
-          <div
-            style={{
-              padding: "16px 20px",
-              background: "#ffffff",
-              border: "1px solid var(--surface-border)",
-              borderRadius: 6,
-              marginBottom: 24,
-              boxShadow: "var(--shadow-subtle)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                color: "var(--text-primary)",
-                marginBottom: 6,
-              }}
-            >
-              Executive Summary & Strategy Finding
-            </div>
-            <p
-              style={{
-                fontSize: 13,
-                lineHeight: 1.6,
-                color: "var(--text-secondary)",
-                margin: 0,
-              }}
-            >
-              {summaryParagraph}
-            </p>
-          </div>
-
-          {/* Detailed Schedule Breakdown Table */}
+          {/* Breakdown Schedule Table */}
           {breakdownTable && (
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 28 }}>
               <h4
                 style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: 15,
-                  fontWeight: 600,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  color: "var(--text-secondary)",
                   marginBottom: 10,
-                  color: "var(--text-primary)",
                 }}
               >
-                Multi-Year Financial Modeling Ledger
+                Itemized Financial Schedule
               </h4>
-              <div style={{ overflowX: "auto" }}>
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: 12,
-                    textAlign: "right",
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
+              <div className="editorial-table-wrap">
+                <table className="editorial-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
-                    <tr style={{ background: "var(--surface-tray)", borderBottom: "1px solid var(--surface-border)" }}>
+                    <tr style={{ borderBottom: "2px solid var(--surface-border)", background: "var(--surface-tray)" }}>
                       {breakdownTable.headers.map((h, i) => (
                         <th
                           key={i}
                           style={{
                             padding: "8px 10px",
-                            fontWeight: 700,
                             textAlign: i === 0 ? "left" : "right",
-                            color: "var(--text-muted)",
+                            fontWeight: 700,
                             fontSize: 11,
                           }}
                         >
@@ -391,24 +475,18 @@ export function ExecutiveDossierModal({
                   </thead>
                   <tbody>
                     {breakdownTable.rows.map((row, rIdx) => (
-                      <tr
-                        key={rIdx}
-                        style={{
-                          borderBottom: "1px solid var(--surface-border-subtle)",
-                          background: rIdx % 2 === 0 ? "#ffffff" : "var(--surface-tray)",
-                        }}
-                      >
+                      <tr key={rIdx} style={{ borderBottom: "1px solid var(--surface-border)" }}>
                         {row.map((cell, cIdx) => (
                           <td
                             key={cIdx}
                             style={{
-                              padding: "7px 10px",
+                              padding: "8px 10px",
                               textAlign: cIdx === 0 ? "left" : "right",
                               fontWeight: cIdx === 0 ? 600 : 400,
-                              color: cIdx === 0 ? "var(--text-primary)" : "var(--text-secondary)",
+                              fontVariantNumeric: "tabular-nums",
                             }}
                           >
-                            {typeof cell === "number" ? cell.toLocaleString() : cell}
+                            {cell}
                           </td>
                         ))}
                       </tr>
@@ -419,14 +497,14 @@ export function ExecutiveDossierModal({
             </div>
           )}
 
-          {/* Official Statutory Legal Basis */}
+          {/* Statutory Methodology Citations */}
           <div
             style={{
-              paddingTop: 16,
-              borderTop: "1px solid var(--surface-border)",
-              fontSize: 11,
-              color: "var(--text-muted)",
-              lineHeight: 1.5,
+              padding: 16,
+              borderRadius: 8,
+              background: "var(--surface-tray)",
+              border: "1px solid var(--surface-border)",
+              marginBottom: 20,
             }}
           >
             <div
@@ -434,24 +512,30 @@ export function ExecutiveDossierModal({
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
+                fontSize: 11,
                 fontWeight: 700,
-                color: "var(--text-secondary)",
-                marginBottom: 6,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "var(--text-primary)",
+                marginBottom: 10,
               }}
             >
-              <ShieldCheck size={13} style={{ color: "var(--primary)" }} />
-              <span>Statutory Compliance & Regulatory Framework</span>
+              <ShieldCheck size={14} style={{ color: "var(--primary)" }} />
+              <span>Statutory Legislation & Basis of Calculation</span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 8, marginBottom: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10 }}>
               {statutoryCitations.map((c, i) => (
-                <div key={i} style={{ padding: "6px 10px", background: "var(--surface-tray)", borderRadius: 4, border: "1px solid var(--surface-border)" }}>
-                  <strong style={{ color: "var(--text-primary)" }}>{c.act}:</strong> {c.description}
+                <div key={i} style={{ fontSize: 11 }}>
+                  <strong style={{ color: "var(--text-primary)" }}>{c.act}:</strong>{" "}
+                  <span style={{ color: "var(--text-secondary)" }}>{c.description}</span>
                 </div>
               ))}
             </div>
-            <p style={{ margin: 0, fontStyle: "italic" }}>
-              Disclaimer: Generated for informational and modeling purposes by LadderPass (https://ladderpass.vercel.app). All tax bands, National Insurance thresholds, and Benefit-in-Kind rates conform to prevailing UK legislation. This document does not constitute personalized financial advice. Consult an FCA-authorized mortgage broker or chartered tax accountant before entering binding financial commitments.
-            </p>
+          </div>
+
+          {/* Regulatory Footer Note */}
+          <div style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "center", lineHeight: 1.5 }}>
+            Generated by LadderPass (The UK Financial Ladder). This memorandum is an independent mathematical illustration and does not constitute personal financial or tax advice under FSMA 2000. Verify final terms with an FCA-regulated intermediary or Chartered Tax Adviser before execution.
           </div>
         </div>
       </div>

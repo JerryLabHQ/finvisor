@@ -22,7 +22,7 @@ import {
   runBTLCalculation,
   BTLInputs,
 } from "@/lib/btl-spv-calculator";
-import { SUPPORT_URL } from "@/lib/constants";
+import { useFinancialProfile } from "@/lib/financial-profile-store";
 import "../../dashboard.css";
 
 const formatGBP = (v: number) =>
@@ -38,7 +38,7 @@ const SPV_CITATIONS: CitationItem[] = [
   {
     act: "Corporation Tax Act 2010",
     section: "Part 3, Companies Carrying on a Property Business",
-    description: "Allows Limited Company SPVs to deduct 100% of mortgage interest as a commercial trading expense, applying 19% small profits rate up to £50,000.",
+    description: "Allows Limited Company SPVs to deduct 100% of mortgage interest as a commercial trading expense, applying 19% small profits rate up to £50,000, 26.5% marginal relief £50k–£250k, and 25% above £250,000.",
     govUrl: "https://www.gov.uk/corporation-tax-rates",
   },
   {
@@ -93,6 +93,7 @@ const SPV_CHECKLIST: ChecklistItem[] = [
 ];
 
 export default function SpvPage() {
+  const { updateProfile } = useFinancialProfile();
   const [price, setPrice] = useState(280000);
   const [rent, setRent] = useState(1450);
   const [deposit, setDeposit] = useState(25);
@@ -101,9 +102,15 @@ export default function SpvPage() {
   const [taxBracket, setTaxBracket] = useState<"BASIC_20" | "HIGHER_40" | "ADDITIONAL_45">("HIGHER_40");
   const [strategy, setStrategy] = useState<"REINVEST_IN_SPV" | "EXTRACT_ALL_DIVIDENDS">("REINVEST_IN_SPV");
 
-  const [donationDismissed, setDonationDismissed] = useState(false);
   const [showBrokerModal, setShowBrokerModal] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
+
+  React.useEffect(() => {
+    updateProfile({
+      targetPropertyPrice: price,
+      depositPercent: deposit,
+    });
+  }, [price, deposit, updateProfile]);
 
   const inputs: BTLInputs = useMemo(
     () => ({
@@ -145,27 +152,6 @@ export default function SpvPage() {
     <div className="dashboard-container">
       {/* Unified Suite Header Navigation */}
       <HeaderNav />
-
-      {/* Dismissible Donation Banner */}
-      {!donationDismissed && SUPPORT_URL && (
-        <div className="donation-banner" role="note">
-          <span className="donation-banner__text">
-            👋 <strong>LadderPass BTL is 100% free with no commercial broker bias.</strong> If this Section 24 and SPV analysis gives you clarity on structuring your property investments, consider{" "}
-            <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className="donation-banner__link">
-              buying me a coffee
-            </a>{" "}
-            to support independent UK research!
-          </span>
-          <button
-            type="button"
-            className="donation-banner__dismiss"
-            onClick={() => setDonationDismissed(true)}
-            aria-label="Dismiss donation prompt"
-          >
-            ×
-          </button>
-        </div>
-      )}
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -701,6 +687,10 @@ export default function SpvPage() {
         }}
         statutoryCitations={SPV_CITATIONS.map((c) => ({ act: c.act, description: c.description }))}
         csvFilename="ladderpass_btl_spv_audit"
+        onRequestConsultation={() => {
+          setIsDossierOpen(false);
+          setShowBrokerModal(true);
+        }}
       />
 
       {/* Global Institutional Editorial Footer */}

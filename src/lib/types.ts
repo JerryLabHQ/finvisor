@@ -1,6 +1,6 @@
-import { CalculatorInputs, CalculatorResults, AnnualData } from "./calculator";
+import { CalculatorInputs, CalculatorResults, AnnualData, UKTaxJurisdiction } from "./calculator";
 
-export type { CalculatorInputs, CalculatorResults, AnnualData };
+export type { CalculatorInputs, CalculatorResults, AnnualData, UKTaxJurisdiction };
 
 export interface Scenario {
   id: string;
@@ -34,6 +34,25 @@ export interface CityMarketData {
   highlights: string[];
 }
 
+export type LeadClientCategory =
+  | "FIRST_TIME_BUYER"
+  | "HOME_MOVER"
+  | "REMORTGAGE"
+  | "HIGH_EARNER_TAX"
+  | "EV_SALARY_SACRIFICE"
+  | "GRADUATE_BORROWER"
+  | "BUY_TO_LET_INVESTOR"
+  | "RETIREMENT_PLANNING";
+
+export interface LeadQualificationMetrics {
+  grossSalary?: number;
+  pensionPot?: number;
+  evP11dValue?: number;
+  btlPortfolioSize?: number;
+  studentLoanPlan?: string;
+  jurisdiction?: UKTaxJurisdiction;
+}
+
 export interface BrokerLead {
   id: string;
   createdAt: string;
@@ -46,10 +65,13 @@ export interface BrokerLead {
   loanAmount: number;
   ltvPercent: number;
   estimatedMonthlyMortgage: number;
-  buyerType: "FIRST_TIME_BUYER" | "HOME_MOVER" | "REMORTGAGE";
+  buyerType: LeadClientCategory;
   buyingTimeline: "IMMEDIATE_3M" | "WITHIN_6M" | "WITHIN_12M" | "JUST_RESEARCHING";
   status: "NEW" | "CONTACTED" | "QUALIFIED" | "INVOICED";
   estimatedLeadValueGbp: number;
+  privacyPolicyAccepted: boolean;
+  consentGrantedAt: string;
+  qualificationMetrics?: LeadQualificationMetrics;
 }
 
 export interface ProStatus {
