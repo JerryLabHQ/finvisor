@@ -71,6 +71,11 @@ check("Standard £1,000,000 -> £43,750 SDLT", calculateSDLT(1000000, false) ===
 check("Scotland LBTT FTB £250,000 -> £1,500 (£175k nil-rate)", calculatePropertyTax(250000, true, false, "SCOTLAND") === 1500);
 check("Scotland LBTT BTL £250,000 (with 8% ADS) -> £22,100", calculatePropertyTax(250000, false, true, "SCOTLAND") === 22100);
 check("Wales LTT Standard £300,000 -> £4,500 (£225k nil-rate)", calculatePropertyTax(300000, false, false, "WALES") === 4500);
+check("Guildford FTB £485,000 -> £9,250 SDLT (5% above £300k)", calculateSDLT(485000, true) === 9250);
+check("St Albans FTB £545,000 (>£500k cap) -> £17,250 standard SDLT", calculateSDLT(545000, true) === 17250);
+check("Reading FTB £355,000 -> £2,750 SDLT (5% above £300k)", calculateSDLT(355000, true) === 2750);
+check("Milton Keynes FTB £330,000 -> £1,500 SDLT (5% above £300k)", calculateSDLT(330000, true) === 1500);
+check("Chelmsford FTB £360,000 -> £3,000 SDLT (5% above £300k)", calculateSDLT(360000, true) === 3000);
 
 // 2. Amortization Math Check
 console.log("\n[2] Property: Mortgage Amortization Formulas:");

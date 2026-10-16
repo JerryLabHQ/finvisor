@@ -8,6 +8,7 @@ import {
   runBuyVsRentCalculation,
   runStressTests,
 } from "../src/lib/calculator.ts";
+import { UK_CITIES, getCityBySlug } from "../src/lib/cities.ts";
 
 test("calculateSDLT - Post-April 2025 First-time buyer relief thresholds", () => {
   // Up to £300k is zero SDLT for FTB
@@ -148,4 +149,62 @@ test("runStressTests - Generates 4 stress test scenarios", () => {
   assert.equal(tests[1].id, "rate-hike");
   assert.equal(tests[2].id, "price-slump");
   assert.equal(tests[3].id, "rent-surge");
+});
+
+test("UK commuter city hubs - Statutory FTB SDLT and benchmark metrics", () => {
+  assert.equal(UK_CITIES.length, 23);
+  const commuterSlugs = ["guildford", "st-albans", "reading", "milton-keynes", "chelmsford"];
+
+  for (const slug of commuterSlugs) {
+    const city = getCityBySlug(slug);
+    assert.ok(city, `City ${slug} must exist in UK_CITIES`);
+    assert.equal(getJurisdictionFromCity(slug), "ENGLAND_NI");
+  }
+
+  // 1. Guildford (£485k, £1,850 rent, 21.8x P/R, 3.4% HPI)
+  const guildford = getCityBySlug("guildford");
+  assert.equal(guildford.averagePrice, 485000);
+  assert.equal(guildford.averageRentMonthly, 1850);
+  assert.equal(guildford.priceToRentRatio, 21.8);
+  assert.equal(guildford.historicalHpi5YrAvg, 3.4);
+  assert.equal(calculateSDLT(guildford.averagePrice, true), 9250);
+  assert.ok(guildford.highlights.some((h) => h.includes("£9,250") && h.includes("£300k")));
+
+  // 2. St Albans (£545k, £1,950 rent, 23.3x P/R, 3.2% HPI)
+  const stAlbans = getCityBySlug("st-albans");
+  assert.equal(stAlbans.averagePrice, 545000);
+  assert.equal(stAlbans.averageRentMonthly, 1950);
+  assert.equal(stAlbans.priceToRentRatio, 23.3);
+  assert.equal(stAlbans.historicalHpi5YrAvg, 3.2);
+  // St Albans exceeds £500k FTB cap -> standard SDLT applies (£17,250)
+  assert.equal(calculateSDLT(stAlbans.averagePrice, true), 17250);
+  assert.equal(calculateSDLT(stAlbans.averagePrice, false), 17250);
+  assert.ok(stAlbans.highlights.some((h) => h.includes("£17,250") && h.includes(">£500k")));
+
+  // 3. Reading (£355k, £1,550 rent, 19.1x P/R, 3.6% HPI)
+  const reading = getCityBySlug("reading");
+  assert.equal(reading.averagePrice, 355000);
+  assert.equal(reading.averageRentMonthly, 1550);
+  assert.equal(reading.priceToRentRatio, 19.1);
+  assert.equal(reading.historicalHpi5YrAvg, 3.6);
+  assert.equal(calculateSDLT(reading.averagePrice, true), 2750);
+  assert.ok(reading.highlights.some((h) => h.includes("£2,750") && h.includes("£300k")));
+
+  // 4. Milton Keynes (£330k, £1,450 rent, 18.9x P/R, 3.8% HPI)
+  const miltonKeynes = getCityBySlug("milton-keynes");
+  assert.equal(miltonKeynes.averagePrice, 330000);
+  assert.equal(miltonKeynes.averageRentMonthly, 1450);
+  assert.equal(miltonKeynes.priceToRentRatio, 18.9);
+  assert.equal(miltonKeynes.historicalHpi5YrAvg, 3.8);
+  assert.equal(calculateSDLT(miltonKeynes.averagePrice, true), 1500);
+  assert.ok(miltonKeynes.highlights.some((h) => h.includes("£1,500") && h.includes("£300k")));
+
+  // 5. Chelmsford (£360k, £1,475 rent, 20.3x P/R, 3.7% HPI)
+  const chelmsford = getCityBySlug("chelmsford");
+  assert.equal(chelmsford.averagePrice, 360000);
+  assert.equal(chelmsford.averageRentMonthly, 1475);
+  assert.equal(chelmsford.priceToRentRatio, 20.3);
+  assert.equal(chelmsford.historicalHpi5YrAvg, 3.7);
+  assert.equal(calculateSDLT(chelmsford.averagePrice, true), 3000);
+  assert.ok(chelmsford.highlights.some((h) => h.includes("£3,000") && h.includes("£300k")));
 });
