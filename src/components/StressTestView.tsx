@@ -18,14 +18,14 @@ export function StressTestView({ inputs }: StressTestViewProps) {
     <div className="glass-panel" style={{ padding: "26px", marginTop: "16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
             <ShieldAlert size={14} />
             <span>Macro Stress Testing & Sensitivity</span>
           </div>
           <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 20, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>
             What If UK Market Conditions Shift?
           </h3>
-          <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 4, lineHeight: 1.5 }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: 14, marginTop: 4, lineHeight: 1.5 }}>
             Simulate how interest rate hikes, falling house prices, or surging rental inflation alter your financial break-even.
           </p>
         </div>
@@ -50,26 +50,26 @@ export function StressTestView({ inputs }: StressTestViewProps) {
             >
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{scenario.title}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>{scenario.title}</span>
                   {isPositive ? (
                     <ArrowUpRight size={16} style={{ color: "var(--primary)" }} />
                   ) : (
                     <ArrowDownRight size={16} style={{ color: "var(--secondary)" }} />
                   )}
                 </div>
-                <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.45, margin: 0 }}>
+                <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.45, margin: 0 }}>
                   {scenario.description}
                 </p>
               </div>
 
               <div style={{ borderTop: "1px solid var(--surface-border)", paddingTop: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, marginBottom: 4 }}>
                   <span style={{ color: "var(--text-secondary)" }}>Net Difference:</span>
                   <span className="tabular-nums" style={{ fontWeight: 700, color: isPositive ? "var(--primary)" : "var(--secondary)", fontVariantNumeric: "tabular-nums" }}>
                     {isPositive ? "+" : ""}{formatGBP(scenario.netWorthDiff)}
                   </span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
                   <span style={{ color: "var(--text-secondary)" }}>Break-Even:</span>
                   <span className="tabular-nums" style={{ fontWeight: 600, color: scenario.breakEven ? "var(--text-primary)" : "var(--tertiary)", fontVariantNumeric: "tabular-nums" }}>
                     {scenario.breakEven ? `Yr ${scenario.breakEven}` : "Renting Wins"}

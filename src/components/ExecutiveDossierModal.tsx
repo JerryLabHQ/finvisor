@@ -152,7 +152,7 @@ export function ExecutiveDossierModal({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 4,
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: 700,
                   padding: "3px 8px",
                   borderRadius: 4,
@@ -177,7 +177,7 @@ export function ExecutiveDossierModal({
                   alignItems: "center",
                   gap: 6,
                   padding: "8px 12px",
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: 600,
                   borderRadius: 6,
                   border: "1px solid var(--surface-border)",
@@ -199,7 +199,7 @@ export function ExecutiveDossierModal({
                 alignItems: "center",
                 gap: 6,
                 padding: "8px 14px",
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: 700,
                 borderRadius: 6,
                 background: "var(--primary)",
@@ -243,7 +243,7 @@ export function ExecutiveDossierModal({
               flexWrap: "wrap",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-primary)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-primary)" }}>
               <Lock size={14} style={{ color: "var(--primary)", flexShrink: 0 }} />
               <span>
                 <strong>Lender-Ready Dossier License:</strong> Unlock certified broker-stamped exports free via an FCA consultation request, or activate an anonymous Lifetime Pro Pass (£{MONETIZATION_CONFIG.proPricing.lifetimePassGbp}).
@@ -259,7 +259,7 @@ export function ExecutiveDossierModal({
                   }}
                   style={{
                     padding: "6px 12px",
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: 700,
                     borderRadius: 4,
                     border: "1px solid var(--primary)",
@@ -277,7 +277,7 @@ export function ExecutiveDossierModal({
                 onClick={handleDirectProUnlock}
                 style={{
                   padding: "6px 12px",
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: 700,
                   borderRadius: 4,
                   border: "none",
@@ -323,7 +323,7 @@ export function ExecutiveDossierModal({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
@@ -349,11 +349,11 @@ export function ExecutiveDossierModal({
               >
                 {title}
               </h1>
-              <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>{subtitle}</p>
+              <p style={{ fontSize: 14, color: "var(--text-secondary)", margin: 0 }}>{subtitle}</p>
             </div>
 
-            <div style={{ textAlign: "right", fontSize: 11, color: "var(--text-muted)" }}>
-              <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: 13 }}>
+            <div style={{ textAlign: "right", fontSize: 12, color: "var(--text-muted)" }}>
+              <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: 14 }}>
                 🇬🇧 LadderPass Institutional Ledger
               </div>
               <div>Date: {new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</div>
@@ -373,7 +373,7 @@ export function ExecutiveDossierModal({
           >
             <div
               style={{
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
@@ -409,7 +409,7 @@ export function ExecutiveDossierModal({
               >
                 <div
                   style={{
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: 700,
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
@@ -431,7 +431,7 @@ export function ExecutiveDossierModal({
                   {m.value}
                 </div>
                 {m.sub && (
-                  <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>
+                  <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 2 }}>
                     {m.sub}
                   </div>
                 )}
@@ -444,7 +444,7 @@ export function ExecutiveDossierModal({
             <div style={{ marginBottom: 28 }}>
               <h4
                 style={{
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
@@ -455,7 +455,7 @@ export function ExecutiveDossierModal({
                 Itemized Financial Schedule
               </h4>
               <div className="editorial-table-wrap">
-                <table className="editorial-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <table className="editorial-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                   <thead>
                     <tr style={{ borderBottom: "2px solid var(--surface-border)", background: "var(--surface-tray)" }}>
                       {breakdownTable.headers.map((h, i) => (
@@ -465,7 +465,7 @@ export function ExecutiveDossierModal({
                             padding: "8px 10px",
                             textAlign: i === 0 ? "left" : "right",
                             fontWeight: 700,
-                            fontSize: 11,
+                            fontSize: 12,
                           }}
                         >
                           {h}
@@ -512,7 +512,7 @@ export function ExecutiveDossierModal({
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
@@ -525,7 +525,7 @@ export function ExecutiveDossierModal({
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10 }}>
               {statutoryCitations.map((c, i) => (
-                <div key={i} style={{ fontSize: 11 }}>
+                <div key={i} style={{ fontSize: 13 }}>
                   <strong style={{ color: "var(--text-primary)" }}>{c.act}:</strong>{" "}
                   <span style={{ color: "var(--text-secondary)" }}>{c.description}</span>
                 </div>
@@ -534,7 +534,7 @@ export function ExecutiveDossierModal({
           </div>
 
           {/* Regulatory Footer Note */}
-          <div style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "center", lineHeight: 1.5 }}>
+          <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", lineHeight: 1.5 }}>
             Generated by LadderPass (The UK Financial Ladder). This memorandum is an independent mathematical illustration and does not constitute personal financial or tax advice under FSMA 2000. Verify final terms with an FCA-regulated intermediary or Chartered Tax Adviser before execution.
           </div>
         </div>

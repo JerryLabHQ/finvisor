@@ -6,18 +6,28 @@ import { BrokerLead } from "../../../lib/types";
 import { MONETIZATION_CONFIG, UK_MARKET_DEFAULTS } from "../../../lib/constants";
 
 const DATA_DIR = path.resolve(process.cwd(), "data");
-const LEADS_FILE = path.resolve(DATA_DIR, "leads.json");
+const LEADS_FILE = process.env.LEADS_FILE_PATH
+  ? path.resolve(process.env.LEADS_FILE_PATH)
+  : path.resolve(DATA_DIR, "leads.json");
+
+function getLeadsFilePath(): string {
+  return process.env.LEADS_FILE_PATH
+    ? path.resolve(process.env.LEADS_FILE_PATH)
+    : LEADS_FILE;
+}
 
 function getStoredLeads(): BrokerLead[] {
   try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+    const leadsFile = getLeadsFilePath();
+    const leadsDir = path.dirname(leadsFile);
+    if (!fs.existsSync(leadsDir)) {
+      fs.mkdirSync(leadsDir, { recursive: true });
     }
-    if (!fs.existsSync(LEADS_FILE)) {
-      fs.writeFileSync(LEADS_FILE, "[]", "utf-8");
+    if (!fs.existsSync(leadsFile)) {
+      fs.writeFileSync(leadsFile, "[]", "utf-8");
       return [];
     }
-    const data = fs.readFileSync(LEADS_FILE, "utf-8");
+    const data = fs.readFileSync(leadsFile, "utf-8");
     return JSON.parse(data);
   } catch (err) {
     console.error("Failed to read leads file:", err);
@@ -27,16 +37,18 @@ function getStoredLeads(): BrokerLead[] {
 
 function saveLeads(leads: BrokerLead[]) {
   try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+    const leadsFile = getLeadsFilePath();
+    const leadsDir = path.dirname(leadsFile);
+    if (!fs.existsSync(leadsDir)) {
+      fs.mkdirSync(leadsDir, { recursive: true });
     }
-    fs.writeFileSync(LEADS_FILE, JSON.stringify(leads, null, 2), "utf-8");
+    fs.writeFileSync(leadsFile, JSON.stringify(leads, null, 2), "utf-8");
   } catch (err) {
     console.error("Failed to save leads file:", err);
   }
 }
 
-export function validateUkMobilePhone(rawPhone?: string): { valid: boolean; normalized?: string } {
+function validateUkMobilePhone(rawPhone?: string): { valid: boolean; normalized?: string } {
   if (!rawPhone || typeof rawPhone !== "string" || rawPhone.trim().length === 0) {
     return { valid: true, normalized: undefined };
   }
@@ -256,7 +268,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request?: Request) {
+export async function GET(request: Request) {
   const adminKey = process.env.ADMIN_API_KEY;
   const authHeader = request?.headers?.get("authorization") || request?.headers?.get("Authorization");
 

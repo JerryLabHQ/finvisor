@@ -1,7 +1,41 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const tempLeadsPath = path.join(
+  os.tmpdir(),
+  `ladderpass-test-leads-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+);
+process.env.LEADS_FILE_PATH = tempLeadsPath;
+
+// Snapshot existing data/leads.json if present
+const defaultLeadsPath = path.resolve(process.cwd(), "data", "leads.json");
+const originalLeadsContent = fs.existsSync(defaultLeadsPath)
+  ? fs.readFileSync(defaultLeadsPath, "utf-8")
+  : null;
+
 import { POST as leadsPost, GET as leadsGet } from "../src/app/api/leads/route.ts";
 import { POST as checkoutPost } from "../src/app/api/checkout/route.ts";
+
+test.after(() => {
+  try {
+    if (fs.existsSync(tempLeadsPath)) {
+      fs.unlinkSync(tempLeadsPath);
+    }
+  } catch {
+    // ignore
+  }
+
+  // Restore snapshot if data/leads.json was touched
+  if (originalLeadsContent !== null && fs.existsSync(defaultLeadsPath)) {
+    const current = fs.readFileSync(defaultLeadsPath, "utf-8");
+    if (current !== originalLeadsContent) {
+      fs.writeFileSync(defaultLeadsPath, originalLeadsContent, "utf-8");
+    }
+  }
+});
 
 test("API: POST /api/leads validates required fields, UK mobile format, and explicit UK GDPR consent", async () => {
   // Missing name/email

@@ -25,7 +25,7 @@ export function UnifiedTwinBar() {
         background: "var(--surface)",
         borderBottom: "1px solid var(--surface-border)",
         padding: "8px 20px",
-        fontSize: 12,
+        fontSize: 13,
         fontVariantNumeric: "tabular-nums",
       }}
     >
@@ -53,7 +53,7 @@ export function UnifiedTwinBar() {
               color: "var(--primary)",
               border: "1px solid var(--primary-border)",
               fontWeight: 700,
-              fontSize: 10,
+              fontSize: 12,
               textTransform: "uppercase",
               letterSpacing: "0.05em",
             }}
@@ -61,7 +61,7 @@ export function UnifiedTwinBar() {
             <Sparkles size={11} />
             <span>UK Financial Twin Sync</span>
           </span>
-          <span style={{ color: "var(--text-muted)", fontSize: 11 }}>
+          <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
             Gross:{" "}
             <strong style={{ color: "var(--text-primary)" }}>
               {formatGBP(snapshot.grossSalary)}/yr
@@ -148,7 +148,7 @@ export function UnifiedTwinBar() {
               <strong style={{ color: "var(--text-primary)" }}>
                 {formatGBP(snapshot.maxMortgageBorrowingCapacity)}
               </strong>{" "}
-              <span style={{ fontSize: 10, color: "var(--text-muted)" }}>(4.5x Net-Adj)</span>
+              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>(4.5x Net-Adj)</span>
             </span>
           </Link>
         </div>
@@ -156,7 +156,7 @@ export function UnifiedTwinBar() {
         {/* Right: Devolved UK Tax Jurisdiction Switcher */}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <MapPin size={12} style={{ color: "var(--primary)" }} />
-          <label htmlFor="twin-jurisdiction-select" style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+          <label htmlFor="twin-jurisdiction-select" style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
             Tax Regime ({taxLabel}):
           </label>
           <select
@@ -164,7 +164,7 @@ export function UnifiedTwinBar() {
             value={profile.jurisdiction}
             onChange={(e) => updateProfile({ jurisdiction: e.target.value as UKTaxJurisdiction })}
             style={{
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 700,
               padding: "3px 8px",
               borderRadius: 4,

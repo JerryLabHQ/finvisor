@@ -325,7 +325,7 @@ export function ConsultationModal({
               background: "var(--primary-light)",
               border: "1px solid var(--primary-border)",
               color: "var(--primary)",
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 700,
               letterSpacing: "0.05em",
               textTransform: "uppercase",
@@ -351,7 +351,7 @@ export function ConsultationModal({
 
           <p
             style={{
-              fontSize: 13,
+              fontSize: 14,
               color: "var(--text-secondary)",
               lineHeight: 1.5,
               margin: 0,
@@ -406,7 +406,7 @@ export function ConsultationModal({
                 <p
                   style={{
                     color: "var(--text-secondary)",
-                    fontSize: 13,
+                    fontSize: 14,
                     lineHeight: 1.5,
                     maxWidth: 420,
                     margin: "0 auto",
@@ -425,7 +425,7 @@ export function ConsultationModal({
                   padding: "16px 20px",
                   width: "100%",
                   textAlign: "left",
-                  fontSize: 13,
+                  fontSize: 14,
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
@@ -475,7 +475,7 @@ export function ConsultationModal({
                 >
                   <span
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.06em",
@@ -486,7 +486,7 @@ export function ConsultationModal({
                   </span>
                   <span
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: 600,
                       color: "var(--primary)",
                       background: "var(--primary-light)",
@@ -502,52 +502,52 @@ export function ConsultationModal({
                 {customMetrics ? (
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
                         {customMetrics.primaryLabel}
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "var(--primary)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
                         {customMetrics.primaryValue}{" "}
                         {customMetrics.primarySub && (
-                          <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
                             ({customMetrics.primarySub})
                           </span>
                         )}
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
                         {customMetrics.secondaryLabel}
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "var(--primary)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
                         {customMetrics.secondaryValue}{" "}
                         {customMetrics.secondarySub && (
-                          <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
                             ({customMetrics.secondarySub})
                           </span>
                         )}
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
                         {customMetrics.tertiaryLabel}
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
                         {customMetrics.tertiaryValue}{" "}
                         {customMetrics.tertiarySub && (
-                          <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
                             ({customMetrics.tertiarySub})
                           </span>
                         )}
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
                         {customMetrics.quaternaryLabel}
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
                         {customMetrics.quaternaryValue}{" "}
                         {customMetrics.quaternarySub && (
-                          <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
                             ({customMetrics.quaternarySub})
                           </span>
                         )}
@@ -557,40 +557,40 @@ export function ConsultationModal({
                 ) : (
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
                         Target Borrowing
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "var(--primary)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
                         {formatGBP(loanAmount)}{" "}
-                        <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
                           ({ltvPercent}% LTV)
                         </span>
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
                         Deposit Equity
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "var(--primary)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
                         {formatGBP(depositAmount)}{" "}
-                        <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
                           ({depositPercent}% Cash)
                         </span>
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
                         Est. Monthly Payment
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
                         {formatGBP(estimatedMonthlyMortgage)}/mo{" "}
-                        <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
                           ({mortgageRate}% Fixed)
                         </span>
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>
                         Full Property Price
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
@@ -607,7 +607,7 @@ export function ConsultationModal({
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <label
                       style={{
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.05em",
@@ -628,7 +628,7 @@ export function ConsultationModal({
                         background: "var(--surface-tray)",
                         border: "1px solid var(--surface-border)",
                         color: "var(--text-primary)",
-                        fontSize: 13,
+                        fontSize: 14,
                         outline: "none",
                       }}
                       value={name}
@@ -639,7 +639,7 @@ export function ConsultationModal({
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <label
                       style={{
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.05em",
@@ -660,7 +660,7 @@ export function ConsultationModal({
                         background: "var(--surface-tray)",
                         border: "1px solid var(--surface-border)",
                         color: "var(--text-primary)",
-                        fontSize: 13,
+                        fontSize: 14,
                         outline: "none",
                       }}
                       value={email}
@@ -672,7 +672,7 @@ export function ConsultationModal({
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   <label
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
@@ -687,7 +687,7 @@ export function ConsultationModal({
                       style={{
                         position: "absolute",
                         left: 12,
-                        fontSize: 13,
+                        fontSize: 14,
                         color: "var(--text-muted)",
                         fontWeight: 600,
                       }}
@@ -706,14 +706,14 @@ export function ConsultationModal({
                         background: "var(--surface-tray)",
                         border: "1px solid var(--surface-border)",
                         color: "var(--text-primary)",
-                        fontSize: 13,
+                        fontSize: 14,
                         outline: "none",
                       }}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
-                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                  <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
                     UK mobile required (`07...` or `+447...`) for FCA advisor verification & instant Pro Dossier unlock.
                   </span>
                 </div>
@@ -722,7 +722,7 @@ export function ConsultationModal({
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <label
                       style={{
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.05em",
@@ -743,7 +743,7 @@ export function ConsultationModal({
                         background: "var(--surface-tray)",
                         border: "1px solid var(--surface-border)",
                         color: "var(--text-primary)",
-                        fontSize: 13,
+                        fontSize: 14,
                         outline: "none",
                       }}
                     >
@@ -761,7 +761,7 @@ export function ConsultationModal({
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <label
                       style={{
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.05em",
@@ -782,7 +782,7 @@ export function ConsultationModal({
                         background: "var(--surface-tray)",
                         border: "1px solid var(--surface-border)",
                         color: "var(--text-primary)",
-                        fontSize: 13,
+                        fontSize: 14,
                         outline: "none",
                       }}
                     >
@@ -805,7 +805,7 @@ export function ConsultationModal({
                     borderRadius: "var(--round-md)",
                     background: "var(--surface-tray)",
                     border: "1px solid var(--surface-border)",
-                    fontSize: 12,
+                    fontSize: 13,
                     color: "var(--text-secondary)",
                     cursor: "pointer",
                     lineHeight: 1.45,
@@ -833,7 +833,7 @@ export function ConsultationModal({
                       background: "rgba(220, 38, 38, 0.08)",
                       border: "1px solid rgba(220, 38, 38, 0.3)",
                       color: "#b91c1c",
-                      fontSize: 12,
+                      fontSize: 13,
                       fontWeight: 600,
                     }}
                   >
@@ -851,7 +851,7 @@ export function ConsultationModal({
                     borderRadius: "var(--round-md)",
                     background: "var(--surface-tray)",
                     border: "1px solid var(--surface-border)",
-                    fontSize: 12,
+                    fontSize: 13,
                     color: "var(--text-secondary)",
                     marginTop: 2,
                   }}
@@ -887,7 +887,7 @@ export function ConsultationModal({
                 style={{
                   borderTop: "1px solid var(--surface-border)",
                   paddingTop: 12,
-                  fontSize: 11,
+                  fontSize: 12,
                   color: "var(--text-muted)",
                   lineHeight: 1.5,
                   textAlign: "center",
