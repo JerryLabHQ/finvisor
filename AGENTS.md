@@ -85,16 +85,20 @@ LadderPass operates 6 core life-stage financial modeling engines synchronized vi
 - **B2B White-Label Proptech Widgets (`/partners` & `/embed`)**: Interactive partner customizer and chromeless `<iframe>` widget supporting `?engine=mortgage|tax|ev|btl` for UK estate agents and mortgage brokers.
 - **Commercial Pro Forma Simulator**: Run `node scripts/simulate-financial-projections.mjs` to audit the 36-month P&L reconciled to the pound with `docs/BUSINESS_PLAN.md`.
 
-## 4. Autonomous 5-Agent Executive Hierarchy (`.agents/skills/`)
-LadderPass is operated by an autonomous 5-agent team orchestrated by the **Virtual CEO**:
+## 4. Autonomous 6-Agent Executive Hierarchy (`.agents/skills/`)
+LadderPass is operated by an autonomous 6-agent team orchestrated by the **Virtual CEO**:
 
-| Role | Skill / Subagent | Model Tier (`invoke_subagent`) | Reasoning Depth |
-|---|---|:---:|---|
-| **Virtual CEO (Orchestrator)** | [`.agents/skills/virtual-ceo/SKILL.md`](.agents/skills/virtual-ceo/SKILL.md) (`virtual-ceo`) | `pro` (Smartest Model; fallback to `inherit` if quota constrained) | Strategic synthesis, P&L allocation, and final release sign-off |
-| **Macro & Statutory Rate Agent** | [`.agents/skills/rate-watcher/SKILL.md`](.agents/skills/rate-watcher/SKILL.md) (`rate-watcher`) | `flash` | Max thinking effort — BoE rates & `SDLT`/`LBTT`/`LTT` brackets |
-| **Programmatic SEO & HPI Agent** | [`.agents/skills/seo-growth/SKILL.md`](.agents/skills/seo-growth/SKILL.md) (`seo-growth`) | `flash` | Max thinking effort — Land Registry HPI, ONS rents & `/city/[slug]` |
-| **Revenue & Lead Ops Agent** | [`.agents/skills/rev-ops/SKILL.md`](.agents/skills/rev-ops/SKILL.md) (`rev-ops`) | `flash` | Max thinking effort — FCA lead audit, UK GDPR & 36m P&L |
-| **QA & Release Engineer** | [`.agents/skills/qa-auditor/SKILL.md`](.agents/skills/qa-auditor/SKILL.md) (`qa-auditor`) | `flash` | Max thinking effort — 7 mandatory acceptance gates |
+| Role | Skill / Subagent | Model Tier (`invoke_subagent`) | Workspace Mode | Reasoning Depth |
+|---|---|:---:|:---:|---|
+| **Virtual CEO (Orchestrator)** | [`.agents/skills/virtual-ceo/SKILL.md`](.agents/skills/virtual-ceo/SKILL.md) (`virtual-ceo`) | `pro` (or `inherit` fallback) | `inherit` | Strategic synthesis, P&L allocation, and final release sign-off |
+| **Lead Full-Stack Developer** | [`.agents/skills/dev-engineer/SKILL.md`](.agents/skills/dev-engineer/SKILL.md) (`dev-engineer`) | `flash` (or `pro` on refactors) | `share` (Git worktree) | Max thinking effort — React 19 UI, Next.js routes, TypeScript math engines |
+| **QA & Release Engineer** | [`.agents/skills/qa-auditor/SKILL.md`](.agents/skills/qa-auditor/SKILL.md) (`qa-auditor`) | `flash` | `inherit` | Max thinking effort — 7 mandatory acceptance gates |
+| **Macro & Statutory Rate Agent** | [`.agents/skills/rate-watcher/SKILL.md`](.agents/skills/rate-watcher/SKILL.md) (`rate-watcher`) | `flash` | `share` (Git worktree) | Max thinking effort — BoE rates & `SDLT`/`LBTT`/`LTT` brackets |
+| **Programmatic SEO & HPI Agent** | [`.agents/skills/seo-growth/SKILL.md`](.agents/skills/seo-growth/SKILL.md) (`seo-growth`) | `flash` | `share` (Git worktree) | Max thinking effort — Land Registry HPI, ONS rents & `/city/[slug]` |
+| **Revenue & Lead Ops Agent** | [`.agents/skills/rev-ops/SKILL.md`](.agents/skills/rev-ops/SKILL.md) (`rev-ops`) | `flash` | `inherit` | Max thinking effort — FCA lead audit, UK GDPR & 36m P&L |
+
+### Worktree Isolation Policy
+To prevent `.git/index.lock` collisions during parallel agent execution, write-heavy subagents (`dev-engineer`, `rate-watcher`, `seo-growth`) are invoked with `Workspace: "share"`. The Virtual CEO and `qa-auditor` verify all 7 gates before worktrees are committed and pushed to `main`.
 
 
 
